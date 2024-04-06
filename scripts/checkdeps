@@ -69,7 +69,6 @@ dep_map=(
   [make]=make
   [patch]=patch
   [perl]=perl
-  [rdfind]=rdfind
   [sed]=sed
   [tar]=tar
   [unzip]=unzip
