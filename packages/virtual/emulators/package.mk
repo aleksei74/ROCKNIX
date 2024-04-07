@@ -29,7 +29,7 @@ case "${DEVICE}" in
   AMD64)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="wine"
     PKG_EMUS+=" cemu-sa dolphin-sa lime3ds-sa mednafen melonds-sa minivmacsa mupen64plus-sa kronos-sa nanoboyadvance-sa pcsx2-sa     \
-               rpcs3-sa scummvmsa vita3k-sa xemu-sa"
+               rpcs3-sa scummvmsa vita3k-sa xemu-sa yuzu-sa ryujinx-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr desmume-lr dolphin-lr flycast-lr lrps2-lr ppsspp-lr        \
                      kronos-lr"
   ;;
@@ -515,6 +515,17 @@ makeinstall_target() {
       add_emu_core wiiu cemu cemu-sa true
       add_es_system wiiu
       install_script "Start CEMU.sh"
+    ;;
+  esac
+
+  ### Nintendo Switch
+  case ${DEVICE} in
+    AMD64)
+      add_emu_core switch yuzu yuzu-sa true
+      add_emu_core switch ryujinx ryujinx-sa false
+      add_es_system switch
+      install_script "Start Yuzu.sh"
+      install_script "Start Ryujinx.sh"
     ;;
   esac
 
