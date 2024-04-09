@@ -3,22 +3,17 @@
 # Copyright (C) 2017-2021 Team LibreELEC (https://libreelec.tv)
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
-if [ -z "${1}" ]; then
-  [ -z "$SYSTEM_ROOT" ] && SYSTEM_ROOT=""
-  [ -z "$BOOT_ROOT" ] && BOOT_ROOT="/flash"
-  [ -z "$BOOT_PART" ] && BOOT_PART=$(df "$BOOT_ROOT" | tail -1 | awk {' print $1 '})
+[ -z "$SYSTEM_ROOT" ] && SYSTEM_ROOT=""
+[ -z "$BOOT_ROOT" ] && BOOT_ROOT="/flash"
+[ -z "$BOOT_PART" ] && BOOT_PART=$(df "$BOOT_ROOT" | tail -1 | awk {' print $1 '})
 
-  # identify the boot device
-  if [ -z "$BOOT_DISK" ]; then
-    case $BOOT_PART in
-      /dev/mmcblk*)
-        BOOT_DISK=$(echo $BOOT_PART | sed -e "s,p[0-9]*,,g")
-        ;;
-    esac
-  fi
-else
-  BOOT_DISK="${1}"
-  BOOT_ROOT="${2}"
+# identify the boot device
+if [ -z "$BOOT_DISK" ]; then
+  case $BOOT_PART in
+    /dev/mmcblk*)
+      BOOT_DISK=$(echo $BOOT_PART | sed -e "s,p[0-9]*,,g")
+      ;;
+  esac
 fi
 
 # mount $BOOT_ROOT rw
@@ -45,18 +40,18 @@ if [ -f $BOOT_ROOT/extlinux/extlinux.conf ]; then
       *gameforce,ace)
         echo "Setting boot FDT to GameForce Ace..."
         sed -i '/FDT/c\  FDT /rk3588s-gameforce-ace.dtb' $BOOT_ROOT/extlinux/extlinux.conf
-      ;;
+        ;;
       *orangepi-5)
         echo "Setting boot FDT to Orange Pi 5..."
         sed -i '/FDT/c\  FDT /rk3588s-orangepi-5.dtb' $BOOT_ROOT/extlinux/extlinux.conf
         sed -i 's/ fbcon=rotate:1//' $BOOT_ROOT/extlinux/extlinux.conf
-      ;;
+        ;;
       *rock-5)
         echo "Setting boot FDT to Rock 5B..."
         sed -i '/FDT/c\  FDT /rk3588-rock-5b.dtb' $BOOT_ROOT/extlinux/extlinux.conf
         sed -i 's/ fbcon=rotate:1//' $BOOT_ROOT/extlinux/extlinux.conf
-       ;;
-     esac
+        ;;
+    esac
   fi
 fi
 
@@ -116,7 +111,7 @@ elif [ -f $SYSTEM_ROOT/usr/share/bootloader/resource.img ]; then
 fi
 
 # Update system partition label to ROCKNIX
-[ ! -z "$(blkid | grep JELOS)" ] && dosfslabel $BOOT_PART ROCKNIX
+[ ! -z "$(blkid | grep JELOS)" ] && ${SYSTEM_ROOT}/usr/sbin/dosfslabel $BOOT_PART ROCKNIX
 
 # mount $BOOT_ROOT ro
 sync

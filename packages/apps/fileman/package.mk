@@ -13,6 +13,7 @@ PKG_PRIORITY="optional"
 PKG_SECTION="tools"
 PKG_SHORTDESC="A Single panel file Manager."
 PKG_PATCH_DIRS="${DEVICE}"
+[ "${DEVICE}" = "S922X" -a "${USE_MALI}" != "no" ] && PKG_PATCH_DIRS+=" S922X-MALI"
 
 pre_build_target() {
   cp -f ${ROOT}/distributions/ROCKNIX/fonts/NanumSquareNeo-bRg.ttf ${PKG_BUILD}/res/
