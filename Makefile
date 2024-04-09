@@ -52,6 +52,7 @@ S922X-PANFROST:
 	PROJECT=Amlogic DEVICE=S922X ARCH=aarch64 USE_MALI=no ./scripts/build_distro
 
 RK3566:
+	unset DEVICE_ROOT
 	DEVICE_ROOT=RK3566 PROJECT=Rockchip DEVICE=RK3566 ARCH=arm ./scripts/build_distro
 	DEVICE_ROOT=RK3566 PROJECT=Rockchip DEVICE=RK3566 ARCH=aarch64 ./scripts/build_distro
 
