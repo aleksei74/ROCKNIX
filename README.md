@@ -2,7 +2,7 @@
 
 ---
 
-ROCKNIX is an immutable Linux distribution for handheld gaming devices developed by a small community of enthusiasts.  Our goal is to produce an operating system that has the features and capabilities that we need, and to have fun as we develop it.
+락닉스(ROCKNIX)는 휴대용 게임기를 위한 불변의 리눅스 배포판으로, 마니아들의 소규모 커뮤니티에 의해 개발되었습니다. 우리의 목표는 우리에게 필요한 기능과 기능을 갖춘 운영 체제를 생산하고 개발하면서 재미를 느끼는 것입니다.
 
 
 ## 소개
@@ -36,20 +36,20 @@ ROCKNIX is an immutable Linux distribution for handheld gaming devices developed
  - 아이디 : root
  - 패스워드 : linux
 
-## Features
+## 특징
 
-* ROCKNIX has a very active community of developers and users.
-* Integrated cross-device local and remote network play.
-* In-game touch support on supported devices.
-* Fine grain control for battery life or performance.
-* Includes support for playing Music and Video.
-* Bluetooth audio and controller support.
-* Support for HDMI audio and video out, and USB audio.
-* Device to device and device to cloud sync with Syncthing and rclone.
-* VPN support with Wireguard, Tailscale, and ZeroTier.
-* Includes built-in support for scraping and retroachievements.
+* ROCKNIX는 개발자와 사용자의 커뮤니티가 매우 활성화되어 있습니다.
+* 통합 크로스 디바이스 로컬 및 원격 네트워크 재생입니다.
+* 지원되는 장치에서 게임 내 터치 지원을 제공합니다.
+* 배터리 수명이나 성능을 위한 미세한 곡물 제어입니다.
+* 음악 및 비디오 재생 지원이 포함되어 있습니다.
+* 블루투스 오디오 및 컨트롤러를 지원합니다.
+* HDMI 오디오 및 비디오 아웃, USB 오디오를 지원합니다.
+* 장치 대 장치 및 장치 대 클라우드 동기화 및 rclone.
+* Wireguard, Tailscale 및 ZeroTier에서 VPN을 지원합니다.
+* 스크래핑 및 레트로 업적을 위한 내장형 지원이 포함되어 있습니다.
 
-## Screenshots
+## 스크린샷
 
 <table>
   <tr>
@@ -61,10 +61,6 @@ ROCKNIX is an immutable Linux distribution for handheld gaming devices developed
     <td><img src="https://rocknix.org/_inc/images/screenshots/gamelist-view-no-metadata-immersive.png"/></td>
   </tr>
 </table>
-
-## Community
-
-The ROCKNIX community utilizes Discord for discussion, if you would like to join us please use this link: [https://discord.gg/seTxckZjJy](https://discord.gg/seTxckZjJy)
 
 ## Licenses
 
