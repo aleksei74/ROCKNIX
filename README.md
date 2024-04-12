@@ -64,4 +64,4 @@
 
 ## 라이센스
 
-**ROCKNIX** 는 [JELOS](https://jelos.org/), 의 포크입니다. 모든 라이센스는 JELOS 팀에 적용되고 크레딧이 부여됩니다.
+**ROCKNIX** 는 [JELOS](https://jelos.org/)의 포크입니다, 모든 라이센스는 JELOS 팀에 적용되고 크레딧이 부여됩니다.
