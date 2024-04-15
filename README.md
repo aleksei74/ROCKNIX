@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/ROCKNIX/distribution/dev/distributions/ROCKNIX/logos/rocknix-logo.png" width=192>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Latest Version](https://img.shields.io/github/release/ROCKNIX/distribution.svg?color=FF5555&label=latest%20version&style=flat-square)](https://github.com/ROCKNIX/distribution/releases/latest)
+<img src="https://raw.githubusercontent.com/UzuCore/ROCKNIX/dev/distributions/ROCKNIX/logos/rocknix-logo.png" width=192>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Latest Version](https://img.shields.io/github/release/UzuCore/ROCKNIX.svg?color=FF5555&label=latest%20version&style=flat-square)](https://github.com/UzuCore/ROCKNIX/releases/latest)
 
 ---
 
