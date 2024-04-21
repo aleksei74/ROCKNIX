@@ -83,6 +83,18 @@
         <image>./images/remove-mac-files.svg</image>
     </game>
     <game>
+        <path>./Start AetherSX2.sh</path>
+        <name>Start AetherSX2</name>
+        <desc>Opens the AetherSX2 GUI (PS2) to enable global configuration changes to be made directly to the emulator. It's recommended to have a mouse and keyboard to modify settings.</desc>
+        <developer>ROCKNIX</developer>
+        <publisher>ROCKNIX</publisher>
+        <rating>5.0</rating>
+        <releasedate>2021</releasedate>
+        <genre>Emulator</genre>
+        <players>1</players>
+        <image>./images/aethersx2.svg</image>
+    </game>
+    <game>
         <path>./Start CEMU.sh</path>
         <name>Cemu 실행</name>
         <desc>Cemu GUI(WiiU)를 열어 전역 구성 변경 사항을 에뮬레이터에 직접 적용할 수 있습니다. 설정을 수정하려면 마우스와 키보드를 준비하는 것이 좋습니다. Wii U 게임 및 애플리케이션을 에뮬레이션하는 소프트웨어입니다.</desc>
@@ -203,15 +215,22 @@
         <image>./images/xemu.svg</image>
     </game>
     <game>
+<<<<<<< HEAD
         <path>./Start Ryujinx.sh</path>
         <name>Start Ryujinx</name>
         <desc>Opens the Ryujinx GUI (Switch) to enable global configuration changes to be made directly to the emulator. It's recommended to have a mouse and keyboard available to modify settings. Ryujinx is an open-source Nintendo Switch emulator created by gdkchan and written in C#. This emulator aims at providing excellent accuracy and performance, a user-friendly interface, and consistent builds.</desc>
+=======
+        <path>./Generate id Tech Launchers.sh</path>
+        <name>Generate id Tech Launchers</name>
+        <desc>Creates launchers for id software games</desc>
+>>>>>>> main
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
         <genre>Emulator</genre>
         <players>1</players>
+<<<<<<< HEAD
         <image>./images/ryujinx.svg</image>
     </game>
 	<game>
@@ -225,5 +244,8 @@
         <genre>Emulator</genre>
         <players>1</players>
         <image>./images/yuzu.svg</image>
+=======
+        <image>./images/idtech.svg</image>
+>>>>>>> main
     </game>
 </gameList>
