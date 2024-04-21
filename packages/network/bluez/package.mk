@@ -3,7 +3,7 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="bluez"
-PKG_VERSION="5.72"
+PKG_VERSION="5.75"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.bluez.org/"
 PKG_URL="https://www.kernel.org/pub/linux/bluetooth/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -34,15 +34,6 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-dependency-tracking \
                            --disable-manpages \
                            --disable-experimental \
                            --enable-sixaxis \
-                           --enable-sap \
-                           --enable-a2dp \
-                           --enable-avrcp \
-                           --enable-btpclient \
-                           --enable-midi \
-                           --enable-mesh \
-                           --enable-hid2hci \
-                           --enable-experimental \
-                           --enable-hid \
                            --with-gnu-ld \
                            ${BLUEZ_CONFIG} \
                            storagedir=/storage/.cache/bluetooth"
@@ -74,6 +65,8 @@ post_makeinstall_target() {
   cat <<EOF >${INSTALL}/etc/bluetooth/input.conf
 [General]
 ClassicBondedOnly=false
+UserspaceHID=false
+FastConnectable=true
 EOF
 
   mkdir -p ${INSTALL}/usr/share/services
@@ -91,6 +84,6 @@ EOF
 
 post_install() {
   enable_service bluetooth-defaults.service
-  #enable_service bluetooth.service
-  #enable_service obex.service
+  enable_service bluetooth.service
+  enable_service obex.service
 }
