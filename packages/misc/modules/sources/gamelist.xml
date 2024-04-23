@@ -27,7 +27,7 @@
     <game>
         <path>./download_bios.sh</path>
         <name>바이오스 다운로더</name>
-        <desc>바이오스를 네트워크에서 다운로드합니다</desc>
+        <desc>기종별 필요한 바이오스를 네트워크에서 다운로드합니다</desc>
         <developer>UzuCore</developer>
         <publisher>UzuCore</publisher>
         <rating>1.0</rating>
@@ -84,8 +84,8 @@
     </game>
     <game>
         <path>./Start AetherSX2.sh</path>
-        <name>Start AetherSX2</name>
-        <desc>Opens the AetherSX2 GUI (PS2) to enable global configuration changes to be made directly to the emulator. It's recommended to have a mouse and keyboard to modify settings.</desc>
+        <name>AetherSX2 실행</name>
+        <desc>AetherSX2 GUI(PS2)를 열어 전역 구성 변경 사항을 에뮬레이터에 직접 적용할 수 있습니다. 설정을 수정하려면 마우스와 키보드를 사용하는 것이 좋습니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
@@ -204,8 +204,8 @@
     </game>
     <game>
         <path>./Start Ryujinx.sh</path>
-        <name>Start Ryujinx</name>
-        <desc>Opens the Ryujinx GUI (Switch) to enable global configuration changes to be made directly to the emulator. It's recommended to have a mouse and keyboard available to modify settings. Ryujinx is an open-source Nintendo Switch emulator created by gdkchan and written in C#. This emulator aims at providing excellent accuracy and performance, a user-friendly interface, and consistent builds.</desc>
+        <name>Ryujinx 실행</name>
+        <desc>Ryujinx GUI(스위치)를 열어 전역 구성 변경을 에뮬레이터에 직접 적용할 수 있습니다. 설정을 수정하려면 마우스와 키보드를 준비하는 것이 좋습니다. Ryujinx는 gdkchan이 만들고 C#으로 작성된 오픈 소스 Nintendo Switch 에뮬레이터입니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
@@ -216,8 +216,8 @@
     </game>
 	<game>
         <path>./Start Yuzu.sh</path>
-        <name>Start Yuzu</name>
-        <desc>Opens the Yuzu GUI (Switch) to enable global configuration changes to be made directly to the emulator. It's recommended to have a mouse and keyboard available to modify settings. Yuzu is an experimental open-source emulator for the Nintendo Switch from the creators of Citra.</desc>
+        <name>Yuzu 실행</name>
+        <desc>Yuzu GUI(스위치)를 열어 전역 구성 변경 사항을 에뮬레이터에 직접 적용할 수 있습니다. 설정을 수정하려면 마우스와 키보드를 준비하는 것이 좋습니다. Yuzu는 Citra 제작자가 만든 Nintendo Switch용 실험적인 오픈 소스 에뮬레이터입니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
@@ -240,8 +240,8 @@
     </game>
     <game>
         <path>./Create id Tech Launchers.sh</path>
-        <name>Create id Tech Launchers</name>
-        <desc>Creates launchers for id software games</desc>
+        <name>id 런처 생성</name>
+        <desc>id 소프트웨어 게임용 런처를 생성합니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
