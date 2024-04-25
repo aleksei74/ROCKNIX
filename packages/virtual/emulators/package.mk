@@ -1005,6 +1005,7 @@ makeinstall_target() {
   ;;
     RK358*)
       add_emu_core saturn retroarch beetle_saturn false
+      add_emu_core saturn mednafen ss false
   ;;
   esac
   add_es_system saturn
@@ -1012,12 +1013,10 @@ makeinstall_target() {
   ### Sega ST-V
   case ${DEVICE} in
     RK358*)
-      add_emu_core st-v retroarch beetle_saturn true
       add_emu_core st-v mednafen ss false
     ;;
     AMD64)
       add_emu_core saturn kronos kronos-sa true
-      add_emu_core st-v retroarch beetle_saturn false
       add_emu_core st-v retroarch kronos false
       add_emu_core st-v mednafen ss false
     ;;
