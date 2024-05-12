@@ -19,7 +19,7 @@ if [ "${DEVICE}" = "S922X" -a "${USE_MALI}" = "no" ]; then
 fi
 
 case ${DEVICE} in
-  RK3326|AMD64)
+  RK3326)
     PKG_VERSION="6.8.9"
     PKG_URL="${PKG_SITE}/pub/linux/kernel/v6.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS+=" mainline"
