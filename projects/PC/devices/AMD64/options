@@ -45,6 +45,9 @@
   # e.g. GRAPHIC_DRIVERS="crocus i915 iris r300 r600 radeonsi virtio"
     GRAPHIC_DRIVERS="crocus i915 iris r300 r600 radeonsi virtio"
 
+  # build and install rocknix joypad driver (yes / no)
+    ROCKNIX_JOYPAD="yes"
+
   # additional packages to install
     ADDITIONAL_PACKAGES=""
 
