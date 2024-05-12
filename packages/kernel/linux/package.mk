@@ -21,7 +21,7 @@ fi
 case ${DEVICE} in
   RK3326)
     PKG_VERSION="6.8.9"
-    PKG_URL="https://git.kernel.org/torvalds/t/linux-${PKG_VERSION}.tar.gz"
+    PKG_URL="${PKG_SITE}/pub/linux/kernel/v6.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS+=" mainline"
     ;;
   RK3588)
