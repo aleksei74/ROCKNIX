@@ -1,1 +1,0 @@
-*open3_setpgrp = \&open3_setpgrp_external
