@@ -21,7 +21,7 @@ fi
 case ${DEVICE} in
   RK3326|AMD64)
     PKG_VERSION="6.8.9"
-    PKG_URL="${PKG_SITE}/pub/linux/kernel/v6.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+    PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS+=" mainline"
     ;;
   RK3588)
