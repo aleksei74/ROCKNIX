@@ -34,8 +34,8 @@ case ${DEVICE} in
     PKG_URL="https://git.sr.ht/~tokyovigilante/linux/archive/${PKG_VERSION}.tar.gz"
     ;;
   AMD64)
-    PKG_VERSION="6.8.7"
-    PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+    PKG_VERSION="6.8.9"
+    PKG_URL="${PKG_SITE}/pub/linux/kernel/v6.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     ;;
   *)
     PKG_VERSION="6.9-rc7"
