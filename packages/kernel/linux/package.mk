@@ -38,8 +38,8 @@ case ${DEVICE} in
     PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     ;;
   *)
-    PKG_VERSION="6.9-rc7"
-    PKG_URL="https://git.kernel.org/torvalds/t/linux-${PKG_VERSION}.tar.gz"
+    PKG_VERSION="6.9"
+    PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS+=" mainline"
     ;;
 esac
@@ -80,7 +80,7 @@ post_unpack() {
        $(get_build_dir rocknix-joypad)/rocknix-joypad.h \
        $(get_build_dir rocknix-joypad)/rocknix-singleadc-joypad.c \
        ${PKG_BUILD}/drivers/input/joystick
-    echo "obj-y += rocknix-joypad.o rocknix-singleadc-joypad.o" >> ${PKG_BUILD}/drivers/input/joystick/Makefile
+    echo "obj-m += rocknix-joypad.o rocknix-singleadc-joypad.o" >> ${PKG_BUILD}/drivers/input/joystick/Makefile
   fi
 }
 
