@@ -59,7 +59,7 @@ case "${DEVICE}" in
     [ "${USE_MALI}" != "no" ] && PKG_EMUS+=" lime3ds-sa"
     PKG_RETROARCH+=" retropie-shaders"
   ;;
-  RK3326*)
+  RK3326*|H700)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_DEPENDS_TARGET+=" common-shaders glsl-shaders"
     PKG_EMUS+=" box64 drastic-sa mednafen portmaster scummvmsa yabasanshiro-sa"
