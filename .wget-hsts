@@ -1,9 +1,0 @@
-# HSTS 1.0 Known Hosts database for GNU Wget.
-# Edit at your own risk.
-# <hostname>	<port>	<incl. subdomains>	<created>	<max-age>
-www.kernel.org	0	0	1715515522	15768001
-developer.arm.com	0	1	1715152585	31536000
-git.kernel.org	0	0	1715559493	15768001
-mirrors.edge.kernel.org	0	0	1715515524	15768001
-github.com	0	1	1715418791	31536000
-codeload.github.com	0	0	1715418791	31536000
