@@ -6,7 +6,7 @@ PKG_VERSION="v1.7.5817"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/pcsx2/pcsx2"
-PKG_URL="${PKG_SITE}/releases/download/${PKG_VERSION}/pcsx2-${PKG_VERSION}-linux-AppImage-64bit-Qt.AppImage"
+PKG_URL="${PKG_SITE}/releases/download/${PKG_VERSION}/pcsx2-${PKG_VERSION}-linux-appimage-x64-Qt.AppImage"
 PKG_LONGDESC="PS2 Emulator appimage"
 PKG_TOOLCHAIN="manual"
 
