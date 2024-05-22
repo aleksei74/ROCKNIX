@@ -4,7 +4,7 @@
 PKG_NAME="yuzu-sa"
 PKG_VERSION="1.0"
 PKG_ARCH="x86_64"
-PKG_URL="https://github.com/UzuCore/es-Storage/raw/main/yz.zip"
+PKG_URL="https://github.com/UzuCore/es-Storage/raw/main/yz.tar.gz"
 PKG_DEPENDS_TARGET="toolchain libfmt boost ffmpeg zstd zlib libzip lz4 opus libusb nlohmann-json qt5"
 PKG_SHORTDESC="Nintendo Switch emulator"
 PKG_TOOLCHAIN="cmake"
