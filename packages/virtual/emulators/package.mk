@@ -120,7 +120,7 @@ makeinstall_target() {
 
   ### Nintendo 3DS
   case ${DEVICE} in
-    S922X)
+    S922X|AMD64)
       add_emu_core 3ds lime3ds lime3ds-sa true
       add_es_system 3ds
     ;;
