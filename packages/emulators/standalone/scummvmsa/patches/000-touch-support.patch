@@ -596,11 +596,10 @@ new mode 100644
 diff --git a/backends/platform/maemo/debian/rules b/backends/platform/maemo/debian/rules
 old mode 100755
 new mode 100644
-diff --git a/backends/platform/sdl/sdl.cpp b/backends/platform/sdl/sdl.cpp
-index 0e0821ceda3..4908e9a4af0 100644
---- a/backends/platform/sdl/sdl.cpp
-+++ b/backends/platform/sdl/sdl.cpp
-@@ -182,6 +182,9 @@ bool OSystem_SDL::hasFeature(Feature f) {
+diff -rupN scummvmsa.orig/backends/platform/sdl/sdl.cpp scummvmsa/backends/platform/sdl/sdl.cpp
+--- scummvmsa.orig/backends/platform/sdl/sdl.cpp	2024-05-22 17:48:06.668512302 +0900
++++ scummvmsa/backends/platform/sdl/sdl.cpp	2024-05-22 18:01:41.315157079 +0900
+@@ -201,6 +201,9 @@ bool OSystem_SDL::hasFeature(Feature f)
  	if (f == kFeatureJoystickDeadzone || f == kFeatureKbdMouseSpeed) {
  		return _eventSource->isJoystickConnected();
  	}
@@ -610,7 +609,7 @@ index 0e0821ceda3..4908e9a4af0 100644
  #if defined(USE_OPENGL_GAME) || defined(USE_OPENGL_SHADERS)
  	/* Even if we are using the 2D graphics manager,
  	 * we are at one initGraphics3d call of supporting OpenGL */
-@@ -191,6 +194,29 @@ bool OSystem_SDL::hasFeature(Feature f) {
+@@ -213,6 +216,29 @@ bool OSystem_SDL::hasFeature(Feature f)
  	return ModularGraphicsBackend::hasFeature(f);
  }
  
@@ -640,52 +639,51 @@ index 0e0821ceda3..4908e9a4af0 100644
  void OSystem_SDL::initBackend() {
  	// Check if backend has not been initialized
  	assert(!_inited);
-diff --git a/backends/platform/sdl/sdl.h b/backends/platform/sdl/sdl.h
-index 28ba76a09ed..3cf1dcf021a 100644
---- a/backends/platform/sdl/sdl.h
-+++ b/backends/platform/sdl/sdl.h
-@@ -52,6 +52,10 @@ public:
- 	void init() override;
+diff -rupN scummvmsa.orig/backends/platform/sdl/sdl.h scummvmsa/backends/platform/sdl/sdl.h
+--- scummvmsa.orig/backends/platform/sdl/sdl.h	2024-05-22 17:48:06.668512302 +0900
++++ scummvmsa/backends/platform/sdl/sdl.h	2024-05-22 18:01:57.223512196 +0900
+@@ -53,6 +53,11 @@ public:
  
  	bool hasFeature(Feature f) override;
+ 
 +#if defined(USE_SDL_TS_VMOUSE)
 +	void setFeatureState(Feature f, bool enable) override;
 +	bool getFeatureState(Feature f) override;
 +#endif // defined(USE_SDL_TS_VMOUSE)
- 
++
  	// Override functions from ModularBackend and OSystem
  	void initBackend() override;
-diff --git a/configure b/configure
-index e9e3abe6493..f3d4aa91764 100755
---- a/configure
-+++ b/configure
-@@ -223,6 +223,7 @@ _nuked_opl=yes
+ 	void engineInit() override;
+diff -rupN scummvmsa.orig/configure scummvmsa/configure
+--- scummvmsa.orig/configure	2024-05-22 17:48:06.700513064 +0900
++++ scummvmsa/configure	2024-05-22 18:07:12.178134975 +0900
+@@ -226,6 +226,7 @@ _nuked_opl=yes
  _builtin_resources=yes
  _windows_console=yes
  _windows_unicode=yes
 +_sdl_ts_vmouse=no
  _cygwin_build=no
- # Default commands
- _ranlib=ranlib
-@@ -978,6 +979,8 @@ Optional Features:
+ _ext_sse2=auto
+ _ext_avx2=auto
+@@ -986,6 +987,8 @@ Optional Features:
    --disable-windows-console do not show console output on Windows
    --enable-windows-unicode  use Windows Unicode APIs (default)
    --disable-windows-unicode use Windows ANSI APIs
 +  --enable-sdl-ts-vmouse   enable SDL touchscreen virtual mouse support
 +  --disable-sdl-ts-vmouse  disable SDL touchscreen virtual mouse support
- 
- Optional Documentation Options:
-   --with-manual-version=VERSION version to use when generating the manual (optional)
-@@ -1285,6 +1288,8 @@ for ac_option in $@; do
+   --enable-ext-sse2         allow code to use sse2 extensions on x86/amd64
+   --enable-ext-avx2         allow code to use avx2 extensions on x86/amd64
+   --enable-ext-neon         allow code to use neon extensions on ARM
+@@ -1307,6 +1310,8 @@ for ac_option in $@; do
  	--disable-eventrecorder)     _eventrec=no            ;;
  	--enable-text-console)       _text_console=yes       ;;
  	--disable-text-console)      _text_console=no        ;;
 +	--enable-sdl-ts-vmouse)      _sdl_ts_vmouse=yes      ;;
 +	--disable-sdl-ts-vmouse)     _sdl_ts_vmouse=no       ;;
- 	--with-fluidsynth-prefix=*)
- 		arg=`echo $ac_option | cut -d '=' -f 2`
- 		FLUIDSYNTH_CFLAGS="-I$arg/include"
-@@ -5972,6 +5977,9 @@ define_in_config_h_if_yes "$_readline" 'USE_READLINE'
+ 	--enable-ext-sse2)           _ext_sse2=yes           ;;
+ 	--disable-ext-sse2)          _ext_sse2=no            ;;
+ 	--enable-ext-avx2)           _ext_avx2=yes           ;;
+@@ -6075,6 +6080,9 @@ define_in_config_h_if_yes "$_readline" '
  
  define_in_config_h_if_yes "$_text_console" 'USE_TEXT_CONSOLE_FOR_DEBUGGER'
  
