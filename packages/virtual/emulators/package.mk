@@ -908,9 +908,6 @@ makeinstall_target() {
 
   ### ScummVM
   case ${DEVICE} in
-    S922X)
-      add_emu_core scummvm retroarch scummvm true
-    ;;
     *)
       add_emu_core scummvm scummvmsa scummvm true
       add_emu_core scummvm retroarch scummvm false
