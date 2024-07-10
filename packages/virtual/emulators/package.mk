@@ -28,16 +28,9 @@ LIBRETRO_CORES="81-lr a5200-lr arduous-lr atari800-lr beetle-gba-lr beetle-lynx-
 case "${DEVICE}" in
   AMD64)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="wine"
-<<<<<<< HEAD
-    PKG_EMUS+=" dolphin-sa lime3ds-sa mednafen melonds-sa minivmacsa kronos-sa nanoboyadvance-sa pcsx2-sa ryujinx-sa         \
-               rpcs3-sa scummvmsa vita3k-sa xemu-sa yuzu-sa"
-    LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr desmume-lr dolphin-lr flycast-lr lrps2-lr ppsspp-lr        \
-                     kronos-lr"
-=======
     PKG_EMUS+=" cemu-sa dolphin-sa lime3ds-sa mednafen melonds-sa minivmacsa mupen64plus-sa nanoboyadvance-sa pcsx2-sa     \
-               rpcs3-sa scummvmsa vita3k-sa xemu-sa"
+               rpcs3-sa scummvmsa vita3k-sa xemu-sa yuzu-sa ryujinx-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr desmume-lr dolphin-lr flycast-lr lrps2-lr"
->>>>>>> ad2b435b82e0c69ebe8b874a7a582fd80b892b09
   ;;
   RK3588*)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr wine"
@@ -514,13 +507,13 @@ makeinstall_target() {
   esac
 
   ### Nintendo Wii U
-  #case ${DEVICE} in
-  #  AMD64)
-  #    add_emu_core wiiu cemu cemu-sa true
-  #    add_es_system wiiu
-  #    install_script "Start CEMU.sh"
-  #  ;;
-  #esac
+  case ${DEVICE} in
+    AMD64)
+      add_emu_core wiiu cemu cemu-sa true
+      add_es_system wiiu
+      install_script "Start CEMU.sh"
+    ;;
+  esac
 
   ### Nintendo Switch
   case ${DEVICE} in
