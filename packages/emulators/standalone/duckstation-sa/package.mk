@@ -20,7 +20,7 @@ case ${TARGET_ARCH} in
   ;;
 esac
 
-if [ "${OPENGL}" = "yes" ] && [ ! "${PREFER_GLES}" = "yes" ]; then
+if [ ! "${OPENGL}" = "no" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGL} glu libglvnd"
 fi
 
@@ -72,4 +72,17 @@ makeinstall_target() {
   rm -rf ${INSTALL}/usr/config/duckstation/common-tests
 
   chmod +x ${INSTALL}/usr/bin/start_duckstation.sh
+}
+
+post_install() {
+    case ${DEVICE} in
+      RK356*)
+        RESOURCE_FOLDER="database"
+      ;;
+      *)
+        RESOURCE_FOLDER="resources"
+      ;;
+    esac
+    sed -e "s/@RESOURCE_FOLDER@/${RESOURCE_FOLDER}/g" \
+        -i ${INSTALL}/usr/bin/start_duckstation.sh
 }
