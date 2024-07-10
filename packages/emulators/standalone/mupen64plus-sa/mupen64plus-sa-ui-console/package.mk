@@ -31,7 +31,6 @@ case ${DEVICE} in
 esac
 
 make_target() {
-  export CFLAGS="${CFLAGS} -Wno-error=incompatible-pointer-types"
 
   export V=1 \
          VC=0

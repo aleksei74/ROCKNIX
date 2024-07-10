@@ -1,5 +1,5 @@
 PKG_NAME="picodrive-lr"
-PKG_VERSION="535217f16bc2848ec70985c41e1d131709352641"
+PKG_VERSION="ad93670449a28825d4b2cebf2eeff72cf03377a9"
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/libretro/picodrive"
 PKG_URL="${PKG_SITE}.git"
@@ -9,11 +9,8 @@ GET_HANDLER_SUPPORT="git"
 PKG_BUILD_FLAGS="-gold"
 PKG_TOOLCHAIN="make"
 
-PKG_PATCH_DIRS="${PROJECT}"
 
-pre_configure_target() {
-export CFLAGS="${CFLAGS} -Wno-error=incompatible-pointer-types"
-}
+PKG_PATCH_DIRS="${PROJECT}"
 
 configure_target() {
   :

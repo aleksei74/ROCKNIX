@@ -15,7 +15,3 @@ PKG_MESON_OPTS_TARGET="-Ddocs=disabled \
                        -Drun-shaping=disabled \
                        -Dtest-text-shaping=false \
                        -Dexamples=false"
-
-pre_configure_target() {
-export TARGET_CFLAGS="${TARGET_CFLAGS} -Wno-error=maybe-uninitialized"
-}

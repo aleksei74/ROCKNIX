@@ -2,11 +2,7 @@
 # Copyright (C) 2022-present JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="xemu-sa"
-<<<<<<< HEAD
 PKG_VERSION="v0.7.121"
-=======
-PKG_VERSION="v0.7.127"
->>>>>>> ad2b435b82e0c69ebe8b874a7a582fd80b892b09
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/xemu-project/xemu"

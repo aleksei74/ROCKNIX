@@ -48,34 +48,24 @@
     </game>
     <game>
         <path>./cloud_backup.sh</path>
-<<<<<<< HEAD
         <name>RCLONE 백업</name>
         <desc>RCLONE을 사용하여 저장 내용을 클라우드 드라이브에 백업하세요. 먼저 jelos.org의 단계에 따라 RCLONE을 설정했는지 확인하세요.</desc>
-=======
-        <name>RCLONE Backup</name>
-        <desc>Backup your saves to a cloud drive using RCLONE. Please make sure you have followed the steps at rocknix.org to set up RCLONE first.</desc>
->>>>>>> ad2b435b82e0c69ebe8b874a7a582fd80b892b09
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
-        <releasedate>2024</releasedate>
+        <releasedate>2022</releasedate>
         <genre>Script</genre>
         <players>1</players>
         <image>./images/rclone-backup.svg</image>
     </game>
     <game>
         <path>./cloud_restore.sh</path>
-<<<<<<< HEAD
         <name>RCLONE 복원</name>
         <desc>RCLONE을 사용하여 클라우드 드라이브에서 저장 내용을 복원합니다. 먼저 jelos.org의 단계에 따라 RCLONE을 설정했는지 확인하세요.</desc>
-=======
-        <name>RCLONE Restore</name>
-        <desc>Restores your saves from a cloud drive using RCLONE. Please make sure you have followed the steps at rocknix.org to set up RCLONE first.</desc>
->>>>>>> ad2b435b82e0c69ebe8b874a7a582fd80b892b09
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
-        <releasedate>2024</releasedate>
+        <releasedate>2022</releasedate>
         <genre>Script</genre>
         <players>1</players>
         <image>./images/rclone-restore.svg</image>
