@@ -3,7 +3,7 @@
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="cemu-sa"
-PKG_VERSION="13b90874f9934f0a79a9ab2b9c4e1288ed2e6764"
+PKG_VERSION="8b37e316d0537da9c717cb0698c9141e668d6fff"
 PKG_ARCH="x86_64"
 PKG_LICENSE="MPL-2.0"
 PKG_SITE="https://github.com/cemu-project/Cemu"
@@ -29,9 +29,9 @@ configure_package() {
   fi
 
   # Vulkan Support
-  if [ "${VULKAN_SUPPORT}" = "yes" ]; then
-    PKG_DEPENDS_TARGET+=" ${VULKAN}"
-  fi
+  #if [ "${VULKAN_SUPPORT}" = "yes" ]; then
+  #  PKG_DEPENDS_TARGET+=" ${VULKAN}"
+  #fi
 }
 
 pre_configure_target() {

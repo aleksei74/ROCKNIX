@@ -3,7 +3,7 @@
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="emulationstation"
-PKG_VERSION="02e858d50722374a98e26bcb566ee6a08a81b845"
+PKG_VERSION="dd7f40b0cfd1f5e51ec0d1deda006e1c2657b3e8"
 PKG_GIT_CLONE_BRANCH="main"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/ROCKNIX/emulationstation"
@@ -95,7 +95,9 @@ pre_configure_target() {
   do
     if [ -z "${!key}" ]
     then
-      echo "WARNING: ${!key} not declared, will not build support."
+      echo "WARNING: ${key} not declared, will not build support."
+    else
+      echo "USING: ${key} = ${!key}"
     fi
   done
 
