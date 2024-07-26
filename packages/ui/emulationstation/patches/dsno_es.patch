@@ -4,7 +4,7 @@
  	{ "FB Alpha 2012", "fbalpha2012" },
  	{ "FB Alpha", "fbalpha" },
  	{ "FinalBurn Neo", "fbneo" },
-+	{ "FinalBurn Neo DSNO", "fbneo" },
++	{ "FinalBurn Neo DSNO", "fbneo-dsno" },
  	{ "FCEUmm", "fceumm" },
  	{ "Flycast", "flycast" },
  	{ "FreeIntv", "freeintv" },
