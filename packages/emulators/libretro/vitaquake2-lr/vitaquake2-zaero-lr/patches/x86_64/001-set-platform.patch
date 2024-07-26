@@ -5,7 +5,7 @@ diff -rupN vitaquake2.orig/Makefile vitaquake2/Makefile
     SHARED := -shared -Wl,--version-script=$(CORE_DIR)/link.T
  	LIBM :=
  
-+else ifeq ($(platform), @DEVICE@)
++else ifeq ($(platform), @DEVICE@_rocknix)
 +    TARGET := $(TARGET_NAME)_libretro.so
 +        fpic := -fPIC
 +    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/link.T -Wl,--no-undefined
