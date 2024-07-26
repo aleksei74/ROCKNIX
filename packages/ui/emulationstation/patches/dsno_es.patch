@@ -1,0 +1,10 @@
+--- GuiNetPlay.cpp.orig	2024-05-21 18:23:02.582164600 +0900
++++ GuiNetPlay.cpp	2024-07-26 16:00:11.537039040 +0900
+@@ -45,6 +45,7 @@ static std::map<std::string, std::string
+ 	{ "FB Alpha 2012", "fbalpha2012" },
+ 	{ "FB Alpha", "fbalpha" },
+ 	{ "FinalBurn Neo", "fbneo" },
++	{ "FinalBurn Neo DSNO", "fbneo" },
+ 	{ "FCEUmm", "fceumm" },
+ 	{ "Flycast", "flycast" },
+ 	{ "FreeIntv", "freeintv" },
