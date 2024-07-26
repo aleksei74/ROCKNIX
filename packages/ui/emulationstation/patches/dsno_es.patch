@@ -1,5 +1,5 @@
---- GuiNetPlay.cpp.orig	2024-05-21 18:23:02.582164600 +0900
-+++ GuiNetPlay.cpp	2024-07-26 16:00:11.537039040 +0900
+--- GuiNetPlay.cpp.orig	2024-07-26 16:05:45.506880700 +0900
++++ GuiNetPlay.cpp	2024-07-26 16:06:58.986846282 +0900
 @@ -45,6 +45,7 @@ static std::map<std::string, std::string
  	{ "FB Alpha 2012", "fbalpha2012" },
  	{ "FB Alpha", "fbalpha" },
