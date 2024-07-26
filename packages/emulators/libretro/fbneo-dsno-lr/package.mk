@@ -26,5 +26,6 @@ fi
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ${PKG_DIR}/fbneo_dsno_libretro.info ${INSTALL}/usr/lib/libretro/
   cp ${PKG_BUILD}/src/burner/libretro/fbneo_libretro.so ${INSTALL}/usr/lib/libretro/fbneo_dsno_libretro.so
 }
