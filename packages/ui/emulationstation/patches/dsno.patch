@@ -1,5 +1,5 @@
 diff --git a/resources/mamenames.xml b/resources/mamenames.xml
-index 92ea6c3..b5e7831 100755
+index 92ea6c3..5793048 100755
 --- a/resources/mamenames.xml
 +++ b/resources/mamenames.xml
 @@ -4546,6 +4546,10 @@
@@ -83,7 +83,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>daimakair</mamename>
    <realname>Daimakaimura (Japan Resale Ver.)</realname>
-@@ -20022,6 +20054,14 @@
+@@ -19734,6 +19766,10 @@
+   <mamename>ddpdojt</mamename>
+   <realname>DoDonPachi Dai-Ou-Jou Tamashii (V201, China)</realname>
+ </game>
++<game vert="true">
++  <mamename>ddpsdoj</mamename>
++  <realname>DoDonPachi SaiDaiOuJou (2012/ 4/20)</realname>
++</game>
+ <game>
+   <mamename>ddr2m</mamename>
+   <realname>Dance Dance Revolution 2nd Mix (GN895 VER. JAA)</realname>
+@@ -20022,6 +20058,14 @@
    <mamename>ddsomjs01</mamename>
    <realname>Dungeons &amp;amp; Dragons: Shadow over Mystara (Translation Chinese 2017-04-26)</realname>
  </game>
@@ -98,7 +109,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>ddsomr1</mamename>
    <realname>Dungeons &amp; Dragons: Shadow over Mystara (Euro 960223)</realname>
-@@ -20098,6 +20138,10 @@
+@@ -20098,6 +20142,10 @@
    <mamename>ddtodjr2</mamename>
    <realname>Dungeons &amp; Dragons: Tower of Doom (Japan 940113)</realname>
  </game>
@@ -109,7 +120,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>ddtodpdec</mamename>
    <realname>Dungeons &amp;amp; Dragons: Tower of Doom (Plus)</realname>
-@@ -21142,6 +21186,10 @@
+@@ -21142,6 +21190,10 @@
    <mamename>dinojp</mamename>
    <realname>Cadillacs Kyouryuu-Shinseiki Plus (Double Edition 2010-03-10)</realname>
  </game>
@@ -120,7 +131,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>dinoki25</mamename>
    <realname>Dinosaur King - D-Team VS. the Alpha Fortress (Export, Ver 2.500) (MDA-C0047)</realname>
-@@ -32498,6 +32546,18 @@
+@@ -32498,6 +32550,18 @@
    <mamename>ffightae</mamename>
    <realname>Final Fight 30th Anniversary Edition 2019-12-03</realname>
  </game>
@@ -139,7 +150,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>ffightb</mamename>
    <realname>Final Fight (Quick whirlwind)</realname>
-@@ -32550,6 +32610,10 @@
+@@ -32550,6 +32614,10 @@
    <mamename>ffightjh01</mamename>
    <realname>Final Fight (Ming Yun Wu Shuang Edition 2016 2016-12-08)</realname>
  </game>
@@ -150,7 +161,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>ffights01</mamename>
    <realname>Final Fight (Change Fighter)</realname>
-@@ -33470,6 +33534,10 @@
+@@ -33470,6 +33538,10 @@
    <mamename>flipshotk</mamename>
    <realname>Battle Flip Shot (Traduction Korean)</realname>
  </game>
@@ -161,7 +172,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>flipull</mamename>
    <realname>Flipull (Japan)</realname>
-@@ -37142,6 +37210,10 @@
+@@ -37142,6 +37214,10 @@
    <mamename>ginganina</mamename>
    <realname>Ginga NinkyouDen (set 2)</realname>
  </game>
@@ -172,7 +183,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>ginganins01</mamename>
    <realname>Ginga NinkyouDen (Korean Translation)</realname>
-@@ -39774,6 +39846,10 @@
+@@ -39774,6 +39850,10 @@
    <mamename>gunbirdk</mamename>
    <realname>Gunbird (Korea)</realname>
  </game>
@@ -183,7 +194,7 @@ index 92ea6c3..b5e7831 100755
  <game gun="true">
    <mamename>gunblade</mamename>
    <realname>Gunblade NY (Revision A)</realname>
-@@ -42426,6 +42502,10 @@
+@@ -42426,6 +42506,10 @@
    <mamename>hookj</mamename>
    <realname>Hook (Japan)</realname>
  </game>
@@ -194,7 +205,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>hooks01</mamename>
    <realname>Hook (1V4 2016-06-25)</realname>
-@@ -54762,6 +54842,10 @@
+@@ -54762,6 +54846,10 @@
    <mamename>knightsjs01</mamename>
    <realname>Knights of the Round (Translation Chinese)</realname>
  </game>
@@ -205,7 +216,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>knightsro</mamename>
    <realname>Knights of the Round (Romanian)</realname>
-@@ -54826,6 +54910,10 @@
+@@ -54826,6 +54914,10 @@
    <mamename>kodja</mamename>
    <realname>The King of Dragons (Japan 910805, B-Board 89625B-1)</realname>
  </game>
@@ -216,7 +227,29 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kodr1</mamename>
    <realname>The King of Dragons (World 910711)</realname>
-@@ -57962,6 +58050,10 @@
+@@ -56546,6 +56638,10 @@
+   <mamename>kof2k1st</mamename>
+   <realname>Kof2001 (Special ST Version)</realname>
+ </game>
++<game>
++  <mamename>kof2k1uh</mamename>
++  <realname>The King of Fighters 2001 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof2k1wh</mamename>
+   <realname>Kof2001 (Diff Moves set 2)</realname>
+@@ -57542,6 +57638,10 @@
+   <mamename>kof2k2tc</mamename>
+   <realname>Kof2002 (Char color changed - Attack spark color changed for Iori and Orochi-Chris)</realname>
+ </game>
++<game>
++  <mamename>kof2k2uh</mamename>
++  <realname>The King of Fighters 2002 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof2k2ul</mamename>
+   <realname>Kof2002 (Ultra 2003-05-15)</realname>
+@@ -57962,6 +58062,10 @@
    <mamename>kof2kkf1</mamename>
    <realname>Kof2000 (Add Char - MVS protection rem set 1)</realname>
  </game>
@@ -227,7 +260,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof2kkvs</mamename>
    <realname>Kof2000 (Add Char - MVS protection rem set 2)</realname>
-@@ -58094,6 +58186,10 @@
+@@ -58014,6 +58118,10 @@
+   <mamename>kof2kst</mamename>
+   <realname>Kof2000 (Add Char - Boss striker moves changed)</realname>
+ </game>
++<game>
++  <mamename>kof2kuh</mamename>
++  <realname>The King of Fighters 2000 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof2kwh</mamename>
+   <realname>Kof2000 (Diff Moves for Takuma)</realname>
+@@ -58094,6 +58202,10 @@
    <mamename>kof94kh</mamename>
    <realname>Kof'94 (Korean Hack)</realname>
  </game>
@@ -238,7 +282,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof94qaq</mamename>
    <realname>Kof'94 (Power Enhanced)</realname>
-@@ -58258,6 +58354,10 @@
+@@ -58206,6 +58318,10 @@
+   <mamename>kof94sri</mamename>
+   <realname>Kof'94 (Super Ultra Remixed)</realname>
+ </game>
++<game>
++  <mamename>kof94uh</mamename>
++  <realname>The King of Fighters '94 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof94y</mamename>
+   <realname>Kof'94 (Hidden Characters-Fix Boss's error)</realname>
+@@ -58258,6 +58374,10 @@
    <mamename>kof95k</mamename>
    <realname>Kof'95 (Korean Translation V1)</realname>
  </game>
@@ -249,7 +304,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof95neo</mamename>
    <realname>Kof'95 (Boss Like NeogeoCD v1.1)</realname>
-@@ -58554,6 +58654,10 @@
+@@ -58402,6 +58522,10 @@
+   <mamename>kof95sp2</mamename>
+   <realname>Kof'95 (Special v1.0.2017-06-13)</realname>
+ </game>
++<game>
++  <mamename>kof95uh</mamename>
++  <realname>The King of Fighters '95 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof95xg</mamename>
+   <realname>Kof'95 (Boss)</realname>
+@@ -58554,6 +58678,10 @@
    <mamename>kof96k3o</mamename>
    <realname>Kof'96 (Remix Kof98 Moves 2003-07-10)</realname>
  </game>
@@ -260,7 +326,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof96kt</mamename>
    <realname>Kof'96 (Korean Translation)</realname>
-@@ -60170,6 +60274,10 @@
+@@ -60170,6 +60298,10 @@
    <mamename>kof97kai</mamename>
    <realname>Kof'97 (Plus)(Alt)</realname>
  </game>
@@ -271,7 +337,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof97kp</mamename>
    <realname>Kof'97 (Enable 1 Hidden Character)(Orochi)</realname>
-@@ -62094,6 +62202,10 @@
+@@ -61042,6 +61174,10 @@
+   <mamename>kof97tse</mamename>
+   <realname>Kof'97 (TSE)</realname>
+ </game>
++<game>
++  <mamename>kof97uh</mamename>
++  <realname>The King of Fighters '97 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof97wh</mamename>
+   <realname>Kof'97 (Style Kyo to 95' Kyo)</realname>
+@@ -62094,6 +62230,10 @@
    <mamename>kof98klc</mamename>
    <realname>Kof'98 (Combo 2009-09-23)(Kalce combo mix)</realname>
  </game>
@@ -282,7 +359,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof98lb</mamename>
    <realname>Kof'98 (Tongtian Edition)</realname>
-@@ -62714,6 +62826,10 @@
+@@ -62402,6 +62542,10 @@
+   <mamename>kof98tim</mamename>
+   <realname>Kof'98 (Triple Impact Remix)</realname>
+ </game>
++<game>
++  <mamename>kof98uh</mamename>
++  <realname>The King of Fighters '98 - The Slugfest / King of Fighters '98 - Dream Match Never Ends (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof98ul</mamename>
+   <realname>Kof'98 (Ultra Leona Rev.2)</realname>
+@@ -62714,6 +62858,10 @@
    <mamename>kof99kp</mamename>
    <realname>Kof'99 (Color changed - 10%)</realname>
  </game>
@@ -293,7 +381,18 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>kof99lb</mamename>
    <realname>Kof'99 (Unknown Hack 2016-01-04)</realname>
-@@ -68366,6 +68482,10 @@
+@@ -63318,6 +63466,10 @@
+   <mamename>kof99the42</mamename>
+   <realname>Kof'99 (The 4 Flame Manipulators)(set 2)</realname>
+ </game>
++<game>
++  <mamename>kof99uh</mamename>
++  <realname>The King of Fighters '99 - Millennium Battle (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>kof99vor</mamename>
+   <realname>Kof'99 (Renewed version 2014-11-12)</realname>
+@@ -68366,6 +68518,10 @@
    <mamename>leader</mamename>
    <realname>Leader (version Z 2E, Greece)</realname>
  </game>
@@ -304,7 +403,62 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>leaguemn</mamename>
    <realname>Yakyuu Kakutou League-Man (Japan)</realname>
-@@ -115090,6 +115210,10 @@
+@@ -106546,6 +106702,10 @@
+   <mamename>mslug2t</mamename>
+   <realname>Metal Slug 2 Turbo (NGM-9410) (hack)</realname>
+ </game>
++<game>
++  <mamename>mslug2uh</mamename>
++  <realname>Metal Slug 2 - Super Vehicle-001/II (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>mslug2vqys01</mamename>
+   <realname>Metal Slug 2 Turbo (Multi-Function Version 2017-05-09)(Revised Version Remix Rev.1.0 [2019-09-13])</realname>
+@@ -108638,6 +108798,10 @@
+   <mamename>mslug3rmx72</mamename>
+   <realname>Metal Slug 3 (Revised Version Thunder Cloud Extreme Mix 2.2 [2019-12-03])</realname>
+ </game>
++<game>
++  <mamename>mslug3uh</mamename>
++  <realname>Metal Slug 3 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>mslug3v</mamename>
+   <realname>Metal Slug 3 (NGH-2560) (Enhanced Violence Version hack by EEZEZY)</realname>
+@@ -109506,6 +109670,10 @@
+   <mamename>mslug4sp</mamename>
+   <realname>Metal Slug 4 (Super Enhanced Version 2015-05-10)</realname>
+ </game>
++<game>
++  <mamename>mslug4uh</mamename>
++  <realname>Metal Slug 4 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>mslug4xg</mamename>
+   <realname>Metal Slug 4 (PPX Team Hack, Remixed)</realname>
+@@ -111306,6 +111474,10 @@
+   <mamename>mslugrmpl04</mamename>
+   <realname>Metal Slug (Revised Version Super Flame Shot Extreme Mix [2019-09-13])</realname>
+ </game>
++<game>
++  <mamename>msluguh</mamename>
++  <realname>Metal Slug - Super Vehicle-001 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>mslugx</mamename>
+   <realname>Metal Slug X - Super Vehicle-001 (NGM-2500 ~ NGH-2500)</realname>
+@@ -112610,6 +112782,10 @@
+   <mamename>mslugxsvb</mamename>
+   <realname>Metal Slug X (Super Enhanced Version Of The Beta 2015 2015-05-24)</realname>
+ </game>
++<game>
++  <mamename>mslugxuh</mamename>
++  <realname>Metal Slug X - Super Vehicle-001 (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>mslugxz01</mamename>
+   <realname>Metal Slug X (Extreme Blue)</realname>
+@@ -115090,6 +115266,10 @@
    <mamename>neocstlv</mamename>
    <realname>Neo CastleVania Demo [Homebrew]</realname>
  </game>
@@ -315,7 +469,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>neocup98</mamename>
    <realname>Neo-Geo Cup '98 - The Road to the Victory</realname>
-@@ -123846,6 +123970,10 @@
+@@ -123846,6 +124026,10 @@
    <mamename>pfghtjs03</mamename>
    <realname>Pocket Fighter (Move Mod 11-10-2007)</realname>
  </game>
@@ -326,7 +480,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>pg675</mamename>
    <realname>Simatic PG675</realname>
-@@ -128154,6 +128282,10 @@
+@@ -128154,6 +128338,10 @@
    <mamename>punisherjs19</mamename>
    <realname>The Punisher (1 Vs 2 Competition Edition 2018-09-20)</realname>
  </game>
@@ -337,7 +491,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>punishers01</mamename>
    <realname>The Punisher (1 Vs 2 Perfect Update 2018-03-30)</realname>
-@@ -128346,10 +128478,18 @@
+@@ -128346,10 +128534,18 @@
    <mamename>puzlstar</mamename>
    <realname>Puzzle Star / Mohuan Xingzuo (ver. 100MG, 09/30/99 build)</realname>
  </game>
@@ -356,7 +510,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>puzzledp</mamename>
    <realname>Puzzle De Pon!</realname>
-@@ -132186,6 +132326,10 @@
+@@ -132186,6 +132382,10 @@
    <mamename>rmancp2j</mamename>
    <realname>Rockman: The Power Battle (CPS2, Japan 950922)</realname>
  </game>
@@ -367,7 +521,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>rmgoldyh</mamename>
    <realname>Real Mahjong Gold Yumehai / Super Real Mahjong GOLD part.2 [BET] (Japan)</realname>
-@@ -132670,10 +132814,18 @@
+@@ -132670,10 +132870,18 @@
    <mamename>rockman2j</mamename>
    <realname>Rockman 2: The Power Fighters (Japan 960708)</realname>
  </game>
@@ -386,7 +540,62 @@ index 92ea6c3..b5e7831 100755
  <game vert="true">
    <mamename>rockn</mamename>
    <realname>Rock'n Tread (Japan)</realname>
-@@ -160338,6 +160490,10 @@
+@@ -134506,6 +134714,10 @@
+   <mamename>samsho2ss</mamename>
+   <realname>Samurai Shodown II (Command change)</realname>
+ </game>
++<game>
++  <mamename>samsho2uh</mamename>
++  <realname>Samurai Shodown II / Shin Samurai Spirits - Haohmaru Jigokuhen (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>samsho2yc</mamename>
+   <realname>Samurai Shodown II (Char - Pow hack)</realname>
+@@ -134602,6 +134814,10 @@
+   <mamename>samsho3ss</mamename>
+   <realname>Samurai Shodown III (Special v0.1 2005-09-19)</realname>
+ </game>
++<game>
++  <mamename>samsho3uh</mamename>
++  <realname>Samurai Shodown III / Samurai Spirits - Zankurou Musouken (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>samsho3yc</mamename>
+   <realname>Samurai Shodown III (Add Char - Pow hack ABC)</realname>
+@@ -134746,6 +134962,10 @@
+   <mamename>samsho4sp</mamename>
+   <realname>Samurai Shodown IV - Amakusa's Revenge / Samurai Spirits - Amakusa Kourin (Special 2017, hack) [Hack]</realname>
+ </game>
++<game>
++  <mamename>samsho4uh</mamename>
++  <realname>Samurai Shodown IV - Amakusa's Revenge / Samurai Spirits - Amakusa Kourin (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>samsho4wh</mamename>
+   <realname>Samurai Shodown IV (Enable hidden characters v1)</realname>
+@@ -134934,6 +135154,10 @@
+   <mamename>samsho5s31</mamename>
+   <realname>Samurai Shodown V (Color Change Boss With Simple Attack Edition 2018-11-13)</realname>
+ </game>
++<game>
++  <mamename>samsho5uh</mamename>
++  <realname>Samurai Shodown V / Samurai Spirits Zero (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>samsho5x</mamename>
+   <realname>Samurai Shodown V / Samurai Spirits Zero (hack of XBOX version) [Hack]</realname>
+@@ -134998,6 +135222,10 @@
+   <mamename>samshos1</mamename>
+   <realname>Samurai Shodown (Easy special attacks 2005-09-19)</realname>
+ </game>
++<game>
++  <mamename>samshouh</mamename>
++  <realname>Samurai Shodown / Samurai Spirits (AES Uncensored Hack)</realname>
++</game>
+ <game>
+   <mamename>samshozk</mamename>
+   <realname>Samurai Shodown (Unlimited Credits in Console Mode 2008-10-23)</realname>
+@@ -160338,6 +160566,10 @@
    <mamename>sfz2aljs10</mamename>
    <realname>Street Fighter Zero 2 Alpha (Super Golden 2020-02-17)</realname>
  </game>
@@ -397,7 +606,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>sfz2als01</mamename>
    <realname>Street Fighter Zero 2 Alpha (Easy Move 2016-11-18)</realname>
-@@ -160374,6 +160530,10 @@
+@@ -160374,6 +160606,10 @@
    <mamename>sfz2jyh</mamename>
    <realname>Street Fighter Zero 2 (Boss hack)</realname>
  </game>
@@ -408,7 +617,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>sfz2n</mamename>
    <realname>Street Fighter Zero 2 (Oceania 960229)</realname>
-@@ -160498,6 +160658,10 @@
+@@ -160498,6 +160734,10 @@
    <mamename>sfzch</mamename>
    <realname>Street Fighter Zero (CPS Changer, Japan 951020)</realname>
  </game>
@@ -419,7 +628,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>sfzchs01</mamename>
    <realname>Street Fighter Zero (CPS Changer - Street Fighter Alpha - Warriors' Dreams)</realname>
-@@ -160570,6 +160734,10 @@
+@@ -160570,6 +160810,10 @@
    <mamename>sfzjyh</mamename>
    <realname>Street Fighter Zero (Enable hidden characters V2)</realname>
  </game>
@@ -430,7 +639,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>sg1000</mamename>
    <realname>SG-1000</realname>
-@@ -163310,6 +163478,10 @@
+@@ -163310,6 +163554,10 @@
    <mamename>sngkacea</mamename>
    <realname>Sengoku Ace (Japan, set 2)</realname>
  </game>
@@ -441,7 +650,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>snk6502_sound</mamename>
    <realname>SNK6502 Custom Sound</realname>
-@@ -166858,6 +167030,10 @@
+@@ -166858,6 +167106,10 @@
    <mamename>spf2xjd</mamename>
    <realname>Super Puzzle Fighter II X (Japan 960531 Phoenix Edition) (bootleg)</realname>
  </game>
@@ -452,7 +661,7 @@ index 92ea6c3..b5e7831 100755
  <game vert="true">
    <mamename>spfghmk2</mamename>
    <realname>Space Fighter Mark II (set 1)</realname>
-@@ -169314,6 +169490,10 @@
+@@ -169314,6 +169566,10 @@
    <mamename>striderjr</mamename>
    <realname>Strider Hiryu (Japan Resale Ver.)</realname>
  </game>
@@ -463,7 +672,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>striders01</mamename>
    <realname>Strider (Fixed Music In Last Several Stages)</realname>
-@@ -172702,6 +172882,10 @@
+@@ -172702,6 +172958,10 @@
    <mamename>tengaij</mamename>
    <realname>Sengoku Blade: Sengoku Ace Episode II / Tengai</realname>
  </game>
@@ -474,7 +683,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>tengais01</mamename>
    <realname>Tengai (Ex Super Version 2009-10-31)</realname>
-@@ -178394,6 +178578,10 @@
+@@ -178394,6 +178654,10 @@
    <mamename>uccopsjs01</mamename>
    <realname>Undercover Cops (Edition Enhanced 2019-07-22)</realname>
  </game>
@@ -485,7 +694,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>uccopsu</mamename>
    <realname>Undercover Cops (US)</realname>
-@@ -183102,6 +183290,10 @@
+@@ -183102,6 +183366,10 @@
    <mamename>wjammere</mamename>
    <realname>Windjammers / Flying Power Disc (Earlier)</realname>
  </game>
@@ -496,7 +705,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>wjammers</mamename>
    <realname>Windjammers / Flying Power Disc</realname>
-@@ -183502,6 +183694,14 @@
+@@ -183502,6 +183770,14 @@
    <mamename>wofchdx</mamename>
    <realname>Sangokushi III Gaiden: Kakou-On's Revenge DX (hack)</realname>
  </game>
@@ -511,7 +720,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>wofes</mamename>
    <realname>Warriors of Fate (Holly Sword Three Kingdoms (Invincible))</realname>
-@@ -183534,6 +183734,14 @@
+@@ -183534,6 +183810,14 @@
    <mamename>wofjh</mamename>
    <realname>Tenchi wo Kurau II - Sekiheki no Tatakai (hack, 921031 Japan) [Hack]</realname>
  </game>
@@ -526,7 +735,7 @@ index 92ea6c3..b5e7831 100755
  <game>
    <mamename>wofr1</mamename>
    <realname>Warriors of Fate (World 921002)</realname>
-@@ -183630,6 +183838,10 @@
+@@ -183630,6 +183914,10 @@
    <mamename>wonder3</mamename>
    <realname>Wonder 3 (Japan 910520)</realname>
  </game>

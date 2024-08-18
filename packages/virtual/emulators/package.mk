@@ -55,7 +55,7 @@ case "${DEVICE}" in
   ;;
   S922X)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 pcsx_rearmed-lr wine"
-    PKG_EMUS+=" aethersx2-sa box64 dolphin-sa drastic-sa portmaster yabasanshiro-sa"
+    PKG_EMUS+=" aethersx2-sa box64 dolphin-sa drastic-sa portmaster scummvmsa yabasanshiro-sa"
     LIBRETRO_CORES+=" beetle-psx-lr bsnes-lr bsnes-hd-lr dolphin-lr geolith-lr flycast-lr uae4arm"
     [ "${USE_MALI}" != "no" ] && PKG_EMUS+=" lime3ds-sa"
     PKG_RETROARCH+=" retropie-shaders"
@@ -906,12 +906,8 @@ makeinstall_target() {
   add_es_system pokemini
 
   ### ScummVM
-  case ${DEVICE} in
-    *)
-      add_emu_core scummvm scummvmsa scummvm true
-      add_emu_core scummvm retroarch scummvm false
-    ;;
-  esac
+  add_emu_core scummvm scummvmsa scummvm true
+  add_emu_core scummvm retroarch scummvm false
   add_es_system scummvm
   install_script "Start ScummVM.sh"
 
