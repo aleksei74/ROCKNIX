@@ -19,7 +19,7 @@ if [ "${DEVICE}" = "S922X" -a "${USE_MALI}" = "no" ]; then
 fi
 
 case ${DEVICE} in
-  RK3326)
+  RK3326|AMD64)
     PKG_VERSION="6.8.9"
     PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS+=" mainline"
@@ -32,11 +32,6 @@ case ${DEVICE} in
   H700)
     PKG_VERSION="996b4126d10e68ee70b64fc9a2fbccdc92a64f93"
     PKG_URL="https://git.sr.ht/~tokyovigilante/linux/archive/${PKG_VERSION}.tar.gz"
-    PKG_PATCH_DIRS+=" mainline"
-    ;;
-   AMD64)
-    PKG_VERSION="6.10.4"
-    PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS+=" mainline"
     ;;
   *)
