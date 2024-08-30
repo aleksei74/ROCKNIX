@@ -24,7 +24,7 @@ src-pkg:
 docs:
 	./tools/foreach './scripts/clean emulators && ./scripts/build emulators'
 
-world: RK3588 RK3566 RK3399 S922X RK3326
+world: RK3588 RK3566 RK3399 S922X RK3326 H700
 
 AMD64:
 	unset DEVICE_ROOT
