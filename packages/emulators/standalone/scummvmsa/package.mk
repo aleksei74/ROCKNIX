@@ -12,7 +12,7 @@ PKG_LONGDESC="Script Creation Utility for Maniac Mansion Virtual Machine"
 
 pre_configure_target() { 
   sed -i "s|sdl-config|sdl2-config|g" ${PKG_BUILD}/configure
-  TARGET_CONFIGURE_OPTS="--host=${TARGET_NAME} --backend=sdl --disable-alsa --with-sdl-prefix=${SYSROOT_PREFIX}/usr/bin --disable-debug --enable-release --enable-vkeybd --enable-sdl-ts-vmouse --opengl-mode=gles2"
+  TARGET_CONFIGURE_OPTS="--host=${TARGET_NAME} --backend=sdl --disable-alsa --with-sdl-prefix=${SYSROOT_PREFIX}/usr/bin --disable-debug --enable-release --enable-vkeybd --enable-sdl-ts-vmouse --opengl-mode=gles2 --disable-gtk"
 }
 
 post_makeinstall_target() {
