@@ -24,7 +24,7 @@ src-pkg:
 docs:
 	./tools/foreach './scripts/clean emulators && ./scripts/build emulators'
 
-world: RK3588 RK3566 RK3399 S922X RK3326 H700
+world: RK3588 RK3566 RK3326 RK3399 S922X H700
 
 AMD64:
 	unset DEVICE_ROOT
@@ -80,7 +80,7 @@ package-clean:
 # For example: make docker-AMD64 will use docker to call: make AMD64
 # All variables are scoped to docker-* commands to prevent weird collisions/behavior with non-docker commands
 
-docker-%: DOCKER_IMAGE := "justenoughlinuxos/jelos-build:latest"
+docker-%: DOCKER_IMAGE := "rocknix/rocknix-build:latest"
 
 # DOCKER_WORK_DIR is the directory in the Docker image - it is set to /work by default
 #   Anytime this directory changes, you must run `make clean` similarly to moving the distribution directory
