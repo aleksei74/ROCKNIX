@@ -597,10 +597,10 @@ diff --git a/backends/platform/maemo/debian/rules b/backends/platform/maemo/debi
 old mode 100755
 new mode 100644
 diff --git a/backends/platform/sdl/sdl.cpp b/backends/platform/sdl/sdl.cpp
-index 0e0821ceda3..4908e9a4af0 100644
+index 8cd8bba06d2..5ff69f3905f 100644
 --- a/backends/platform/sdl/sdl.cpp
 +++ b/backends/platform/sdl/sdl.cpp
-@@ -182,6 +182,9 @@ bool OSystem_SDL::hasFeature(Feature f) {
+@@ -201,6 +201,9 @@ bool OSystem_SDL::hasFeature(Feature f) {
  	if (f == kFeatureJoystickDeadzone || f == kFeatureKbdMouseSpeed) {
  		return _eventSource->isJoystickConnected();
  	}
@@ -610,7 +610,7 @@ index 0e0821ceda3..4908e9a4af0 100644
  #if defined(USE_OPENGL_GAME) || defined(USE_OPENGL_SHADERS)
  	/* Even if we are using the 2D graphics manager,
  	 * we are at one initGraphics3d call of supporting OpenGL */
-@@ -191,6 +194,29 @@ bool OSystem_SDL::hasFeature(Feature f) {
+@@ -213,6 +216,29 @@ bool OSystem_SDL::hasFeature(Feature f) {
  	return ModularGraphicsBackend::hasFeature(f);
  }
  
@@ -641,7 +641,7 @@ index 0e0821ceda3..4908e9a4af0 100644
  	// Check if backend has not been initialized
  	assert(!_inited);
 diff --git a/backends/platform/sdl/sdl.h b/backends/platform/sdl/sdl.h
-index 28ba76a09ed..3cf1dcf021a 100644
+index 1315ae9b7fe..376e1b3cae0 100644
 --- a/backends/platform/sdl/sdl.h
 +++ b/backends/platform/sdl/sdl.h
 @@ -52,6 +52,10 @@ public:
@@ -656,36 +656,36 @@ index 28ba76a09ed..3cf1dcf021a 100644
  	// Override functions from ModularBackend and OSystem
  	void initBackend() override;
 diff --git a/configure b/configure
-index e9e3abe6493..f3d4aa91764 100755
+index 480916a2706..8de5c65791c 100755
 --- a/configure
 +++ b/configure
-@@ -223,6 +223,7 @@ _nuked_opl=yes
+@@ -226,6 +226,7 @@ _nuked_opl=yes
  _builtin_resources=yes
  _windows_console=yes
  _windows_unicode=yes
 +_sdl_ts_vmouse=no
  _cygwin_build=no
- # Default commands
- _ranlib=ranlib
-@@ -978,6 +979,8 @@ Optional Features:
-   --disable-windows-console do not show console output on Windows
-   --enable-windows-unicode  use Windows Unicode APIs (default)
-   --disable-windows-unicode use Windows ANSI APIs
+ _ext_sse2=auto
+ _ext_avx2=auto
+@@ -989,6 +990,8 @@ Optional Features:
+   --enable-ext-sse2         allow code to use sse2 extensions on x86/amd64
+   --enable-ext-avx2         allow code to use avx2 extensions on x86/amd64
+   --enable-ext-neon         allow code to use neon extensions on ARM
 +  --enable-sdl-ts-vmouse   enable SDL touchscreen virtual mouse support
 +  --disable-sdl-ts-vmouse  disable SDL touchscreen virtual mouse support
  
  Optional Documentation Options:
    --with-manual-version=VERSION version to use when generating the manual (optional)
-@@ -1285,6 +1288,8 @@ for ac_option in $@; do
- 	--disable-eventrecorder)     _eventrec=no            ;;
- 	--enable-text-console)       _text_console=yes       ;;
- 	--disable-text-console)      _text_console=no        ;;
+@@ -1313,6 +1316,8 @@ for ac_option in $@; do
+	--disable-ext-avx2)          _ext_avx2=no            ;;
+	--enable-ext-neon)           _ext_neon=yes           ;;
+	--disable-ext-neon)          _ext_neon=no            ;;
 +	--enable-sdl-ts-vmouse)      _sdl_ts_vmouse=yes      ;;
 +	--disable-sdl-ts-vmouse)     _sdl_ts_vmouse=no       ;;
  	--with-fluidsynth-prefix=*)
  		arg=`echo $ac_option | cut -d '=' -f 2`
  		FLUIDSYNTH_CFLAGS="-I$arg/include"
-@@ -5972,6 +5977,9 @@ define_in_config_h_if_yes "$_readline" 'USE_READLINE'
+@@ -6075,6 +6080,9 @@ define_in_config_h_if_yes "$_readline" 'USE_READLINE'
  
  define_in_config_h_if_yes "$_text_console" 'USE_TEXT_CONSOLE_FOR_DEBUGGER'
  

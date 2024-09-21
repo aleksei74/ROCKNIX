@@ -3,16 +3,16 @@
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="scummvmsa"
-PKG_VERSION="b347be081cb35889bebc191165fa88f5261932ba"
+PKG_VERSION="6378050357807502d47a5291cf53a38f4a18d9d0"
 PKG_LICENSE="GPL2"
-PKG_SITE="https://github.com/scummvm/scummvm"
+PKG_SITE="https://github.com/british-choi/scummvm"
 PKG_URL="${PKG_SITE}.git"
-PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_net freetype fluidsynth soundfont-generaluser pipewire"
+PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_net freetype fluidsynth soundfont-generaluser pipewire libmad libtheora"
 PKG_LONGDESC="Script Creation Utility for Maniac Mansion Virtual Machine"
 
 pre_configure_target() { 
   sed -i "s|sdl-config|sdl2-config|g" ${PKG_BUILD}/configure
-  TARGET_CONFIGURE_OPTS="--host=${TARGET_NAME} --backend=sdl --disable-alsa --with-sdl-prefix=${SYSROOT_PREFIX}/usr/bin --disable-debug --enable-release --enable-vkeybd --enable-sdl-ts-vmouse --opengl-mode=gles2"
+  TARGET_CONFIGURE_OPTS="--host=${TARGET_NAME} --backend=sdl --disable-alsa --with-sdl-prefix=${SYSROOT_PREFIX}/usr/bin --disable-debug --enable-release --enable-vkeybd --enable-sdl-ts-vmouse --opengl-mode=gles2 --disable-gtk"
 }
 
 post_makeinstall_target() {
