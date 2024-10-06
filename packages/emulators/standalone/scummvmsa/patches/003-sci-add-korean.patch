@@ -6,7 +6,7 @@ index 2936c8424c0..28b629d483c 100644
  		// sometimes we need these to differentiate between localized versions.
  		addFileToDetectedGame("resource.aud", allFiles, md5Prop, game);
  		addFileToDetectedGame("resource.msg", allFiles, md5Prop, game);
-+		addFileToDetectedGame("resource.tex", allFiles, md5Prop, game);
++		addFileToDetectedGame("text.res", allFiles, md5Prop, game);
  	} else if (allFiles.contains("resmap.000") || allFiles.contains("resmap.001")) {
  		// add maps and volumes
  		for (int i = 0; i <= 7; i++) {
@@ -19,7 +19,7 @@ index 6b0279e2724..92abeea8805 100644
  		{"resource.001", 0, "13e81e1839cd7b216d2bb5615c1ca160", 796776},
  		{"resource.002", 0, "930e416bec196b9703a331d81b3d66f2", 1283812},
 -		{"resource.msg", 0, "71c6f480e742a0dd3700ec7825962921", 49538},
-+		{"resource.tex", 0, "71c6f480e742a0dd3700ec7825962921", 49538},
++		{"text.res", 0, "71c6f480e742a0dd3700ec7825962921", 49538},
  		AD_LISTEND},
  		Common::KO_KOR, Common::kPlatformDOS, 0, GUIO_STD16	},
  
@@ -43,7 +43,7 @@ index 6b0279e2724..92abeea8805 100644
  		{"resource.003", 0, "6f8d552b60ec82a165619a99e19c509d", 1078032},
  		{"resource.004", 0, "e114ce8f884601c43308fb5cbbea4874", 1174129},
  		{"resource.005", 0, "349ad9438172265d00680075c5a988d0", 1019669},
-+		{"resource.tex", 0, "2ab3703bac740dc34eedfed5d5c2610e", 102933},
++		{"text.res", 0, "2ab3703bac740dc34eedfed5d5c2610e", 102933},
  		AD_LISTEND},
 -		Common::JA_JPN, Common::kPlatformPC98, ADGF_ADDENGLISH, GUIO_STD16_HIRES	},
 +		Common::KO_KOR, Common::kPlatformPC98, ADGF_ADDENGLISH, GUIO_STD16_HIRES	},
@@ -63,7 +63,7 @@ index 6b0279e2724..92abeea8805 100644
 +		{"resource.002", 0, "6767f8c8585f617aaa91d442f41ae714", 1032989},
 +		{"resource.003", 0, "b1288e0821ee358d1ffe877e5900c8ec", 1047565},
 +		{"resource.004", 0, "f79daa70390d73746742ffcfc3dc4471", 937580},
-+		{"resource.tex", 0, "6a471b152556b7d39e38321fb2fbd2c9", 2948975},
++		{"text.res", 0, "6a471b152556b7d39e38321fb2fbd2c9", 2948975},
 +		AD_LISTEND},
 +		Common::KO_KOR, Common::kPlatformDOS, 0, GUIO_STD16	},
 +
@@ -80,7 +80,7 @@ index 6b0279e2724..92abeea8805 100644
 +	{"mothergoose256", "", {
 +		{"resource.map", 0, "52aae15e493cafd1da7e1c9b657a5bb9", 7026},
 +		{"resource.000", 0, "b7ecd8ae9e254e80310b5a668b276e6e", 2948975},
-+		{"resource.tex", 0, "3bb9104f7dc385fbc16605190af375cb", 2948975},
++		{"text.res", 0, "3bb9104f7dc385fbc16605190af375cb", 2948975},
 +		AD_LISTEND},
 +		Common::KO_KOR, Common::kPlatformDOS, 0, GUIO_STD16	},
  
@@ -111,7 +111,7 @@ index 59ae2119701..c654a1ba8ee 100644
  	addPatchDir(".");
 +	
 +	if (Common::File::exists("text.map"))
-+		addSource(new VolumeResourceSource("resource.tex", addExternalMap("text.map"), 0));
++		addSource(new VolumeResourceSource("text.res", addExternalMap("text.map"), 0));
  
  	if (Common::File::exists("message.map"))
  		addSource(new VolumeResourceSource("resource.msg", addExternalMap("message.map"), 0));
