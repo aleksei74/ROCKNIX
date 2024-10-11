@@ -20,16 +20,13 @@ restore() {
 
 verify() {
   TYPE=$(grep a ${CFG_PATH}/system.cfg 2>&1)
-  if [[ "${TYPE}" =~ binary ]]
-  then
+  if [[ "${TYPE}" =~ binary ]]; then
     restore
   fi
-  # verify again after restore, if config still
-  # corrupt then restore default config
-  TYPE=$(grep a ${CFG_PATH}/system.cfg 2>&1)
-  if [[ "${TYPE}" =~ binary ]]
-  then
-    cp /usr/config/system/configs/system.cfg ${CFG_PATH}/system.cfg
+
+  # If RA config is empty then something is wrong, restore everything
+  if [ ! -s /storage/.config/retroarch/retroarch-core-options.cfg ]; then
+    rsync -a /usr/config/ /storage/.config
   fi
 }
 
