@@ -11,7 +11,7 @@ index 2936c8424c0..28b629d483c 100644
  		// add maps and volumes
  		for (int i = 0; i <= 7; i++) {
 diff --git a/engines/sci/detection_tables.h b/engines/sci/detection_tables.h
-index 6b0279e2724..33abaf2c976 100644
+index 6b0279e2724..0a8b6f9f351 100644
 --- a/engines/sci/detection_tables.h
 +++ b/engines/sci/detection_tables.h
 @@ -157,7 +157,7 @@ static const struct ADGameDescription SciGameDescriptions[] = {
@@ -39,16 +39,42 @@ index 6b0279e2724..33abaf2c976 100644
  	// Freddy Pharkas - English DOS Floppy (updated information from markcoolio in bug reports #4267 and #4286)
  	// Executable scanning reports "1.cfs.081"
  	// SCI interpreter version 1.001.132 (just a guess)
-@@ -1898,7 +1907,7 @@ static const struct ADGameDescription SciGameDescriptions[] = {
- 		{"resource.005", 0, "b6c43441cb78a9b484efc8e614aac092", 1287999},
- 		{"resource.006", 0, "672ede1136e9e401658538e51bd5dc22", 1172619},
- 		{"resource.007", 0, "2f48faf27666b58c276dda20f91f4a93", 1240456},
--		{"resource.msg", 0, "8d94253e33b268c310126562a72de6f5", 93930},
-+		{"text.res", 0, "8d94253e33b268c310126562a72de6f5", 93930},
+@@ -941,7 +950,7 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+ 		{"resource.000", 0, "69b7516962510f780d38519cc15fcc7c", 12581736},
+ 		{"resource.msg", 0, "5a35e00e0b8d656ff423b76831a86ab8", 980765},
  		AD_LISTEND},
- 		Common::KO_KOR, Common::kPlatformDOS, 0, GUIO_STD16	},
+-		Common::KO_KOR, Common::kPlatformDOS, ADGF_CD, GUIO3(GUIO_LINKSPEECHTOSFX, GAMEOPTION_ORIGINAL_SAVELOAD, GAMEOPTION_HQ_VIDEO) },
++		Common::KO_KOR, Common::kPlatformDOS, ADGF_CD, GUIO_GK1_CD_DOS },
  
-@@ -2187,6 +2196,21 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+ 	{"gk1", "CD", {
+ 		{"resource.map", 0, "372d059f75856afa6d73dd84cbb8913d", 10996},
+@@ -1920,6 +1929,25 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+ 		AD_LISTEND},
+ 		Common::EN_ANY, Common::kPlatformDOS, 0, GUIO_STD16	},
+ 
++	// King's Quest 5 - Korean fan translation, based on English DOS Floppy
++	// VERSION file reports "0.000.051"
++	// Supplied by misterhands in bug report #6056.
++	// This is the original English version, which has been externally patched to
++	// Polish in the Polish release below.
++	{"kq5", "", {
++		{"resource.map", 0, "70010c20138541f89013bb5e1b30f16a", 7998},
++		{"resource.000", 0, "a591bd4b879fc832b8095c0b3befe9e2", 276398},
++		{"resource.001", 0, "c0f48d4a7ebeaa6aa074fc98d77423e9", 1018560},
++		{"resource.002", 0, "7f188a95acdb60bbe32a8379ba299393", 1307048},
++		{"resource.003", 0, "0860785af59518b94d54718dddcd6907", 1348500},
++		{"resource.004", 0, "c4745dd1e261c22daa6477961d08bf6c", 1239887},
++		{"resource.005", 0, "6556ff8e7c4d1acf6a78aea154daa76c", 1287869},
++		{"resource.006", 0, "da82e4beb744731d0a151f1d4922fafa", 1170456},
++		{"resource.007", 0, "431def14ca29cdb5e6a5e84d3f38f679", 1240176},
++		{"resource.msg", 0, "8d94253e33b268c310126562a72de6f5", 93930},
++		AD_LISTEND},
++		Common::KO_KOR, Common::kPlatformDOS, 0, GUIO_STD16	},
++
+ 	// King's Quest 5 - English DOS Floppy (supplied by omer_mor in bug report #5048)
+ 	// VERSION file reports "0.000.051"
+ 	{"kq5", "", {
+@@ -2187,6 +2215,21 @@ static const struct ADGameDescription SciGameDescriptions[] = {
  		AD_LISTEND},
  		Common::JA_JPN, Common::kPlatformPC98, ADGF_ADDENGLISH, GUIO_STD16_HIRES	},
  
@@ -70,7 +96,25 @@ index 6b0279e2724..33abaf2c976 100644
  	// King's Quest 6 - English DOS Non-Interactive Demo
  	// Executable scanning reports "1.001.055", VERSION file reports "1.000.000"
  	// SCI interpreter version 1.001.055
-@@ -3753,6 +3777,19 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+@@ -2328,7 +2371,7 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+ 		{"resource.000", 0, "233394a5f33b475ae5975e7e9a420865", 8376352},
+ 		{"resource.msg", 0, "51ca9f8afc42ef442f6545b3c82a9165", 596121},
+ 		AD_LISTEND},
+-		Common::KO_KOR, Common::kPlatformDOS, ADGF_CD, GUIO4(GAMEOPTION_PREFER_DIGITAL_SFX, GAMEOPTION_ORIGINAL_SAVELOAD, GAMEOPTION_MIDI_MODE, GAMEOPTION_RGB_RENDERING)	},
++		Common::KO_KOR, Common::kPlatformDOS, ADGF_CD, GUIO_KQ6_CD	},
+ 
+ 	// King's Quest 6 - Korean fan translation, based on English Windows CD (from the King's Quest Collection)
+ 	// Executable scanning reports "1.cfs.158", VERSION file reports "1.034 9/11/94 - KQ6 version 1.000.00G"
+@@ -2338,7 +2381,7 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+ 		{"resource.000", 0, "233394a5f33b475ae5975e7e9a420865", 8376352},
+ 		{"resource.msg", 0, "51ca9f8afc42ef442f6545b3c82a9165", 596121},
+ 		AD_LISTEND},
+-		Common::KO_KOR, Common::kPlatformWindows, ADGF_CD, GUIO5(GUIO_NOASPECT, GAMEOPTION_WINDOWS_CURSORS, GAMEOPTION_PREFER_DIGITAL_SFX, GAMEOPTION_ORIGINAL_SAVELOAD, GAMEOPTION_MIDI_MODE)	},
++		Common::KO_KOR, Common::kPlatformWindows, ADGF_CD, GUIO_KQ6_CD_WINDOWS	},
+ 
+ 	// King's Quest 6 - English Macintosh Floppy
+ 	// VERSION file reports "1.0"
+@@ -3753,6 +3796,19 @@ static const struct ADGameDescription SciGameDescriptions[] = {
  		AD_LISTEND},
  		Common::EN_ANY, Common::kPlatformDOS, 0, GUIO_STD16	},
  
@@ -90,7 +134,7 @@ index 6b0279e2724..33abaf2c976 100644
  	// Mixed-Up Fairy Tales - English DOS Floppy (from jvprat)
  	// Executable scanning reports "1.000.145", Floppy label reports "1.0, 11.13.91", VERSION file reports "1.000"
  	{"fairytales", "", {
-@@ -3802,6 +3839,16 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+@@ -3802,6 +3858,16 @@ static const struct ADGameDescription SciGameDescriptions[] = {
  		{"resource.000", 0, "b7ecd8ae9e254e80310b5a668b276e6e", 2948975},
  		AD_LISTEND},
  		Common::EN_ANY, Common::kPlatformDOS, 0, GUIO_STD16	},
@@ -107,6 +151,15 @@ index 6b0279e2724..33abaf2c976 100644
  
  	// Mixed-Up Mother Goose - English DOS CD (from jvprat)
  	// Executable scanning reports "x.yyy.zzz"
+@@ -5818,7 +5884,7 @@ static const struct ADGameDescription SciGameDescriptions[] = {
+ 		{"resource.000", 0, "63247e3901ab8963d4eece73747832e0", 5157378},
+ 		{"resource.msg", 0, "6ca82305ba1f8ac1cebdd20427168106", 561801},
+ 		AD_LISTEND},
+-		Common::KO_KOR, Common::kPlatformDOS, ADGF_CD, GUIO5(GAMEOPTION_SQ4_SILVER_CURSORS, GAMEOPTION_PREFER_DIGITAL_SFX, GAMEOPTION_ORIGINAL_SAVELOAD, GAMEOPTION_MIDI_MODE, GAMEOPTION_RGB_RENDERING)	},
++		Common::KO_KOR, Common::kPlatformDOS, ADGF_CD, GUIO_SQ4_CD	},
+ 
+ 	// Space Quest 4 - English DOS CD "NRS SQ4 Update 1.2" (unofficial patch)
+ 	// This patch set was distributed as a mixture the CD and floppy versions (the whole game)
 diff --git a/engines/sci/resource/resource.cpp b/engines/sci/resource/resource.cpp
 index 59ae2119701..c654a1ba8ee 100644
 --- a/engines/sci/resource/resource.cpp
