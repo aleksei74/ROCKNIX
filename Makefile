@@ -24,17 +24,12 @@ src-pkg:
 docs:
 	./tools/foreach './scripts/clean emulators && ./scripts/build emulators'
 
-world: RK3588 RK3566 RK3399 S922X RK3326 H700
+world: RK3588 RK3566 RK3326 RK3399 S922X H700 SD865
 
 AMD64:
 	unset DEVICE_ROOT
 	PROJECT=PC DEVICE=AMD64 ARCH=i686 ./scripts/build_distro
 	PROJECT=PC DEVICE=AMD64 ARCH=x86_64 ./scripts/build_distro
-
-INTEL64:
-	unset DEVICE_ROOT
-	PROJECT=PC DEVICE=INTEL64 ARCH=i686 ./scripts/build_distro
-	PROJECT=PC DEVICE=INTEL64 ARCH=x86_64 ./scripts/build_distro
 
 RK3588:
 	unset DEVICE_ROOT
@@ -71,6 +66,11 @@ H700:
 	PROJECT=Allwinner DEVICE=H700 ARCH=arm ./scripts/build_distro
 	PROJECT=Allwinner DEVICE=H700 ARCH=aarch64 ./scripts/build_distro
 
+SD865:
+	unset DEVICE_ROOT
+	PROJECT=Qualcomm DEVICE=SD865 ARCH=arm ./scripts/build_distro
+	PROJECT=Qualcomm DEVICE=SD865 ARCH=aarch64 ./scripts/build_distro
+
 update:
 	PROJECT=Rockchip DEVICE=RK3588 ARCH=aarch64 ./scripts/update_packages
 
@@ -85,7 +85,7 @@ package-clean:
 # For example: make docker-AMD64 will use docker to call: make AMD64
 # All variables are scoped to docker-* commands to prevent weird collisions/behavior with non-docker commands
 
-docker-%: DOCKER_IMAGE := "justenoughlinuxos/jelos-build:latest"
+docker-%: DOCKER_IMAGE := "rocknix/rocknix-build:latest"
 
 # DOCKER_WORK_DIR is the directory in the Docker image - it is set to /work by default
 #   Anytime this directory changes, you must run `make clean` similarly to moving the distribution directory
