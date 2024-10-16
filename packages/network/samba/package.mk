@@ -22,9 +22,9 @@ configure_package() {
     SMB_AVAHI="--disable-avahi"
   fi
 
-  if [ "${TARGET_ARCH}" = x86_64 ]; then
-    SMB_AESNI="--accel-aes=intelaesni"
-  fi
+  #if [ "${TARGET_ARCH}" = x86_64 ]; then
+  #  SMB_AESNI="--accel-aes=intelaesni"
+  #fi
 
   PKG_CONFIGURE_OPTS="--prefix=/usr \
                       --sysconfdir=/etc \
