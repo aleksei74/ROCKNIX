@@ -20,7 +20,7 @@ if [ "${DEVICE}" = "S922X" -a "${USE_MALI}" = "no" ]; then
 fi
 
 case ${DEVICE} in
-  RK3326|AMD64)
+  AMD64)
     PKG_VERSION="6.8.9"
     PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     ;;
@@ -29,7 +29,7 @@ case ${DEVICE} in
     PKG_URL="https://github.com/armbian/linux-rockchip/archive/${PKG_VERSION}.tar.gz"
     PKG_GIT_CLONE_BRANCH="rk-6.1-rkr3"
     PKG_PATCH_DIRS="${LINUX} ${DEVICE} default"
-  ;;
+    ;;
   H700)
     PKG_VERSION="6.12-rc3"
     PKG_URL="https://git.kernel.org/torvalds/t/linux-${PKG_VERSION}.tar.gz"
