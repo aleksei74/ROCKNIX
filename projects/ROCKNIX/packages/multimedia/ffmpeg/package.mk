@@ -159,6 +159,7 @@ configure_target() {
               --extra-libs="${PKG_FFMPEG_LIBS}" \
               --disable-static \
               --enable-shared \
+              --enable-gpl \
               --enable-version3 \
               --enable-logging \
               --disable-doc \
