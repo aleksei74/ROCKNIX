@@ -21,6 +21,7 @@
 	chassis-type = "handset";
 	compatible = "miyoo,flip", "rockchip,rk3566";
 
+	/* Console and boot: serial2 = UART2 at 1.5M baud (ROCKNIX debug/console). Stock uses ttyFIQ0. */
 	chosen: chosen {
 		stdout-path = "serial2:1500000n8";
 	};
@@ -92,6 +93,8 @@
 #define RETRO_DEVICE_ID_JOYPAD_R3      15
 */
 
+	/* Gamepad: ROCKNIX rocknix-singleadc-joypad driver. Stock uses gpio-keys-polled with different keycodes.
+	 * rocknix,use-miyoo-serial-joypad: analog stick via UART1 (Miyoo serial protocol), not ADC. */
 	joypad: rocknix-singleadc-joypad {
 		compatible = "rocknix-singleadc-joypad";
 
@@ -205,6 +208,7 @@
 		};
 	};
 
+	/* LCD backlight: PWM4, mainline pwm-backlight. Stock same; brightness curve matches BSP. */
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm4 0 1250000 0>;
@@ -287,6 +291,7 @@
 		sound-name-prefix = "Speaker Amp";
 	};
 
+	/* Audio: simple-audio-card (mainline). CPU = I2S1_8ch, codec = RK817. Stock uses BSP rk817-codec + spk-ctl-gpios. */
 	rk817-sound {
 		compatible = "simple-audio-card";
 		pinctrl-0 = <&hp_det>;
@@ -318,6 +323,7 @@
 		};
 	};
 
+	/* Power supply: simple-battery (3 Ah, 4.227 V max). Used by RK817 charger and userspace. */
 	battery: battery {
 		compatible = "simple-battery";
 		charge-full-design-microamp-hours = <3000000>;
@@ -337,6 +343,7 @@
 					<3400000 0>;
 	};
 
+	/* Volume keys (GPIO) and lid (hall sensor). Stock has vol + lid in gpio-keys-polled. */
 	gpio_keys: gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-0 = <&btn_pins_vol>, <&gpio_hall_l>;
@@ -366,6 +373,7 @@
 		};
 	};
 
+	/* Status LEDs: work (GPIO0_PB4), charger (GPIO0_PC2). Stock names Charging LED / Charging-Full. */
 	leds: leds {
 		compatible = "gpio-leds";
 		work_led: work {
@@ -379,6 +387,7 @@
 		};
 	};
 
+	/* Main system 3.8 V rail (always-on). Input to PMIC and RK8600; from battery/charger. */
 	vccsys: vccsys {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v8_sys";
@@ -436,7 +445,8 @@
 		pinctrl-0 = <&vcc_sd_h>;
 		regulator-name = "vcc_sd";
 	};
-	
+
+	/* Second SD slot (sdmmc1) 3.3 V power. GPIO2_PB1 enable (active-low). */
 	vcc_sd2: vcc-sd2 {
 		compatible = "regulator-fixed";
 		enable-active-low;
@@ -481,6 +491,7 @@
 		>;
 	};
 
+	/* DMC devfreq: DDR frequency scaling via ATF SIP. DFI provides load; governor scales 324–1056 MHz. Stock uses same SIP. */
 	dmc: dmc {
 		compatible = "rockchip,rk3568-dmc";
 		interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
@@ -493,6 +504,7 @@
 		status = "okay";
 	};
 
+	/* DMC OPPs: 324/528/780/1056 MHz, all at 900 mV. Match U-Boot/BL31 fsp_param and stock. */
 	dmc_opp_table: dmc-opp-table {
 		compatible = "operating-points-v2";
 
@@ -515,6 +527,7 @@
 	};
 };
 
+/* CRU: clock rates for RTC 32K, GPLL 1.2 GHz, PPLL 200 MHz, VPLL 1.2 GHz. */
 &cru {
 	assigned-clocks = <&pmucru CLK_RTC_32K>, <&cru PLL_GPLL>,
 			  <&pmucru PLL_PPLL>, <&cru PLL_VPLL>;
@@ -532,6 +545,7 @@
 	status = "disabled";
 };
 
+/* VOP2 VP1: output to DSI0 (MIPI). Primary display path for LCD. */
 &vp1 {
 	vp1_out_dsi0: endpoint@ROCKCHIP_VOP2_EP_MIPI0 {
 		reg = <ROCKCHIP_VOP2_EP_MIPI0>;
@@ -553,10 +567,12 @@
 	};
 };
 
+/* DFI: devfreq-event for DMC (DDRMON). Patch 1011 adds PM suspend/resume to re-init after deep sleep. */
 &dfi {
 	status = "okay";
 };
 
+/* CPU cores: supply from RK8600 (vdd_cpu). All four Cortex-A55. */
 &cpu0 {
 	cpu-supply = <&vdd_cpu_rk860>;
 };
@@ -585,6 +601,7 @@
 	};
 };
 
+/* DSI host: VP1 -> DSI0 -> panel. Panel is rocknix,generic-dsi (MIPI DSI, init seq from BSP). */
 &dsi0 {
 	status = "okay";
 	#address-cells = <1>;
@@ -606,6 +623,7 @@
 		};
 	};
 
+	/* Panel: ROCKNIX generic-dsi driver. 640x480, 2 lanes, NTSC/PAL/60Hz. Init sequence from stock BSP. */
 	panel: panel@0 {
 		compatible = "rocknix,generic-dsi";
 		panel_description =
@@ -660,6 +678,7 @@
 	status = "okay";
 };
 
+/* HDMI: enabled for display-subsystem; Phy table for common pixel clocks. */
 &hdmi {
 	status = "okay";
 	avdd-0v9-supply = <&vdda_0v9>;
@@ -673,11 +692,12 @@
 		<000000000 0x0000 0x0000 0x0000>;
 };
 
+/* HDMI sound (unused when no HDMI cable). */
 &hdmi_sound {
 	status = "okay";
 };
 
-
+/* I2C0: PMIC (RK817 @0x20), CPU regulator (RK8600 @0x40). Stock same; 100 kHz for power (commit 601ccabc20). */
 &i2c0 {
 	status = "okay";
 	/* 100 kHz Standard mode: minimal PMIC/regulator traffic, saves a little bus power vs 400 kHz; no UX impact. */
@@ -712,6 +732,7 @@
         };
     };
 
+	/* RK817 PMIC @0x20: regulators, charger, codec, RTC. Stock same. system-power-controller + wakeup-source. */
 	rk817: pmic@20 {
 		status = "okay";
 		compatible = "rockchip,rk817";
@@ -751,6 +772,7 @@
 			status = "okay";
 		};
 
+		/* Regulators: DCDC1–4, LDO1–9, BOOST. Suspend state per rail (logic/gpu/ddr off, PMU/always-on on). */
 		regulators {
 			vdd_logic: DCDC_REG1 {
 				regulator-always-on;
@@ -969,10 +991,12 @@
 	status = "disabled";
 };
 
+/* I2S0: 8ch (unused by sound; rk817-sound uses I2S1). Enabled for potential other users. */
 &i2s0_8ch {
 	status = "okay";
 };
 
+/* I2S1: used by rk817-sound (codec). BSP used rockchip,clk-trcm = <1>; mainline = rockchip,trcm-sync-tx-only. */
 &i2s1_8ch {
 	status = "okay";
 	/* BSP used rockchip,clk-trcm = <1>; mainline property name is different */
@@ -1021,6 +1045,7 @@
 	vccio7-supply = <&vcc_3v3>;
 };
 
+/* PWM4: LCD backlight. PWM5: joypad rumble motor. */
 &pwm4 {
 	status = "okay";
 };
@@ -1044,6 +1069,7 @@
 	status = "disabled";
 };
 
+/* SD slot 0 (primary): 4-bit, SDR104, 150 MHz. ROCKNIX boot. vcc_sd / vccio_sd. */
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1059,6 +1085,7 @@
 	status = "okay";
 };
 
+/* SD slot 1 (second): same config as slot 0. vcc_sd2 / vccio_sd. */
 &sdmmc1 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1142,15 +1169,18 @@
 	status = "disabled";
 };
 
+/* USB2 PHY0 host: 5V from vcc5v0_host (GPIO). Used when host port has device. */
 &usb2phy0_host {
 	phy-supply = <&vcc5v0_host>;
 	status = "okay";
 };
 
+/* USB2 PHY0 OTG: charging and USB gadget (peripheral). */
 &usb2phy0_otg {
 	status = "okay";
 };
 
+/* USB2 PHY1 host: WiFi (RTL8733BU) on this PHY. */
 &usb2phy1_host {
 	phy-supply = <&vcc5v0_host>;
 	status = "okay";
@@ -1162,6 +1192,7 @@
 	status = "disabled";
 };
 
+/* USB2 PHY0/1 controllers (enable the PHY blocks). */
 &usb2phy0 {
 	status = "okay";
 };
@@ -1183,6 +1214,7 @@
 	status = "disabled";
 };
 
+/* USB host 1 EHCI/OHCI: WiFi chip (RTL8733BU) is on this USB2 host. */
 &usb_host1_ehci {
 	status = "okay";
 };
@@ -1209,6 +1241,7 @@
 	phy-names = "usb2-phy";
 };
 
+/* Host port XHCI: forced to high-speed (USB2) only; WiFi is USB2. Avoids DWC3 USB3 init issues. */
 &usb_host1_xhci {
 	status = "okay";
 	phys = <&usb2phy1_host>;
@@ -1222,6 +1255,7 @@
 	status = "okay";
 };
 
+/* VDPU/VEPU MMU: iommu for video decoder/encoder. Required when vpu/vepu are enabled. */
 &vdpu_mmu {
 	status = "okay";
 };
@@ -1246,7 +1280,7 @@
 	status = "okay";
 };
 
-/* uart1: used by rocknix-singleadc-joypad Miyoo serial protocol.
+/* UART1: used by rocknix-singleadc-joypad Miyoo serial protocol.
  * The driver opens /dev/ttyS1 at 9600 8N1 for analog stick calibration.
  * Must remain enabled — disabling it causes Auto-cal read error: -5. */
 &uart1 {
@@ -1261,8 +1295,9 @@
 	status = "okay";
 };
 
+/* Pinctrl: board-specific pin mux and pull. Groups for buttons, volume, lid, WiFi, PMIC, LCD, SD, USB. */
 &pinctrl {
-
+	/* Button and control GPIOs: joypad (dpad, A/B/X/Y, select/start, L/R, mode), pull-up/down per BSP. */
 	gpio-control {
 		btn_pins_ctrl: btn-pins-ctrl {
 			rockchip,pins =
@@ -1292,6 +1327,7 @@
 		};
 	};
 
+	/* Speaker amp enable (GPIO4_PC2). Stock: spk-ctl-gpios in codec. */
 	audio-amplifier {
 		spk_amp_enable_h: spk-amp-enable-h {
 			rockchip,pins =
@@ -1299,12 +1335,14 @@
 		};
 	};
 
+	/* Headphone jack detect (GPIO4_PC6). Used by simple-audio-card hp-det. */
 	headphone {
 		hp_det: hp-det {
 			rockchip,pins = <4 RK_PC6 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
 	};
 
+	/* LCD panel reset (GPIO4_PA0). */
 	gpio-lcd {
 		lcd_rst: lcd-rst {
 			rockchip,pins =
@@ -1312,12 +1350,14 @@
 		};
 	};
 
+	/* Lid/hall sensor (GPIO0_PC6). SW_LID for gpio-keys. */
 	gpio-hall {
 		gpio_hall_l: gpio-hall-l {
 			rockchip,pins = <0 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
+	/* WiFi power enable (GPIO0_PA0). rtl8733bu-power driver. */
 	wireless-wlan {
 		wifi_enable_h: wifi-enable-h {
 			rockchip,pins =
@@ -1325,6 +1365,7 @@
 		};
 	};
 
+	/* PMIC: interrupt (GPIO0_PA3), PMU_SLEEP (GPIO0_PA2) for deep suspend. */
 	pmic {
 		pmic_int: pmic_int {
 			rockchip,pins =
@@ -1345,6 +1386,7 @@
 		};
 	};
 
+	/* USB host 5V enable (GPIO4_PC5). vcc5v0_host regulator. */
 	usb {
 		vcc5v0_host_en: vcc5v0-host-en {
 			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -1352,6 +1394,7 @@
 
 	};
 
+	/* SD slot 0/1 power enable GPIOs (active-low). */
 	vcc-sd {
 		vcc_sd_h: vcc-sd-h {
 			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_down>;
