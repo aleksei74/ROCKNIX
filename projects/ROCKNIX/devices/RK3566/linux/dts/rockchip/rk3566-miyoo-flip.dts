@@ -946,18 +946,14 @@
 				};
 			};
 
-		/* OTG_SWITCH regulator: commented out; uncomment if the board uses the PMIC
-		 * to gate 5V on the OTG port. Some designs need this node for correct OTG
-		 * power sequencing or for the charger/OTG driver to reference; without it
-		 * the port may stay powered in suspend or fail to enable when switching to
-		 * host mode.
-			otg_switch: OTG_SWITCH {
-				regulator-name = "otg_switch";
-				regulator-state-mem {
-					regulator-off-in-suspend;
-				};
+		/* OTG_SWITCH: PMIC gate for 5V on OTG port. Required for correct OTG
+		 * power sequencing on some boards; charger/OTG driver may reference it. */
+		otg_switch: OTG_SWITCH {
+			regulator-name = "otg_switch";
+			regulator-state-mem {
+				regulator-off-in-suspend;
 			};
-		*/
+		};
 		};
 
 		rk817_charger: charger {
@@ -980,17 +976,14 @@
 	};
 };
 
-/* &i2c3: On stock (miyoo-355) DTS this bus is enabled with muic@30,
- * compatible = "gi,muic" (MUIC = Micro USB Interface Controller for
- * cable-type detection: charger vs data vs OTG). The driver for "gi,muic"
- * is not present in the stock kernel source nor in mainline; basic charge
- * and USB detection work via USB PHY extcon (usb2phy0) without it, so keep
- * i2c3 disabled. */
+/* &i2c3: Stock had muic@30 (gi,muic). This unit has a device at 0x3d only.
+ * Register dump (0xfd = 0x2a, pattern in low regs) identified it as Hynitron
+ * CST3xx-family touch controller. Miyoo Flip has no touchscreen so disable it. */
 &i2c3 {
 	status = "disabled";
 };
 
-/* I2S0: 8ch (unused by sound; rk817-sound uses I2S1). Enabled for potential other users. */
+/* I2S0_8ch (fe400000.i2s): used by HDMI sound card (card 0). rk817-sound uses I2S1_8ch (card 1). */
 &i2s0_8ch {
 	status = "okay";
 };
