@@ -693,8 +693,7 @@
 	};
 
     /* CPU rail: fan53555 driver probes this (RK8600 shares code). Must set fcs,suspend-voltage-selector
-     * so driver uses correct VSEL; wrong value can drop CPU rail and hang right after "FAN53555 Detected!".
-     * See deep-research-report.md. */
+     * so driver uses correct VSEL; wrong value can drop CPU rail and hang right after "FAN53555 Detected!". */
     vdd_cpu_rk860: rk8600@40{
         compatible = "rockchip,rk8600";
         reg = <0x40>;
@@ -960,10 +959,12 @@
 	};
 };
 
-/* MUIC (Micro USB Interface Controller) — proprietary "gi,muic" chip for
- * USB cable-type detection (charger vs data vs OTG).  No mainline driver.
- * Basic charge/USB detection works through USB PHY extcon (usb2phy0)
- * without this, so keep i2c3 disabled. */
+/* &i2c3: On stock (miyoo-355) DTS this bus is enabled with muic@30,
+ * compatible = "gi,muic" (MUIC = Micro USB Interface Controller for
+ * cable-type detection: charger vs data vs OTG). The driver for "gi,muic"
+ * is not present in the stock kernel source nor in mainline; basic charge
+ * and USB detection work via USB PHY extcon (usb2phy0) without it, so keep
+ * i2c3 disabled. */
 &i2c3 {
 	status = "disabled";
 };
@@ -1156,7 +1157,7 @@
 };
 
 /* usb2phy1_otg: PHY for usb_host0_ehci/ohci (fd800000) which is disabled.
- * No need to power this PHY. Maxwell doesn't define it at all. */
+ * No need to power this PHY. */
 &usb2phy1_otg {
 	status = "disabled";
 };
