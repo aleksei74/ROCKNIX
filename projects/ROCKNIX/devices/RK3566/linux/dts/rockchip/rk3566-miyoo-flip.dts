@@ -527,51 +527,6 @@
 	};
 };
 
-/* CRU: clock rates for RTC 32K, GPLL 1.2 GHz, PPLL 200 MHz, VPLL 1.2 GHz. */
-&cru {
-	assigned-clocks = <&pmucru CLK_RTC_32K>, <&cru PLL_GPLL>,
-			  <&pmucru PLL_PPLL>, <&cru PLL_VPLL>;
-	assigned-clock-rates = <32768>, <1200000000>,
-			       <200000000>, <1200000000>;
-};
-
-/* Display pipeline: VP1 -> DSI0 -> panel (MIPI DSI).
- * DPHY0 is required for the DSI link; DPHY1 is unused. */
-&dsi_dphy0 {
-	status = "okay";
-};
-
-&dsi_dphy1 {
-	status = "disabled";
-};
-
-/* VOP2 VP1: output to DSI0 (MIPI). Primary display path for LCD. */
-&vp1 {
-	vp1_out_dsi0: endpoint@ROCKCHIP_VOP2_EP_MIPI0 {
-		reg = <ROCKCHIP_VOP2_EP_MIPI0>;
-		remote-endpoint = <&dsi0_in_vp1>;
-	};
-};
-
-/* VOP2 -> HDMI pipeline (for HDMI-capable boards or display-subsystem compatibility). */
-&hdmi_in {
-	hdmi_in_vp0: endpoint {
-		remote-endpoint = <&vp0_out_hdmi>;
-	};
-};
-
-&vp0 {
-	vp0_out_hdmi: endpoint@ROCKCHIP_VOP2_EP_HDMI0 {
-		reg = <ROCKCHIP_VOP2_EP_HDMI0>;
-		remote-endpoint = <&hdmi_in_vp0>;
-	};
-};
-
-/* DFI: devfreq-event for DMC (DDRMON). Patch 1011 adds PM suspend/resume to re-init after deep sleep. */
-&dfi {
-	status = "okay";
-};
-
 /* CPU cores: supply from RK8600 (vdd_cpu). All four Cortex-A55. */
 &cpu0 {
 	cpu-supply = <&vdd_cpu_rk860>;
@@ -599,6 +554,19 @@
 	opp-408000000 {
 		clock-latency-ns = <100000>;
 	};
+};
+
+/* CRU: clock rates for RTC 32K, GPLL 1.2 GHz, PPLL 200 MHz, VPLL 1.2 GHz. */
+&cru {
+	assigned-clocks = <&pmucru CLK_RTC_32K>, <&cru PLL_GPLL>,
+			  <&pmucru PLL_PPLL>, <&cru PLL_VPLL>;
+	assigned-clock-rates = <32768>, <1200000000>,
+			       <200000000>, <1200000000>;
+};
+
+/* DFI: devfreq-event for DMC (DDRMON). Patch 1011 adds PM suspend/resume to re-init after deep sleep. */
+&dfi {
+	status = "okay";
 };
 
 /* DSI host: VP1 -> DSI0 -> panel. Panel is rocknix,generic-dsi (MIPI DSI, init seq from BSP). */
@@ -671,8 +639,39 @@
 	};
 };
 
-/* GPU: Mali G52 (Panfrost/kbase). mali-supply is the GPU voltage rail. */
+/* Display pipeline: VP1 -> DSI0 -> panel (MIPI DSI).
+ * DPHY0 is required for the DSI link; DPHY1 is unused. */
+&dsi_dphy0 {
+	status = "okay";
+};
 
+&dsi_dphy1 {
+	status = "disabled";
+};
+
+/* VOP2 VP1: output to DSI0 (MIPI). Primary display path for LCD. */
+&vp1 {
+	vp1_out_dsi0: endpoint@ROCKCHIP_VOP2_EP_MIPI0 {
+		reg = <ROCKCHIP_VOP2_EP_MIPI0>;
+		remote-endpoint = <&dsi0_in_vp1>;
+	};
+};
+
+/* VOP2 -> HDMI pipeline (for HDMI-capable boards or display-subsystem compatibility). */
+&hdmi_in {
+	hdmi_in_vp0: endpoint {
+		remote-endpoint = <&vp0_out_hdmi>;
+	};
+};
+
+&vp0 {
+	vp0_out_hdmi: endpoint@ROCKCHIP_VOP2_EP_HDMI0 {
+		reg = <ROCKCHIP_VOP2_EP_HDMI0>;
+		remote-endpoint = <&hdmi_in_vp0>;
+	};
+};
+
+/* GPU: Mali G52 (Panfrost/kbase). mali-supply is the GPU voltage rail. */
 &gpu {
 	mali-supply = <&vdd_gpu>;
 	status = "okay";
@@ -1008,293 +1007,6 @@
 		     &i2s1m0_sdo0>;
 };
 
-/* IEP (Image Enhancement Processor): hardware deinterlacer/scaler at 0xfdef0000.
- * The BSP uses "rockchip,iep-v2" which requires the proprietary MPP (Media Process
- * Platform) framework — a large set of BSP-only drivers (mpp_service, mpp_dev, etc.)
- * that have no mainline equivalent and cannot be ported as a simple out-of-tree module.
- * IEP shares PD_RGA power domain with RGA (which IS probed), so its power domain
- * is already managed — no battery penalty from leaving it disabled.
- * For retro gaming, IEP's deinterlacing is rarely useful (emulators output progressive).
- *
- * jpegd, jpegd_mmu, mpp_srv, nandc0: also BSP-only, not in mainline rk356x. */
-
- /*
-  * There are 10 independent IO domains in RK3566/RK3568, including PMUIO[0:2] and VCCIO[1:7].
-  * 1/ PMUIO0 and PMUIO1 are fixed-level power domains which cannot be configured;
-  * 2/ PMUIO2 and VCCIO1,VCCIO[3:7] domains require that their hardware power supply voltages
-  *    must be consistent with the software configuration correspondingly
-  *	a/ When the hardware IO level is connected to 1.8V, the software voltage configuration
-  *	   should also be configured to 1.8V accordingly;
-  *	b/ When the hardware IO level is connected to 3.3V, the software voltage configuration
-  *	   should also be configured to 3.3V accordingly;
-  * 3/ VCCIO2 voltage control selection (0xFDC20140)
-  *	BIT[0]: 0x0: from GPIO_0A7 (default)
-  *	BIT[0]: 0x1: from GRF
-  *    Default is determined by Pin FLASH_VOL_SEL/GPIO0_A7:
-  *	L:VCCIO2 must supply 3.3V
-  *	H:VCCIO2 must supply 1.8V
-  */
-&pmu_io_domains {
-	status = "okay";
-	pmuio2-supply = <&vcc3v3_pmu>;
-	vccio1-supply = <&vccio_acodec>;
-	vccio3-supply = <&vccio_sd>;
-	vccio4-supply = <&vcc_3v3>;
-	vccio5-supply = <&vcc_1v8>;
-	vccio6-supply = <&vcc_1v8>;
-	vccio7-supply = <&vcc_3v3>;
-};
-
-/* PWM4: LCD backlight. PWM5: joypad rumble motor. */
-&pwm4 {
-	status = "okay";
-};
-
-&pwm5 {
-	status = "okay";
-};
-
-/* SARADC: used by joypad driver for analog stick data (ch0).
- * vref-supply sets the ADC reference voltage. */
-
-&saradc {
-	status = "okay";
-	vref-supply = <&vcc_1v8>;
-};
-
-/* sdhci (fc000000): eMMC controller — disabled.
- * The Miyoo Flip has no eMMC; internal storage is SPI-NAND (via SFC).
- * The two SD card slots use sdmmc0 and sdmmc1. */
-&sdhci {
-	status = "disabled";
-};
-
-/* SD slot 0 (primary): 4-bit, SDR104, 150 MHz. ROCKNIX boot. vcc_sd / vccio_sd. */
-&sdmmc0 {
-	max-frequency = <150000000>;
-	no-sdio;
-	no-mmc;
-	bus-width = <4>;
-	cap-sd-highspeed;
-	disable-wp;
-	sd-uhs-sdr104;
-	vmmc-supply = <&vcc_sd>;
-	vqmmc-supply = <&vccio_sd>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&sdmmc0_bus4 &sdmmc0_clk &sdmmc0_cmd &sdmmc0_det>;
-	status = "okay";
-};
-
-/* SD slot 1 (second): same config as slot 0. vcc_sd2 / vccio_sd. */
-&sdmmc1 {
-	max-frequency = <150000000>;
-	no-sdio;
-	no-mmc;
-	bus-width = <4>;
-	cap-sd-highspeed;
-	disable-wp;
-	sd-uhs-sdr104;
-	vmmc-supply = <&vcc_sd2>;
-	vqmmc-supply = <&vccio_sd>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&sdmmc1_bus4 &sdmmc1_clk &sdmmc1_cmd &sdmmc1_det>;
-	status = "okay";
-};
-
-/* SFC: SPI Flash Controller — accesses the internal SPI-NAND (BSP boot media).
- * ROCKNIX boots from SD card, so this is unused at runtime. Kept here
- * (disabled) with the BSP partition layout for reference.
- * Chip is ESMT (0xc8); mainline has no ESMT SPI-NAND table. */
-/*
-&sfc {
-	status = "okay";
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	flash@0 {
-		compatible = "spi-nand";
-		reg = <0>;
-		spi-max-frequency = <24000000>;
-		spi-rx-bus-width = <1>;
-		spi-tx-bus-width = <1>;
-
-		partitions {
-			compatible = "fixed-partitions";
-			#address-cells = <1>;
-			#size-cells = <1>;
-
-			partition@200000 {
-				label = "vnvm";
-				reg = <0x200000 0x100000>;
-			};
-			partition@300000 {
-				label = "uboot";
-				reg = <0x300000 0x400000>;
-			};
-			partition@700000 {
-				label = "boot";
-				reg = <0x700000 0x2600000>;
-			};
-			partition@2d00000 {
-				label = "rootfs";
-				reg = <0x2d00000 0x4000000>;
-			};
-			partition@6d00000 {
-				label = "userdata";
-				reg = <0x6d00000 0x1260000>;
-			};
-		};
-	};
-};
-*/
-
-&tsadc {
-	status = "okay";
-	/* CRU mode (0): thermal shutdown resets via clock unit — no dedicated GPIO needed.
-	 * GPIO mode (1) would require a board-specific thermal shutdown pin.
-	 * Polarity 0 = active-low (matches Rockchip reference designs). */
-	rockchip,hw-tshut-mode = <0>;
-	rockchip,hw-tshut-polarity = <0>;
-};
-
-/* combphy1/combphy2: combo PHYs for USB3/SATA/PCIe.
- * Nothing on the Miyoo Flip uses USB3, SATA, or PCIe.
- * WiFi is USB2 (EHCI), and usb_host1_xhci is overridden to USB2-only below.
- * Disabling combphys allows PD_PIPE power domain to gate — saves power. */
-&combphy1 {
-	status = "disabled";
-};
-
-&combphy2 {
-	status = "disabled";
-};
-
-/* USB2 PHY0 host: 5V from vcc5v0_host (GPIO). Used when host port has device. */
-&usb2phy0_host {
-	phy-supply = <&vcc5v0_host>;
-	status = "okay";
-};
-
-/* USB2 PHY0 OTG: charging and USB gadget (peripheral). */
-&usb2phy0_otg {
-	status = "okay";
-};
-
-/* USB2 PHY1 host: WiFi (RTL8733BU) on this PHY. */
-&usb2phy1_host {
-	phy-supply = <&vcc5v0_host>;
-	status = "okay";
-};
-
-/* usb2phy1_otg: PHY for usb_host0_ehci/ohci (fd800000) which is disabled.
- * No need to power this PHY. */
-&usb2phy1_otg {
-	status = "disabled";
-};
-
-/* USB2 PHY0/1 controllers (enable the PHY blocks). */
-&usb2phy0 {
-	status = "okay";
-};
-
-&usb2phy1 {
-	status = "okay";
-};
-
-/* usb_host0_ehci/ohci (fd800000/fd840000): USB2 host via usb2phy1_otg.
- * This is a separate USB2 port from the OTG (usb_host0_xhci/usb2phy0_otg)
- * and from the host port where WiFi lives (usb_host1_ehci/usb2phy1_host).
- * Nothing is physically routed to this port on the Miyoo Flip PCB.
- * Disabled to save power — re-enable if a USB device is found on this port. */
-&usb_host0_ehci {
-	status = "disabled";
-};
-
-&usb_host0_ohci {
-	status = "disabled";
-};
-
-/* USB host 1 EHCI/OHCI: WiFi chip (RTL8733BU) is on this USB2 host. */
-&usb_host1_ehci {
-	status = "okay";
-};
-
-&usb_host1_ohci {
-	status = "okay";
-};
-
-/* USB topology:
- *   usb_host0_xhci (fcc00000) = OTG port — peripheral mode (charging/gadget)
- *   usb_host1_xhci (fd000000) = Host port — USB2-only (WiFi chip via EHCI)
- *   usb_host0_ehci/ohci (fd800000) = unused USB2 port — disabled
- *   usb_host1_ehci/ohci (fd880000) = WiFi USB2 host — enabled
- *
- * No USB3 signals are routed on this board; combphy1/2 are disabled.
- * usb_host1_xhci is overridden to USB2-only to avoid DWC3 init failure. */
-
-/* OTG port: peripheral-only mode (charging + USB gadget).
- * Disabling host-side hardware saves power when nothing is plugged in. */
-&usb_host0_xhci {
-	status = "okay";
-	dr_mode = "peripheral";
-	phys = <&usb2phy0_otg>;
-	phy-names = "usb2-phy";
-};
-
-/* Host port XHCI: forced to high-speed (USB2) only; WiFi is USB2. Avoids DWC3 USB3 init issues. */
-&usb_host1_xhci {
-	status = "okay";
-	phys = <&usb2phy1_host>;
-	phy-names = "usb2-phy";
-	maximum-speed = "high-speed";
-};
-
-/* VPU (video decoder), VEPU (H.264 encoder), RGA (2D blitter):
- * All use mainline drivers with runtime PM — power domains gate when idle. */
-&vpu {
-	status = "okay";
-};
-
-/* VDPU/VEPU MMU: iommu for video decoder/encoder. Required when vpu/vepu are enabled. */
-&vdpu_mmu {
-	status = "okay";
-};
-
-&vepu {
-	status = "okay";
-};
-
-&vepu_mmu {
-	status = "okay";
-};
-
-/* VOP2: display controller. Must be enabled for DRM to bind.
- * Clock parents: DCLK_VOP0 -> HPLL, DCLK_VOP1 -> VPLL. */
-&vop {
-	status = "okay";
-	assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
-	assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
-};
-
-&vop_mmu {
-	status = "okay";
-};
-
-/* UART1: used by rocknix-singleadc-joypad Miyoo serial protocol.
- * The driver opens /dev/ttyS1 at 9600 8N1 for analog stick calibration.
- * Must remain enabled — disabling it causes Auto-cal read error: -5. */
-&uart1 {
-	status = "okay";
-	dma-names = "tx", "rx";
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
-};
-
-/* Re-enable for serial console debugging. Disable to save power. */
-&uart2 {
-	status = "okay";
-};
-
 /* Pinctrl: board-specific pin mux and pull. Groups for buttons, volume, lid, WiFi, PMIC, LCD, SD, USB. */
 &pinctrl {
 	/* Button and control GPIOs: joypad (dpad, A/B/X/Y, select/start, L/R, mode), pull-up/down per BSP. */
@@ -1404,4 +1116,288 @@
 		};		
 	};
 
+};
+
+/* IEP (Image Enhancement Processor): hardware deinterlacer/scaler at 0xfdef0000.
+ * The BSP uses "rockchip,iep-v2" which requires the proprietary MPP (Media Process
+ * Platform) framework — a large set of BSP-only drivers (mpp_service, mpp_dev, etc.)
+ * that have no mainline equivalent and cannot be ported as a simple out-of-tree module.
+ * IEP shares PD_RGA power domain with RGA (which IS probed), so its power domain
+ * is already managed — no battery penalty from leaving it disabled.
+ * For retro gaming, IEP's deinterlacing is rarely useful (emulators output progressive).
+ *
+ * jpegd, jpegd_mmu, mpp_srv, nandc0: also BSP-only, not in mainline rk356x. */
+ /*
+  * There are 10 independent IO domains in RK3566/RK3568, including PMUIO[0:2] and VCCIO[1:7].
+  * 1/ PMUIO0 and PMUIO1 are fixed-level power domains which cannot be configured;
+  * 2/ PMUIO2 and VCCIO1,VCCIO[3:7] domains require that their hardware power supply voltages
+  *    must be consistent with the software configuration correspondingly
+  *	a/ When the hardware IO level is connected to 1.8V, the software voltage configuration
+  *	   should also be configured to 1.8V accordingly;
+  *	b/ When the hardware IO level is connected to 3.3V, the software voltage configuration
+  *	   should also be configured to 3.3V accordingly;
+  * 3/ VCCIO2 voltage control selection (0xFDC20140)
+  *	BIT[0]: 0x0: from GPIO_0A7 (default)
+  *	BIT[0]: 0x1: from GRF
+  *    Default is determined by Pin FLASH_VOL_SEL/GPIO0_A7:
+  *	L:VCCIO2 must supply 3.3V
+  *	H:VCCIO2 must supply 1.8V
+  */
+&pmu_io_domains {
+	status = "okay";
+	pmuio2-supply = <&vcc3v3_pmu>;
+	vccio1-supply = <&vccio_acodec>;
+	vccio3-supply = <&vccio_sd>;
+	vccio4-supply = <&vcc_3v3>;
+	vccio5-supply = <&vcc_1v8>;
+	vccio6-supply = <&vcc_1v8>;
+	vccio7-supply = <&vcc_3v3>;
+};
+
+/* PWM4: LCD backlight. PWM5: joypad rumble motor. */
+&pwm4 {
+	status = "okay";
+};
+
+&pwm5 {
+	status = "okay";
+};
+
+/* SARADC: used by joypad driver for analog stick data (ch0).
+ * vref-supply sets the ADC reference voltage. */
+&saradc {
+	status = "okay";
+	vref-supply = <&vcc_1v8>;
+};
+
+/* sdhci (fc000000): eMMC controller — disabled.
+ * The Miyoo Flip has no eMMC; internal storage is SPI-NAND (via SFC).
+ * The two SD card slots use sdmmc0 and sdmmc1. */
+&sdhci {
+	status = "disabled";
+};
+
+/* SD slot 0 (primary): 4-bit, SDR104, 150 MHz. ROCKNIX boot. vcc_sd / vccio_sd. */
+&sdmmc0 {
+	max-frequency = <150000000>;
+	no-sdio;
+	no-mmc;
+	bus-width = <4>;
+	cap-sd-highspeed;
+	disable-wp;
+	sd-uhs-sdr104;
+	vmmc-supply = <&vcc_sd>;
+	vqmmc-supply = <&vccio_sd>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc0_bus4 &sdmmc0_clk &sdmmc0_cmd &sdmmc0_det>;
+	status = "okay";
+};
+
+/* SD slot 1 (second): same config as slot 0. vcc_sd2 / vccio_sd. */
+&sdmmc1 {
+	max-frequency = <150000000>;
+	no-sdio;
+	no-mmc;
+	bus-width = <4>;
+	cap-sd-highspeed;
+	disable-wp;
+	sd-uhs-sdr104;
+	vmmc-supply = <&vcc_sd2>;
+	vqmmc-supply = <&vccio_sd>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc1_bus4 &sdmmc1_clk &sdmmc1_cmd &sdmmc1_det>;
+	status = "okay";
+};
+
+/* SFC: SPI Flash Controller — accesses the internal SPI-NAND (BSP boot media).
+ * ROCKNIX boots from SD card, so this is unused at runtime. Kept here
+ * (disabled) with the BSP partition layout for reference.
+ * Chip is ESMT (0xc8); mainline has no ESMT SPI-NAND table. */
+/*
+&sfc {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+		spi-max-frequency = <24000000>;
+		spi-rx-bus-width = <1>;
+		spi-tx-bus-width = <1>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@200000 {
+				label = "vnvm";
+				reg = <0x200000 0x100000>;
+			};
+			partition@300000 {
+				label = "uboot";
+				reg = <0x300000 0x400000>;
+			};
+			partition@700000 {
+				label = "boot";
+				reg = <0x700000 0x2600000>;
+			};
+			partition@2d00000 {
+				label = "rootfs";
+				reg = <0x2d00000 0x4000000>;
+			};
+			partition@6d00000 {
+				label = "userdata";
+				reg = <0x6d00000 0x1260000>;
+			};
+		};
+	};
+};
+
+*/
+&tsadc {
+	status = "okay";
+	/* CRU mode (0): thermal shutdown resets via clock unit — no dedicated GPIO needed.
+	 * GPIO mode (1) would require a board-specific thermal shutdown pin.
+	 * Polarity 0 = active-low (matches Rockchip reference designs). */
+	rockchip,hw-tshut-mode = <0>;
+	rockchip,hw-tshut-polarity = <0>;
+};
+
+/* UART1: used by rocknix-singleadc-joypad Miyoo serial protocol.
+ * The driver opens /dev/ttyS1 at 9600 8N1 for analog stick calibration.
+ * Must remain enabled — disabling it causes Auto-cal read error: -5. */
+&uart1 {
+	status = "okay";
+	dma-names = "tx", "rx";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
+};
+
+/* Re-enable for serial console debugging. Disable to save power. */
+&uart2 {
+	status = "okay";
+};
+
+/* USB2 PHY0/1 controllers (enable the PHY blocks). */
+&usb2phy0 {
+	status = "okay";
+};
+
+&usb2phy1 {
+	status = "okay";
+};
+
+/* USB2 PHY0 host: 5V from vcc5v0_host (GPIO). Used when host port has device. */
+&usb2phy0_host {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+/* USB2 PHY0 OTG: charging and USB gadget (peripheral). */
+&usb2phy0_otg {
+	status = "okay";
+};
+
+/* USB2 PHY1 host: WiFi (RTL8733BU) on this PHY. */
+&usb2phy1_host {
+	phy-supply = <&vcc5v0_host>;
+	status = "okay";
+};
+
+/* usb2phy1_otg: PHY for usb_host0_ehci/ohci (fd800000) which is disabled.
+ * No need to power this PHY. */
+&usb2phy1_otg {
+	status = "disabled";
+};
+
+/* usb_host0_ehci/ohci (fd800000/fd840000): USB2 host via usb2phy1_otg.
+ * This is a separate USB2 port from the OTG (usb_host0_xhci/usb2phy0_otg)
+ * and from the host port where WiFi lives (usb_host1_ehci/usb2phy1_host).
+ * Nothing is physically routed to this port on the Miyoo Flip PCB.
+ * Disabled to save power — re-enable if a USB device is found on this port. */
+&usb_host0_ehci {
+	status = "disabled";
+};
+
+/* USB topology:
+ *   usb_host0_xhci (fcc00000) = OTG port — peripheral mode (charging/gadget)
+ *   usb_host1_xhci (fd000000) = Host port — USB2-only (WiFi chip via EHCI)
+ *   usb_host0_ehci/ohci (fd800000) = unused USB2 port — disabled
+ *   usb_host1_ehci/ohci (fd880000) = WiFi USB2 host — enabled
+ *
+ * No USB3 signals are routed on this board; combphy1/2 are disabled.
+ * usb_host1_xhci is overridden to USB2-only to avoid DWC3 init failure. */
+/* OTG port: peripheral-only mode (charging + USB gadget).
+ * Disabling host-side hardware saves power when nothing is plugged in. */
+&usb_host0_xhci {
+	status = "okay";
+	dr_mode = "peripheral";
+	phys = <&usb2phy0_otg>;
+	phy-names = "usb2-phy";
+};
+
+/* USB host 1 EHCI/OHCI: WiFi chip (RTL8733BU) is on this USB2 host. */
+&usb_host1_ehci {
+	status = "okay";
+};
+
+/* Host port XHCI: forced to high-speed (USB2) only; WiFi is USB2. Avoids DWC3 USB3 init issues. */
+&usb_host1_xhci {
+	status = "okay";
+	phys = <&usb2phy1_host>;
+	phy-names = "usb2-phy";
+	maximum-speed = "high-speed";
+};
+
+&usb_host0_ohci {
+	status = "disabled";
+};
+
+&usb_host1_ohci {
+	status = "okay";
+};
+
+/* VPU (video decoder), VEPU (H.264 encoder), RGA (2D blitter):
+ * All use mainline drivers with runtime PM — power domains gate when idle. */
+&vpu {
+	status = "okay";
+};
+
+/* VDPU/VEPU MMU: iommu for video decoder/encoder. Required when vpu/vepu are enabled. */
+&vdpu_mmu {
+	status = "okay";
+};
+
+&vepu {
+	status = "okay";
+};
+
+&vepu_mmu {
+	status = "okay";
+};
+
+/* VOP2: display controller. Must be enabled for DRM to bind.
+ * Clock parents: DCLK_VOP0 -> HPLL, DCLK_VOP1 -> VPLL. */
+&vop {
+	status = "okay";
+	assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
+	assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
+};
+
+&vop_mmu {
+	status = "okay";
+};
+
+/* combphy1/combphy2: combo PHYs for USB3/SATA/PCIe.
+ * Nothing on the Miyoo Flip uses USB3, SATA, or PCIe.
+ * WiFi is USB2 (EHCI), and usb_host1_xhci is overridden to USB2-only below.
+ * Disabling combphys allows PD_PIPE power domain to gate — saves power. */
+&combphy1 {
+	status = "disabled";
+};
+
+&combphy2 {
+	status = "disabled";
 };
