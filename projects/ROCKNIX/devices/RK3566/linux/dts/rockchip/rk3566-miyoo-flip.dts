@@ -127,20 +127,20 @@
 		/* Deadzone / fuzz / flat / tuning — same DTS properties as ADC joypads.
 		 * Requires patched rocknix-singleadc-joypad (0002-miyoo-serial patch).
 		 * Miyoo axis range is [-32760..32760]; deadzone is an absolute value in
-		 * that range.  6552 = ~20% radial deadzone.
+		 * that range.  4914 = ~15% radial deadzone.
 		 * Tuning 100 = no scaling; >100 amplifies, <100 attenuates. */
-		button-adc-deadzone = <6552>;
+		button-adc-deadzone = <4914>;
 		button-adc-fuzz = <32>;
 		button-adc-flat = <32>;
 
-		abs_x-p-tuning = <100>;
-		abs_x-n-tuning = <100>;
-		abs_y-p-tuning = <100>;
-		abs_y-n-tuning = <100>;
-		abs_rx-p-tuning = <100>;
-		abs_rx-n-tuning = <100>;
-		abs_ry-p-tuning = <100>;
-		abs_ry-n-tuning = <100>;
+		abs_x-p-tuning = <90>;
+		abs_x-n-tuning = <90>;
+		abs_y-p-tuning = <90>;
+		abs_y-n-tuning = <90>;
+		abs_rx-p-tuning = <90>;
+		abs_rx-n-tuning = <90>;
+		abs_ry-p-tuning = <90>;
+		abs_ry-n-tuning = <90>;
 
 		sw1 {
 			gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_LOW>;
