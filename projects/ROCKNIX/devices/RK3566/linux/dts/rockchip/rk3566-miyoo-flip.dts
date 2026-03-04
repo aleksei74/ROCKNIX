@@ -6,6 +6,7 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/leds/common.h>
 #include <dt-bindings/pinctrl/rockchip.h>
 #include <dt-bindings/pwm/pwm.h>
 #include <dt-bindings/input/input.h>
@@ -393,14 +394,21 @@
 		};
 	};
 
-	/* Status LEDs: work (GPIO0_PB4), charger (GPIO0_PC2). Stock names Charging LED / Charging-Full. */
+	/* Status LEDs: power (GPIO0_PB4), charger (GPIO0_PC2). Names match RK3566 platform ledcontrol
+	 * (green:power, amber:charging). No red:status on this 2-LED device; platform script handles that. */
 	leds: leds {
 		compatible = "gpio-leds";
-		work_led: work {
+		work_led: led-power {
+			label = "green:power";
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_POWER;
 			gpios = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "default-on";
 		};
-		charger_led: charger {
+		charger_led: led-charging {
+			label = "amber:charging";
+			color = <LED_COLOR_ID_AMBER>;
+			function = LED_FUNCTION_CHARGING;
 			gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "battery-charging";
 			retain-state-suspended;
