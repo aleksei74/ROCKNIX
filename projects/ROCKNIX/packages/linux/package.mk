@@ -16,6 +16,7 @@ PKG_STAMP="${KERNEL_TARGET} ${KERNEL_MAKE_EXTRACMD}"
 PKG_PATCH_DIRS="${LINUX} mainline ${DEVICE} default"
 
 [[ "${DEVICE}" == RK* ]] && PKG_PATCH_DIRS+=" mainline-rockchip"
+[[ "${DEVICE}" == SM* ]] && PKG_DEPENDS_TARGET+=" mkbootimg:host"
 
 case ${DEVICE} in
   RK3588)
@@ -32,11 +33,11 @@ case ${DEVICE} in
   *)
     case ${DEVICE} in
       SM8250)
-        PKG_VERSION="6.19-rc5"
-        PKG_URL="https://git.kernel.org/torvalds/t/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+        PKG_VERSION="6.19.3"
+        PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
         ;;
       S922X|H700|RK3399|RK3566|SM8550|SM8650)
-        PKG_VERSION="6.18.8"
+        PKG_VERSION="6.18.13"
         PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
         ;;
       *)
@@ -331,7 +332,26 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/.image
-  cp -p arch/${TARGET_KERNEL_ARCH}/boot/${KERNEL_TARGET} System.map .config Module.symvers ${INSTALL}/.image/
+  cp -p System.map .config Module.symvers ${INSTALL}/.image/
+
+  if [ "${BOOTLOADER}" != "qcom-abl" ]; then
+  	cp -p arch/${TARGET_KERNEL_ARCH}/boot/${KERNEL_TARGET} ${INSTALL}/.image/
+  else
+
+    gzip -c "arch/${TARGET_KERNEL_ARCH}/boot/${KERNEL_TARGET}" > "${INSTALL}/.image/kernel.gz"
+    for dtb in "arch/${TARGET_KERNEL_ARCH}/boot/dts/"**/*.dtb; do
+      if [ -f ${dtb} ]; then
+        cat "$dtb" >> "${INSTALL}/.image/kernel.gz"
+      fi
+    done
+    echo -n "dummy" > "${INSTALL}/.image/ramdisk"
+    python3 "${TOOLCHAIN}/mkbootimg/mkbootimg.py" \
+      --kernel "${INSTALL}/.image/kernel.gz" --ramdisk "${INSTALL}/.image/ramdisk" \
+	  --kernel_offset 0x00000000 --ramdisk_offset 0x00000000 --tags_offset 0x00000000 \
+	  --os_version 12.0.0 --os_patch_level "$(date '+%Y-%m')" --header_version 0 \
+	  --cmdline "boot=LABEL=${DISTRO_BOOTLABEL} disk=LABEL=${DISTRO_DISKLABEL} ${EXTRA_CMDLINE}" \
+	  -o "${INSTALL}/.image/${KERNEL_TARGET}" || { exit 1; }
+  fi
 
   kernel_make INSTALL_MOD_PATH=${INSTALL}/$(get_kernel_overlay_dir) modules_install
   rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/build

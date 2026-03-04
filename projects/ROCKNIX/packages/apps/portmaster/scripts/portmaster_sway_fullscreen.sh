@@ -11,11 +11,11 @@ if echo "${UI_SERVICE}" | grep -q "sway"; then
     if [[ "${DEVICE_HAS_DUAL_SCREEN}" == "true" ]]; then
         TSKEY=$(get_setting "rocknix.touchscreen-keyboard.enabled")
         if [[ "${TSKEY}" == "1" ]]; then
-            swaymsg 'output DSI-1 power on, seat seat1 fallback no'
+            swaymsg 'output DSI-1 power on'
+            (
+              sleep 2
+              swaymsg 'seat seat1 fallback yes'
+            ) &
         fi
     fi
-    
-    # Explicitly map all input devices to the active game seat to prevent wayland focus revocation.
-    swaymsg 'seat seat1 attach "*"'
-    swaymsg 'seat * keyboard_grouping none'
 fi

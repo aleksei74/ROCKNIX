@@ -72,6 +72,7 @@ FUNCTION_HOTKEY_BTN_SOUTH_EVENT="*(BTN_SOUTH), value 1*"
 FUNCTION_HOTKEY_BTN_WEST_EVENT="*(BTN_WEST), value 1*"
 FUNCTION_HOTKEY_BTN_EAST_EVENT="*(BTN_EAST), value 1*"
 FUNCTION_HOTKEY_BTN_BACK_EVENT="*(BTN_BACK), value 1*"
+FUNCTION_HOTKEY_KEY_RECORD_EVENT="*(KEY_RECORD), value 1*"
 
 FUNCTION_HOTKEY_TOUCH_EVENT="*(BTN_TOUCH), value 1*"
 
@@ -469,9 +470,11 @@ set +e
       ;;
       (${FUNCTION_HOTKEY_BTN_EAST_EVENT})
         if [ "${HOTKEY_A_PRESSED}" = true ]; then
-          ${DEBUG} && log $0 "${FUNCTION_HOTKEY_BTN_EAST_EVENT}: Screenshot Taken"
+          ${DEBUG} && log $0 "${FUNCTION_HOTKEY_BTN_EAST_EVENT}: Screenshot"
           /usr/bin/rocknix-screenshot
-          /usr/bin/mako-notify "Screenshot Saved" -no-ra
+          # Display notification if 'success' exit code
+          SCREENSHOT_SUCCESS=$?
+          [ "$SCREENSHOT_SUCCESS" -eq 0 ] && /usr/bin/mako-notify "Screenshot Saved" -no-ra
         fi
       ;;
      (${FUNCTION_HOTKEY_BTN_WEST_EVENT})
@@ -480,7 +483,7 @@ set +e
           /usr/bin/mangohud_set toggle
         fi
       ;;
-     (${FUNCTION_HOTKEY_BTN_BACK_EVENT})
+     (${FUNCTION_HOTKEY_BTN_BACK_EVENT}|${FUNCTION_HOTKEY_KEY_RECORD_EVENT})
        if [ "${HOTKEY_A_PRESSED}" = true ]; then
          ${DEBUG} && log $0 "${FUNCTION_HOTKEY_BTN_BACK_EVENT}: Switch Screen Output"
          /usr/bin/screen_switch

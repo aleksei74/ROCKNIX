@@ -68,12 +68,12 @@ fi
 if [ "$PLATFORM" = "ndsiware" ]; then
     sed -i '/^DirectBoot=/c\DirectBoot=0' /storage/.config/melonDS/melonDS.ini
 else
-    if [ "$DBOOT" = "1" ]; then
-        sed -i '/^DirectBoot=/c\DirectBoot=1' /storage/.config/melonDS/melonDS.ini
-        sed -i '/^ExternalBIOSEnable=/c\ExternalBIOSEnable=0' /storage/.config/melonDS/melonDS.ini
-    else
+    if [ "$DBOOT" = "0" ]; then
         sed -i '/^DirectBoot=/c\DirectBoot=0' /storage/.config/melonDS/melonDS.ini
         sed -i '/^ExternalBIOSEnable=/c\ExternalBIOSEnable=1' /storage/.config/melonDS/melonDS.ini
+    else
+        sed -i '/^DirectBoot=/c\DirectBoot=1' /storage/.config/melonDS/melonDS.ini
+        sed -i '/^ExternalBIOSEnable=/c\ExternalBIOSEnable=0' /storage/.config/melonDS/melonDS.ini
     fi
 fi
 
@@ -106,7 +106,8 @@ sed -i '/^Screen1Enabled=/c\Screen1Enabled=0' "${CONF_DIR}/${MELONDS_INI}"
 
 enable_second_screen() {
     sed -i '/^ScreenSizing=/c\ScreenSizing=4' "${CONF_DIR}/${MELONDS_INI}"
-    sed -i '/^Screen1Enabled=/c\Screen1Enabled=1' "${CONF_DIR}/${MELONDS_INI}"
+    sed -i '/^Screen1Enabled=/d$ a Screen1Enabled=1' "${CONF_DIR}/${MELONDS_INI}"
+    sed -i '/^Screen1Layout=/d$ a Screen1Layout=2' "${CONF_DIR}/${MELONDS_INI}"
 }
 
 if [ "$SLAYOUT" = "6" ]; then
@@ -123,10 +124,10 @@ fi
 if [[ "${DEVICE_HAS_DUAL_SCREEN}" = "true" && ( -z "$SLAYOUT" || "$SLAYOUT" = "6" ) ]]; then
     if [ "$SWAP" = "1" ]; then
         sed -i '/^ScreenSizing=/c\ScreenSizing=5' "${CONF_DIR}/${MELONDS_INI}"
-        sed -i '/^Screen1Sizing=/c\Screen1Sizing=4' "${CONF_DIR}/${MELONDS_INI}"
+        sed -i '/^Screen1Sizing=/d$ a Screen1Sizing=4' "${CONF_DIR}/${MELONDS_INI}"
     else
         sed -i '/^ScreenSizing=/c\ScreenSizing=4' "${CONF_DIR}/${MELONDS_INI}"
-        sed -i '/^Screen1Sizing=/c\Screen1Sizing=5' "${CONF_DIR}/${MELONDS_INI}"
+        sed -i '/^Screen1Sizing=/d$ a Screen1Sizing=5' "${CONF_DIR}/${MELONDS_INI}"
     fi
 else
     sed -i "/^ScreenSwap=/c\ScreenSwap=${SWAP:-0}" "${CONF_DIR}/${MELONDS_INI}"
@@ -176,6 +177,9 @@ esac
 
 #Generate a new MelonDS.toml each run (temporary hack)
 rm -rf "${CONF_DIR}/melonDS.toml"
+
+#Retroachievements
+/usr/bin/cheevos_melonds.sh
 
 #Run MelonDS emulator
 $GPTOKEYB "melonDS" -c "${CONF_DIR}/melonDS.gptk" &
