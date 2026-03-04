@@ -425,6 +425,19 @@
 		regulator-max-microvolt = <3800000>;
 	};
 
+	/* Apply unused-pin pinctrl at boot so unpopulated eMMC/PMU pins are held, not floating. */
+	unused_pins_holder: unused-pins-holder {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&unused_emmc_pins &unused_gpio0_pins &unused_gpio0_d_pins
+			    &unused_gpio1_a01_pins &unused_gpio2_pins &unused_gpio2_c7d_pins
+			    &unused_gpio3_pins &unused_gpio4_pins &unused_gpio4_d2_pins
+			    &unused_i2s1_pins>;
+		status = "okay";
+	};
+
 	/* vcc5v0_usb: removed — was an intermediate always-on 5V regulator
 	 * between dcdc_boost and vcc5v0_host. Unnecessary on this board;
 	 * vcc5v0_host now sources directly from dcdc_boost. */
@@ -1137,6 +1150,145 @@
 		};		
 	};
 
+	/*
+	 * Unused pins: GPIO + pull per datasheet pad type (_u → pull-up, _d → pull-down)
+	 * to avoid floating and shoot-through current. */
+	unused-pins {
+		/* GPIO1 B4–D4: eMMC/Flash. Pad _u → pull_up; C5,C6,C7,D0 _d → pull_down. */
+		unused_emmc_pins: unused-emmc-pins {
+			rockchip,pins =
+				<1 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PB7 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PC0 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PC1 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PC2 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PC4 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PC7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PD0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PD1 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PD2 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PD3 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PD4 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+		/* GPIO0 unclaimed PMU pins. Pad _u → pull_up, _d → pull_down. */
+		unused_gpio0_pins: unused-gpio0-pins {
+			rockchip,pins =
+				<0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>,
+				<0 RK_PB0 RK_FUNC_GPIO &pcfg_pull_up>,
+				<0 RK_PB3 RK_FUNC_GPIO &pcfg_pull_up>,
+				<0 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>,
+				<0 RK_PB6 RK_FUNC_GPIO &pcfg_pull_up>,
+				<0 RK_PB7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PC0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PC5 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		/* GPIO2 unclaimed: B5 _u → pull_up; B7,C2–C6 _d → pull_down. B6 excluded: UART1_CTSn (Miyoo serial). */
+		unused_gpio2_pins: unused-gpio2-pins {
+			rockchip,pins =
+				<2 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>,
+				<2 RK_PB7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PC2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PC3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PC4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PC5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PC6 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		/* GPIO3 unclaimed: A0,A2,B7,C4–D7 all _d → pull_down. */
+		unused_gpio3_pins: unused-gpio3-pins {
+			rockchip,pins =
+				<3 RK_PA0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PA2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PC4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PC7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<3 RK_PD7 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		/* GPIO4 unclaimed: A1–C1, C3, C4 all _d → pull_down. */
+		unused_gpio4_pins: unused-gpio4-pins {
+			rockchip,pins =
+				<4 RK_PA1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PA2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PA3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PA4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PA5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PA6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PA7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PB7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PC0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PC1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PC3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PC4 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		/* I2S1 unused: A4,A6,B0,B1,B2 _d → pull_down. */
+		unused_i2s1_pins: unused-i2s1-pins {
+			rockchip,pins =
+				<1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PA6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PB1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<1 RK_PB2 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		/* Remaining unclaimed: GPIO0_D2–D7 (datasheet D3–D6 _d), GPIO1_A0–A1 (_u), GPIO2_C7–D7, GPIO3_A0, GPIO4_D2–D7. */
+		unused_gpio0_d_pins: unused-gpio0-d-pins {
+			rockchip,pins =
+				<0 RK_PD2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PD3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PD4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PD5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PD6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0 RK_PD7 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		unused_gpio1_a01_pins: unused-gpio1-a01-pins {
+			rockchip,pins =
+				<1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
+				<1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+		unused_gpio2_c7d_pins: unused-gpio2-c7d-pins {
+			rockchip,pins =
+				<2 RK_PC7 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD0 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD1 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 RK_PD7 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+		unused_gpio4_d2_pins: unused-gpio4-d2-pins {
+			rockchip,pins =
+				<4 RK_PD2 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PD3 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PD4 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_down>,
+				<4 RK_PD7 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+	};
+
 };
 
 /* IEP (Image Enhancement Processor): hardware deinterlacer/scaler at 0xfdef0000.
@@ -1421,4 +1573,18 @@
 
 &combphy2 {
 	status = "disabled";
+};
+
+/* NPU (Neural Processing Unit) at 0xfdab0000.
+ * Mainline has no RK3566/RK3568 NPU driver (RKNPU2 is out-of-tree). For a handheld
+ * it is rarely useful (retro gaming doesn’t need it; AI upscaling would need userspace
+ * and an out-of-tree kernel). Define the node as disabled so the block is not enabled
+ * by any overlay and power can be saved. If a kernel with rknpu2 is used, set status
+ * to "okay" and add clocks/interrupts/power-domains per the driver binding. */
+/ {
+	npu: npu@fdab0000 {
+		compatible = "rockchip,rk3568-rknpu";
+		reg = <0x0 0xfdab0000 0x0 0x10000>;
+		status = "disabled";
+	};
 };
