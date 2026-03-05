@@ -631,15 +631,18 @@
 		};
 	};
 
-	/* Panel: ROCKNIX generic-dsi driver. 640x480, 2 lanes; 59.94 Hz (NTSC) and 50 Hz (PAL) only (60 Hz disabled, artifacts). Init sequence from stock BSP. */
+	/* Panel: FT8006M (controller IC), 3.5" 640x480 MIPI DSI 2-lane RGB888. Physical panel likely
+	 * TXW350099C0-12 or similar (3.5" 640x480 TFT IPS MIPI); no public datasheet
+	 * for FT8006M. Default = NTSC 525 lines; stock BSP = 518 lines, same rate.
+	 * Backlight 800 Hz; stock "display mode" is userspace (DRM hue/sat, backlight). */
 	panel: panel@0 {
 		compatible = "rocknix,generic-dsi";
 		panel_description =
 			"G size=68,121 delays=0,160,200,200,20 format=rgb888 lanes=2 flags=0xe03",
 
-			"M clock=34287 horizontal=640,150,130,120 vertical=480,20,38,12 default=1", /* 59.94 Hz (NTSC) */
-			"M clock=32010 horizontal=640,150,157,120 vertical=480,20,88,12",        /* 50.00 Hz (PAL) */
-			/* "M clock=32760 horizontal=640,150,140,120 vertical=480,20,8,12", 60.00 Hz — disabled (artifacts); kept as reference */
+			/* "M clock=32000 horizontal=640,150,120,120 vertical=480,20,6,12", stock BSP ~59.94 Hz 518 lines */
+			"M clock=32388 horizontal=640,150,120,120 vertical=480,20,6,19 default=1", /* NTSC: 525 lines, ~59.94 Hz */
+			"M clock=32010 horizontal=640,150,157,120 vertical=480,20,88,12",         /* PAL: 600 lines, 50 Hz */
 
 			"I seq=11 wait=250",
 			"I seq=29 wait=32",
