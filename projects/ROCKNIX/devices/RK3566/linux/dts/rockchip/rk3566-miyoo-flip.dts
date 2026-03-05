@@ -632,7 +632,7 @@
 		};
 	};
 
-	/* Panel: ROCKNIX generic-dsi driver. 640x480, 2 lanes, NTSC/PAL/60Hz. Init sequence from stock BSP. */
+	/* Panel: ROCKNIX generic-dsi driver. 640x480, 2 lanes; 59.94 Hz (NTSC) and 50 Hz (PAL) only (60 Hz disabled, artifacts). Init sequence from stock BSP. */
 	panel: panel@0 {
 		compatible = "rocknix,generic-dsi";
 		panel_description =
@@ -640,7 +640,7 @@
 
 			"M clock=34287 horizontal=640,150,130,120 vertical=480,20,38,12 default=1", /* 59.94 Hz (NTSC) */
 			"M clock=32010 horizontal=640,150,157,120 vertical=480,20,88,12",        /* 50.00 Hz (PAL) */
-			"M clock=32760 horizontal=640,150,140,120 vertical=480,20,8,12",          /* 60.00 Hz */
+			/* "M clock=32760 horizontal=640,150,140,120 vertical=480,20,8,12", 60.00 Hz — disabled (artifacts); kept as reference */
 
 			"I seq=11 wait=250",
 			"I seq=29 wait=32",
