@@ -263,7 +263,7 @@ insmod part_msdos
 load_env
 
 if [ "\${saved_entry}" ]; then
-  set timeout=2
+  set timeout=0
   set default="\${saved_entry}"
 else
   set timeout=-1
