@@ -36,6 +36,11 @@ led_amber() {
   led_state amber:charging ${B}
 }
 
+# No argument: read config and apply saved state (or default). Callers can run "ledcontrol" alone.
+if [ -z "${1}" ]; then
+  set -- "${LED_STATUS:-default}"
+fi
+
 case ${1} in
   green)
     led_green
