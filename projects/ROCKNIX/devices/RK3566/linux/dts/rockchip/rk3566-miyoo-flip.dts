@@ -1452,7 +1452,7 @@
 
 /* Re-enable for serial console debugging. Disable to save power. */
 &uart2 {
-	status = "okay";
+	status = "disabled";
 };
 
 /* USB2 PHY0/1 controllers (enable the PHY blocks). */
