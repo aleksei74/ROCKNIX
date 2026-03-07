@@ -640,9 +640,9 @@
 		panel_description =
 			"G size=68,121 delays=0,160,200,200,20 format=rgb888 lanes=2 flags=0xe03",
 
-			/* "M clock=32000 horizontal=640,150,120,120 vertical=480,20,6,12", stock BSP ~59.94 Hz 518 lines */
-			"M clock=32388 horizontal=640,150,120,120 vertical=480,20,6,19 default=1", /* NTSC: 525 lines, ~59.94 Hz */
-			"M clock=32010 horizontal=640,150,157,120 vertical=480,20,88,12",         /* PAL: 600 lines, 50 Hz */
+			"M clock=32000 horizontal=640,150,120,120 vertical=480,20,6,12 default=1", /* stock BSP ~59.94 Hz 518 lines */
+			"M clock=30900 horizontal=640,150,120,120 vertical=480,20,88,12",         /* PAL: 600 lines, 50 Hz; same H as stock (1030) to reduce flicker */
+			"M clock=21408 horizontal=640,150,120,120 vertical=480,20,6,14",         /* 40 Hz (21408/1030/520), test */
 
 			"I seq=11 wait=250",
 			"I seq=29 wait=32",
