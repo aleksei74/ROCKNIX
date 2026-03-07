@@ -13,6 +13,7 @@ PKG_LONGDESC="GStreamer Bad Plug-ins is a set of plug-ins that aren't up to par 
 PKG_MESON_OPTS_TARGET="-Dgst_play_tests=false \
                          -Dwebp=disabled \
                          -Dfaad=enabled \
+                         -Dbluez=disabled \
                          -Dgpl=enabled \
                          -Dhls=disabled \
                          -Dsctp-internal-usrsctp=disabled \
