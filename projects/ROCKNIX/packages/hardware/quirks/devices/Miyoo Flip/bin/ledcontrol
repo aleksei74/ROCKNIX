@@ -1,21 +1,12 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2024 ROCKNIX (https://github.com/ROCKNIX)
-# Miyoo Flip: 2 LEDs (green:power, amber:charging). Pattern from RK3588 2-LED ledcontrol.
-# List: default, off, green, amber (no red). Charging shows amber; discharging restores user choice.
+# Miyoo Flip: 2 LEDs (green:power, red:charging), on/off only. Pattern from RK3588 2-LED ledcontrol. No brightness menu (010-led_control sets DEVICE_LED_BRIGHTNESS=false).
 
 . /etc/profile.d/001-functions
 
 LED_PATH="/sys/class/leds"
 LED_STATUS=$(get_setting led.color)
-
-# Brightness: default max, or from setting (min/mid/max -> 15/63/255)
-GETBRIGHTNESS=$(get_setting led.brightness)
-[ -n "${2}" ] && LEDBRIGHTNESS=${2} || LEDBRIGHTNESS=${GETBRIGHTNESS:-max}
-[ "${LEDBRIGHTNESS}" != "${GETBRIGHTNESS}" ] && set_setting led.brightness "${LEDBRIGHTNESS}"
-case ${LEDBRIGHTNESS} in
-  max) B=255 ;; mid) B=63 ;; min) B=15 ;; *) B=255 ;;
-esac
 
 led_state() {
   [ -d "${LED_PATH}/${1}" ] && echo "${2}" >"${LED_PATH}/${1}/brightness" 2>/dev/null
@@ -23,17 +14,17 @@ led_state() {
 
 led_off() {
   led_state green:power 0
-  led_state amber:charging 0
+  led_state red:charging 0
 }
 
 led_green() {
   led_off
-  led_state green:power ${B}
+  led_state green:power 1
 }
 
-led_amber() {
+led_red() {
   led_off
-  led_state amber:charging ${B}
+  led_state red:charging 1
 }
 
 # No argument: read config and apply saved state (or default). Callers can run "ledcontrol" alone.
@@ -47,12 +38,12 @@ case ${1} in
     set_setting led.color ${1}
     ;;
   amber)
-    led_amber
-    set_setting led.color ${1}
+    led_red
+    set_setting led.color red
     ;;
   red)
-    led_amber
-    set_setting led.color amber
+    led_red
+    set_setting led.color ${1}
     ;;
   off)
     led_off
@@ -60,14 +51,14 @@ case ${1} in
     ;;
   discharging)
     if [ -n "${LED_STATUS}" ] && [ "${LED_STATUS}" != "off" ]; then
-      ledcontrol ${LED_STATUS} ${LEDBRIGHTNESS}
+      ledcontrol ${LED_STATUS}
     else
       led_green
     fi
     ;;
   charging)
     if [ "${LED_STATUS}" != "off" ]; then
-      led_amber
+      led_red
     else
       led_off
     fi
@@ -81,7 +72,7 @@ case ${1} in
     ;;
   brightness)
     if [ -n "${LED_STATUS}" ] && [ "${LED_STATUS}" != "off" ]; then
-      ledcontrol ${LED_STATUS} ${LEDBRIGHTNESS}
+      ledcontrol ${LED_STATUS}
     else
       led_off
     fi
@@ -90,6 +81,6 @@ case ${1} in
     echo "default"
     echo "off"
     echo "green"
-    echo "amber"
+    echo "red"
     ;;
 esac

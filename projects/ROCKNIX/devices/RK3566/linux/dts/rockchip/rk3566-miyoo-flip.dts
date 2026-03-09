@@ -395,7 +395,8 @@
 	};
 
 	/* Status LEDs: power (GPIO0_PB4), charger (GPIO0_PC2). Names match RK3566 platform ledcontrol
-	 * (green:power, amber:charging). No red:status on this 2-LED device; platform script handles that. */
+	 * (green:power, red:charging). Platform ledcontrol uses green + red.
+	 * GPIO-only — no PWM on these pins; brightness is on/off only. */
 	leds: leds {
 		compatible = "gpio-leds";
 		work_led: led-power {
@@ -406,8 +407,8 @@
 			linux,default-trigger = "default-on";
 		};
 		charger_led: led-charging {
-			label = "amber:charging";
-			color = <LED_COLOR_ID_AMBER>;
+			label = "red:charging";
+			color = <LED_COLOR_ID_RED>;
 			function = LED_FUNCTION_CHARGING;
 			gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "battery-charging";
