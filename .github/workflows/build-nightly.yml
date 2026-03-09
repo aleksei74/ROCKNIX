@@ -208,4 +208,4 @@ jobs:
          makeLatest: true                # 최신 릴리즈로 표시
          prerelease: false               # 정식 릴리즈로 표시 (원하면 true로 변경)
          body: "Automated build by GitHub Actions for aleksei74/ROCKNIX"
-         token: ${{ secrets.ACTION_TOKEN }} # 아까 만든 토큰 사용
+         token: ${{ secrets.GH_PAT }} # 아까 만든 토큰 사용
