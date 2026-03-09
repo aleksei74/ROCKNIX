@@ -513,7 +513,7 @@
 	rk3568-suspend {
 		compatible = "rk3568,pm-config";
 		status = "okay";
-		rockchip,sleep-debug-en = <0>;
+		rockchip,sleep-debug-en = <0>;	/* Set 1 + no_console_suspend for serial across suspend */
 		rockchip,sleep-mode-config = <
 			(0
 			| RKPM_SLP_CENTER_OFF
@@ -836,10 +836,8 @@
 				};
 			};
 
-			/* GPU suspend/resume: without mali-bifrost 003-fix-unbalanced-runtime-pm-for-rk356x.patch
-			 * the Mali driver would call regulator_disable()/clk_disable during suspend, causing
-			 * use-count underflow and clock re-enable timeout on resume. The patch lets the power
-			 * domain and regulator framework handle the lifecycle. */
+			/* GPU: mali-bifrost uses devicetree platform backend, which delegates
+			 * clock/regulator lifecycle to the kernel power domain framework. */
 			vdd_gpu: DCDC_REG2 {
 				regulator-always-on;
 				regulator-boot-on;
@@ -1254,6 +1252,8 @@
 				<1 RK_PB2 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
 		/* Remaining unclaimed: GPIO0_D2–D7 (datasheet D3–D6 _d), GPIO1_A0–A1 (_u), GPIO2_C7–D7, GPIO3_A0, GPIO4_D2–D7. */
+		/* GPIO0 D2–D7: PMUPLL / GPIO-only or NC. All pads _d → pull_down.
+		 * D0/D1 excluded: claimed by uart2 (must stay enabled for deep sleep resume). */
 		unused_gpio0_d_pins: unused-gpio0-d-pins {
 			rockchip,pins =
 				<0 RK_PD2 RK_FUNC_GPIO &pcfg_pull_down>,
@@ -1450,9 +1450,10 @@
 	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
 };
 
-/* Re-enable for serial console debugging. Disable to save power. */
+/* UART2 (debug serial): must stay enabled for deep sleep resume to work.
+ * For serial across suspend: no_console_suspend in cmdline + sleep-debug-en=1. */
 &uart2 {
-	status = "disabled";
+	status = "okay";
 };
 
 /* USB2 PHY0/1 controllers (enable the PHY blocks). */
