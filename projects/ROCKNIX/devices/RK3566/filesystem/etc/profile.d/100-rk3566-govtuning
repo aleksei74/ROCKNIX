@@ -1,37 +1,16 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
-#
-# RK3566 ondemand governor tuning
-#
-# The base ondemand() in 099-freqfunctions only sets the governor name.
-# The cpufreq.service never applies tunables because the kernel boots
-# with 'performance' governor (switched to ondemand later by autostart).
-#
-# Without tuning, the kernel defaults (sampling_rate=8ms, up_threshold=95)
-# cause ~94 CPU frequency transitions/sec, each requiring an I2C voltage
-# adjustment on the RK817 PMIC — producing ~1600 I2C interrupts/sec.
-#
-# Tuning rationale (measured on Miyoo Flip, idle EmulationStation):
-#   sampling_rate=200ms   — 5 governor decisions/sec; halves DVFS I2C vs 100ms
-#   up_threshold=80       — scale up at 80% load (responsive, avoids spurious spikes)
-#   sampling_down_factor=10 — at max freq, check every 2s whether to step down
-#   io_is_busy=1          — count I/O wait as busy (prevents drops during SD reads)
-#
-# Measured I2C interrupt rates (fdd40000.i2c, idle ES):
-#   no tuning (8ms/95/1):  1468/s    performance (no DVFS): 7/s
-#   100ms/70/5:             107/s    100ms/50/50:           92/s
-#   200ms/80/10:             53/s  <-- this config
+# RK3566: CPU DVFS drives I2C to PMIC; rate-limit ondemand to 300 ms (schedutil uses DTS clock-latency).
 
 ondemand() {
   set_cpu_gov ondemand
   set_dmc_gov ondemand
-
   local gov="/sys/devices/system/cpu/cpufreq/ondemand"
   if [ -d "$gov" ]; then
-    echo 200000 > "$gov/sampling_rate"
-    echo 80 > "$gov/up_threshold"
-    echo 10 > "$gov/sampling_down_factor"
-    echo 1 > "$gov/io_is_busy"
+    echo 300000 > "$gov/sampling_rate" 2>/dev/null
+    echo 80 > "$gov/up_threshold" 2>/dev/null
+    echo 10 > "$gov/sampling_down_factor" 2>/dev/null
+    echo 1 > "$gov/io_is_busy" 2>/dev/null
   fi
 }
