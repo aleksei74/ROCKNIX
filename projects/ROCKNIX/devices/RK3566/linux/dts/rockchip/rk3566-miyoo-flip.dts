@@ -594,14 +594,12 @@
 	cpu-supply = <&vdd_cpu_rk860>;
 };
 
-/* OPP clock-latency: cpufreq uses it as transition_latency (ondemand sampling,
- * schedutil rate_limit_us). One table (cpu0_opp_table) is shared by all 4 CPUs;
- * setting it on one OPP is enough. 5 ms reduces DVFS/I2C rate; if UI feels
- * sluggish, try 3000000 (3 ms). Don't go below 1 ms with I2C PMIC.
+/* OPP clock-latency: cpufreq transition_latency. 300 ms avoids I2C storm (DVFS via PMIC on I2C).
+ * schedutil uses it for rate_limit_us; ondemand still needs 300 ms sampling_rate in profile.d.
  */
 &cpu0_opp_table {
 	opp-408000000 {
-		clock-latency-ns = <5000000>;
+		clock-latency-ns = <300000000>;
 	};
 };
 
