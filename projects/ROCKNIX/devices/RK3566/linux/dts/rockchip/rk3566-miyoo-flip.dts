@@ -357,7 +357,7 @@
 		compatible = "simple-battery";
 		charge-full-design-microamp-hours = <3000000>;
 		charge-term-current-microamp = <300000>;
-		constant-charge-current-max-microamp = <2000000>;
+		constant-charge-current-max-microamp = <2500000>;
 		constant-charge-voltage-max-microvolt = <4300000>;
 		factory-internal-resistance-micro-ohms = <100000>;
 		voltage-max-design-microvolt = <4227000>;
@@ -1010,7 +1010,7 @@
 		rk817_charger: charger {
 			monitored-battery = <&battery>;
 			rockchip,resistor-sense-micro-ohms = <10000>;
-			rockchip,sleep-enter-current-microamp = <150000>;
+			rockchip,sleep-enter-current-microamp = <300000>;
 			rockchip,sleep-filter-current-microamp = <100000>;
 			/* Match stock: disable OTG 5V in suspend for lower power consumption */
 			rockchip,otg5v-suspend-enable = <0>;
