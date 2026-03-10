@@ -1547,12 +1547,13 @@
 	status = "okay";
 };
 
+/* VEPU (H.264 encoder): works but disabled — retro gaming doesn't encode video. */
 &vepu {
-	status = "okay";
+	status = "disabled";
 };
 
 &vepu_mmu {
-	status = "okay";
+	status = "disabled";
 };
 
 /* VOP2: display controller. Must be enabled for DRM to bind.
