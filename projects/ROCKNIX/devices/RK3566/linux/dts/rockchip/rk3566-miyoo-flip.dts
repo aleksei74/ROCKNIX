@@ -229,7 +229,15 @@
 		};
 	};
 
-	/* LCD backlight: PWM4, mainline pwm-backlight. Stock same; brightness curve matches BSP. */
+	/* LCD backlight: PWM4, mainline pwm-backlight.
+	 * Stock miyoo355_fw_20250527 lcd_frequencies.json offers selectable PWM modes
+	 * via sysfs /sys/devices/platform/backlight/backlight/backlight/period:
+	 *   800 Hz  period=1250000 ns  brightness 20-160  (lowest flicker freq, widest range)
+	 *   10000 Hz  period=100000 ns  brightness 8-140
+	 *   12500 Hz  period=80000 ns   brightness 10-100
+	 *   25000 Hz  period=40000 ns   brightness 45-90
+	 *   40000 Hz  period=25000 ns   brightness 65-115  (stock default in MainUI)
+	 * DTS sets the boot default; runtime switching via sysfs period write. */
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm4 0 1250000 0>;
@@ -344,24 +352,24 @@
 		};
 	};
 
-	/* Power supply: simple-battery (3 Ah, 4.227 V max). Used by RK817 charger and userspace. */
+	/* Power supply: simple-battery. Values changed between miyoo355_fw_20241119 and miyoo355_fw_20250509. */
 	battery: battery {
 		compatible = "simple-battery";
 		charge-full-design-microamp-hours = <3000000>;
 		charge-term-current-microamp = <300000>;
-		constant-charge-current-max-microamp = <2000000>;
-		constant-charge-voltage-max-microvolt = <4300000>;
+		constant-charge-current-max-microamp = <2500000>;
+		constant-charge-voltage-max-microvolt = <4200000>;
 		factory-internal-resistance-micro-ohms = <100000>;
-		voltage-max-design-microvolt = <4227000>;
-		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4150000>;
+		voltage-min-design-microvolt = <3000000>;
 
 		ocv-capacity-celsius = <20>;
-		ocv-capacity-table-0 =  <4227000 100>, <4186000 95>, <3970000 90>, <3920000 85>,
-					<3873000 80>, <3836000 75>, <3790000 70>, <3759000 65>,
-					<3727000 60>, <3685000 55>, <3655000 50>, <3622000 45>,
-					<3585000 40>, <3566000 35>, <3540000 30>, <3516000 25>,
-					<3495000 20>, <3470000 15>, <3450000 10>, <3420000 5>,
-					<3400000 0>;
+		ocv-capacity-table-0 =  <4150000 100>, <4057000 95>, <3998000 90>, <3967000 85>,
+					<3930000 80>, <3883000 75>, <3849000 70>, <3816000 65>,
+					<3773000 60>, <3722000 55>, <3676000 50>, <3638000 45>,
+					<3609000 40>, <3587000 35>, <3566000 30>, <3547000 25>,
+					<3525000 20>, <3500000 15>, <3469000 10>, <3426000 5>,
+					<3378000 0>;
 	};
 
 	/* Volume keys (GPIO) and lid (hall sensor). Stock has vol + lid in gpio-keys-polled. */
@@ -959,6 +967,7 @@
 				};
 			};
 
+			/* miyoo355_fw_20250509 sets regulator-always-on and regulator-boot-on on LDO_REG8 and LDO_REG9 */
 			vcc1v8_dvp: LDO_REG8 {
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
@@ -1001,7 +1010,8 @@
 		rk817_charger: charger {
 			monitored-battery = <&battery>;
 			rockchip,resistor-sense-micro-ohms = <10000>;
-			rockchip,sleep-enter-current-microamp = <150000>;
+			/* Changed between miyoo355_fw_20241119 (150 mA) and miyoo355_fw_20250509 (300 mA) */
+			rockchip,sleep-enter-current-microamp = <300000>;
 			rockchip,sleep-filter-current-microamp = <100000>;
 			/* Match stock: disable OTG 5V in suspend for lower power consumption */
 			rockchip,otg5v-suspend-enable = <0>;
@@ -1353,7 +1363,7 @@
 	status = "disabled";
 };
 
-/* SD slot 0 (primary): 4-bit, SDR104, 150 MHz. ROCKNIX boot. vcc_sd / vccio_sd. */
+/* SD slot 0 (primary): 4-bit, 150 MHz. UHS changed between miyoo355_fw_20241119 (SDR104) and miyoo355_fw_20250509 (SDR12/SDR25). */
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1361,7 +1371,8 @@
 	bus-width = <4>;
 	cap-sd-highspeed;
 	disable-wp;
-	sd-uhs-sdr104;
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
 	vmmc-supply = <&vcc_sd>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
@@ -1369,7 +1380,7 @@
 	status = "okay";
 };
 
-/* SD slot 1 (second): same config as slot 0. vcc_sd2 / vccio_sd. */
+/* SD slot 1 (second): no UHS. Changed between miyoo355_fw_20241119 (SDR104) and miyoo355_fw_20250509 (no UHS). */
 &sdmmc1 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1377,7 +1388,6 @@
 	bus-width = <4>;
 	cap-sd-highspeed;
 	disable-wp;
-	sd-uhs-sdr104;
 	vmmc-supply = <&vcc_sd2>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
@@ -1391,7 +1401,7 @@
  * Chip is ESMT (0xc8); mainline has no ESMT SPI-NAND table. */
 /*
 &sfc {
-	status = "okay";
+	status = "disabled";
 	#address-cells = <1>;
 	#size-cells = <0>;
 
