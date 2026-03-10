@@ -229,7 +229,15 @@
 		};
 	};
 
-	/* LCD backlight: PWM4, mainline pwm-backlight. Stock same; brightness curve matches BSP. */
+	/* LCD backlight: PWM4, mainline pwm-backlight.
+	 * Stock miyoo355_fw_20250527 lcd_frequencies.json offers selectable PWM modes
+	 * via sysfs /sys/devices/platform/backlight/backlight/backlight/period:
+	 *   800 Hz  period=1250000 ns  brightness 20-160  (lowest flicker freq, widest range)
+	 *   10000 Hz  period=100000 ns  brightness 8-140
+	 *   12500 Hz  period=80000 ns   brightness 10-100
+	 *   25000 Hz  period=40000 ns   brightness 45-90
+	 *   40000 Hz  period=25000 ns   brightness 65-115  (stock default in MainUI)
+	 * DTS sets the boot default; runtime switching via sysfs period write. */
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm4 0 1250000 0>;
@@ -959,6 +967,7 @@
 				};
 			};
 
+			/* miyoo355_fw_20250509 sets regulator-always-on and regulator-boot-on on LDO_REG8 and LDO_REG9 */
 			vcc1v8_dvp: LDO_REG8 {
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
@@ -1353,7 +1362,7 @@
 	status = "disabled";
 };
 
-/* SD slot 0 (primary): 4-bit, SDR104, 150 MHz. ROCKNIX boot. vcc_sd / vccio_sd. */
+/* SD slot 0 (primary): 4-bit, 150 MHz. UHS changed between miyoo355_fw_20241119 (SDR104) and miyoo355_fw_20250509 (SDR12/SDR25). */
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1361,7 +1370,8 @@
 	bus-width = <4>;
 	cap-sd-highspeed;
 	disable-wp;
-	sd-uhs-sdr104;
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
 	vmmc-supply = <&vcc_sd>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
@@ -1369,7 +1379,7 @@
 	status = "okay";
 };
 
-/* SD slot 1 (second): same config as slot 0. vcc_sd2 / vccio_sd. */
+/* SD slot 1 (second): no UHS. Changed between miyoo355_fw_20241119 (SDR104) and miyoo355_fw_20250509 (no UHS). */
 &sdmmc1 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1377,7 +1387,6 @@
 	bus-width = <4>;
 	cap-sd-highspeed;
 	disable-wp;
-	sd-uhs-sdr104;
 	vmmc-supply = <&vcc_sd2>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
@@ -1432,6 +1441,10 @@
 };
 
 */
+&sfc {
+	status = "disabled";
+};
+
 &tsadc {
 	status = "okay";
 	/* CRU mode (0): thermal shutdown resets via clock unit — no dedicated GPIO needed.
