@@ -1370,6 +1370,7 @@
 	disable-wp;
 	sd-uhs-sdr12;
 	sd-uhs-sdr25;
+	sd-uhs-sdr50;
 	vmmc-supply = <&vcc_sd>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
@@ -1385,6 +1386,9 @@
 	bus-width = <4>;
 	cap-sd-highspeed;
 	disable-wp;
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
+	sd-uhs-sdr50;
 	vmmc-supply = <&vcc_sd2>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
