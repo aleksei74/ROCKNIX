@@ -795,7 +795,9 @@
 		 * suspend, applying all regulator-state-mem settings.
 		 * Without it, the PMIC stays fully awake during WFI. */
 		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>, <&soc_slppin_slp>;
-		system-power-controller;
+		/* No system-power-controller: DEV_OFF races with PSCI SYSTEM_OFF,
+		 * causing partial PMIC shutdown and battery drain. Let BL31 handle
+		 * power-off via SLPPIN_DN_FUN (set by rk8xx_shutdown). */
 		wakeup-source;
 		#clock-cells = <1>;
 		#sound-dai-cells = <0>;
