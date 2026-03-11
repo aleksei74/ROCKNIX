@@ -1543,8 +1543,9 @@
 	status = "disabled";
 };
 
+/* OHCI is USB 1.1 companion to EHCI on the same port. WiFi is high-speed (EHCI only); no USB 1.1 device on this port. */
 &usb_host1_ohci {
-	status = "okay";
+	status = "disabled";
 };
 
 /* VPU (video decoder), VEPU (H.264 encoder), RGA (2D blitter):
