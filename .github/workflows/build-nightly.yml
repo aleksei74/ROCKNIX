@@ -175,20 +175,20 @@ jobs:
          remove-codeql: true
          remove-docker-images: true
 
-     - uses: actions/checkout@v4
+     - uses: actions/checkout@v6
        with:
          fetch-depth: 0
 
      # 빌드된 이미지 다운로드
      - name: Download artifacts (Images)
-       uses: actions/download-artifact@v4
+       uses: actions/download-artifact@v8
        with:
          pattern: ROCKNIX-image*
          merge-multiple: true
 
      # 업데이트 파일 다운로드
      - name: Download artifacts (Updates)
-       uses: actions/download-artifact@v4
+       uses: actions/download-artifact@v8
        with:
          pattern: ROCKNIX-update*
          merge-multiple: true
