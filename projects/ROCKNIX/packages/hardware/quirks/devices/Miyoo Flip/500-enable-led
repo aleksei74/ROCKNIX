@@ -1,0 +1,7 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
+# Apply saved LED state at boot (DTS default-on would otherwise show green).
+
+. /etc/profile.d/001-functions
+/usr/bin/ledcontrol

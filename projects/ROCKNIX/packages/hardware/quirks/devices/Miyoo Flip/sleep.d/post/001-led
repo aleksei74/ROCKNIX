@@ -1,0 +1,10 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
+# Restore LED state saved before sleep (sleep.sh runs ledcontrol early; restore again from saved state).
+
+. /etc/profile.d/001-functions
+
+SLEEP_LED_STATE=$(get_setting sleep.led.color)
+[ -z "${SLEEP_LED_STATE}" ] && SLEEP_LED_STATE="default"
+/usr/bin/ledcontrol "${SLEEP_LED_STATE}"

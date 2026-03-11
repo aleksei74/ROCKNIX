@@ -412,7 +412,7 @@
 			color = <LED_COLOR_ID_GREEN>;
 			function = LED_FUNCTION_POWER;
 			gpios = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "default-on";
+			/* No default-trigger: boot with LED off; 500-enable-led applies saved state. */
 		};
 		charger_led: led-charging {
 			label = "red:charging";

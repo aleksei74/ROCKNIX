@@ -1,0 +1,11 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
+# Save LED state and turn LEDs off during sleep (poweroff does not change led.color).
+
+. /etc/profile.d/001-functions
+
+PRE_SLEEP_LED_STATE=$(get_setting led.color)
+[ -z "${PRE_SLEEP_LED_STATE}" ] && PRE_SLEEP_LED_STATE="default"
+set_setting sleep.led.color "${PRE_SLEEP_LED_STATE}"
+/usr/bin/ledcontrol poweroff
