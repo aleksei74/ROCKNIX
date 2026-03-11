@@ -1134,7 +1134,7 @@
 		 * signal the RK817 PMIC to enter its sleep state
 		 * (applying all regulator-state-mem settings). */
 		soc_slppin_slp: soc-slppin-slp {
-			rockchip,pins = <0 RK_PA2 1 &pcfg_pull_none>;
+			rockchip,pins = <0 RK_PA2 1 &pcfg_pull_up>;
 		};
 
 		soc_slppin_gpio: soc-slppin-gpio {
