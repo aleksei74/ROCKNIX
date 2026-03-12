@@ -25,5 +25,6 @@ post_makeinstall_target() {
   # clean up
   safe_remove ${INSTALL}/usr/include
   safe_remove ${INSTALL}/usr/lib/pkgconfig
+  safe_remove ${INSTALL}/usr/lib/gstreamer-1.0/include
   safe_remove ${INSTALL}/usr/share
 }
