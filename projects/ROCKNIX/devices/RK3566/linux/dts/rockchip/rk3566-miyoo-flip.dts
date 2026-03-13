@@ -1367,7 +1367,11 @@
 	status = "disabled";
 };
 
-/* SD slot 0 (primary): 4-bit, 150 MHz. UHS changed between miyoo355_fw_20241119 (SDR104) and miyoo355_fw_20250509 (SDR12/SDR25). */
+/* SD slot 0 (primary / boot + games): 4-bit, 150 MHz, UHS-I SDR50.
+ * Warm-reboot with UHS cards relies on the Jonas Karlman kernel patch
+ * (mmc: core: set initial signal voltage on power off) which switches
+ * the card back to 3.3V in mmc_power_off() before reboot, so SPL sees
+ * 3.3V. See patches/linux/0027-mmc-set-initial-signal-voltage-on-power-off.patch. */
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
