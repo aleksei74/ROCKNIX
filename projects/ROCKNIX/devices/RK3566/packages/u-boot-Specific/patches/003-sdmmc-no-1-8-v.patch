@@ -1,0 +1,28 @@
+diff --git a/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi b/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi
+index 19d23169884..f1a2b3c4d56 100644
+--- a/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi
++++ b/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi
+@@ -15,6 +15,15 @@
+ 	bootph-pre-ram;
+ };
+ 
++/*
++ * Prevent U-Boot from switching SD cards to 1.8V UHS signaling.
++ * On warm reboot the card stays at 1.8V but the bootrom expects 3.3V,
++ * causing "Card did not respond to voltage select" failures in SPL.
++ *
++ * Idea from the same Rockchip UHS warm-reboot issue and fixes in:
++ * - OpenWRT: PR #4860 (mmc signal voltage on reboot),
++ *   https://github.com/openwrt/openwrt/pull/4860
++ * - OpenWRT: NanoPi R2S/R4S UHS/SD fixes (e.g. PR #4338, #18553).
++ * - FriendlyARM/community: NanoPi R4S "Card did not respond to voltage
++ *   select" and similar reports; using no-1-8-v in DTS keeps SD at 3.3V
++ *   so SPL and warm reboot work. Standard MMC binding: no-1-8-v.
++ */
++&sdmmc0 {
++	no-1-8-v;
++};
++
+ &sdhci {
+ 	cap-mmc-highspeed;
+ 	pinctrl-names = "default";
