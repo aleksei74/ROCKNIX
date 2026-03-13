@@ -22,6 +22,11 @@
 	chassis-type = "handset";
 	compatible = "miyoo,flip", "rockchip,rk3566";
 
+	aliases {
+		mmc0 = &sdmmc0;
+		mmc1 = &sdmmc1;
+	};
+
 	/* Console and boot: serial2 = UART2 at 1.5M baud (ROCKNIX debug/console). Stock uses ttyFIQ0. */
 	chosen: chosen {
 		stdout-path = "serial2:1500000n8";
