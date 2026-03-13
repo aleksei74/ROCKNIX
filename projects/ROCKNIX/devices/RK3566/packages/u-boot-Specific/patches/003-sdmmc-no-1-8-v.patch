@@ -2,7 +2,7 @@ diff --git a/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi b/arch/arm/dts/rk3566-qu
 index 19d23169884..f1a2b3c4d56 100644
 --- a/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi
 +++ b/arch/arm/dts/rk3566-quartz64-a-u-boot.dtsi
-@@ -15,6 +15,15 @@
+@@ -12,6 +12,23 @@
  	bootph-pre-ram;
  };
  
