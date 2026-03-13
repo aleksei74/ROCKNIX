@@ -1083,11 +1083,11 @@
 		};
 	};
 
-	/* Speaker amp enable (GPIO4_PC2). Stock: spk-ctl-gpios in codec. */
+	/* Speaker amp enable (GPIO4_PC2). Pad _d per datasheet → pull_down = amp off when not driven. */
 	audio-amplifier {
 		spk_amp_enable_h: spk-amp-enable-h {
 			rockchip,pins =
-				<4 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
+				<4 RK_PC2 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
 	};
 
@@ -1113,11 +1113,11 @@
 		};
 	};
 
-	/* WiFi power enable (GPIO0_PA0). rtl8733bu-power driver. */
+	/* WiFi power enable (GPIO0_PA0). Active-low: pull_up = disabled when not driven. */
 	wireless-wlan {
 		wifi_enable_h: wifi-enable-h {
 			rockchip,pins =
-				<0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>;
+				<0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
@@ -1142,10 +1142,10 @@
 		};
 	};
 
-	/* USB host 5V enable (GPIO4_PC5). vcc5v0_host regulator. */
+	/* USB host 5V enable (GPIO4_PC5). Pad _d per datasheet → pull_down = 5V off when not driven. */
 	usb {
 		vcc5v0_host_en: vcc5v0-host-en {
-			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
 
 	};
