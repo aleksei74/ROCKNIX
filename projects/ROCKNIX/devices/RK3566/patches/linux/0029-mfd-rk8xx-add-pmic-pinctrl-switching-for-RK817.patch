@@ -38,14 +38,19 @@ Changes ported from BSP:
    set SLPPOL_H, select power-off pinctrl), then assert
    SLPPIN_DN_FUN with a 2 ms I2C sync delay.
 
+5) Probe-time init (BSP parity): configure DCDC3 feedback resistor
+   to external (RK817_BUCK3_FB_RES_EXT) and initialize SYS_CFG(3)
+   to SLPPIN_NULL_FUN + RST_FUNC_DEV so the PMIC starts from a
+   known safe state regardless of what U-Boot left behind.
+
 Boards that do not define these pinctrl states are unaffected;
 all state lookups are optional and NULL-checked.
 
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
- drivers/mfd/rk8xx-core.c  | 116 ++++++++++++++++++++++++++++++++++---
+ drivers/mfd/rk8xx-core.c  | 126 ++++++++++++++++++++++++++++++++++---
  include/linux/mfd/rk808.h |   8 +++
- 2 files changed, 114 insertions(+), 10 deletions(-)
+ 2 files changed, 124 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 --- a/drivers/mfd/rk8xx-core.c
@@ -60,7 +65,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
  #include <linux/reboot.h>
  
  struct rk808_reg_data {
-@@ -603,6 +605,48 @@
+@@ -603,6 +605,58 @@
  	.init_ack_masked = true,
  };
  
@@ -104,12 +109,22 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 +			 pins->power_off ? "yes" : "no",
 +			 pins->reset ? "yes" : "no");
 +	}
++
++	/* BSP probe-time init: DCDC3 feedback to external resistor */
++	regmap_update_bits(rk808->regmap, RK817_POWER_CONFIG,
++			   RK817_BUCK3_FB_RES_MSK, RK817_BUCK3_FB_RES_EXT);
++
++	/* BSP probe-time init: SLPPIN = NULL, reset func = reset dev.
++	 * Ensures known safe state regardless of what U-Boot left. */
++	regmap_update_bits(rk808->regmap, RK817_SYS_CFG(3),
++			   RK817_SLPPIN_FUNC_MSK | RK817_RST_FUNC_MSK,
++			   SLPPIN_NULL_FUN | RK817_RST_FUNC_DEV);
 +}
 +
  static int rk808_power_off(struct sys_off_data *data)
  {
  	struct rk808 *rk808 = data->cb_data;
-@@ -679,10 +723,35 @@
+@@ -679,10 +733,35 @@
  		break;
  	case RK809_ID:
  	case RK817_ID:
@@ -145,7 +160,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
  		break;
  	default:
  		return;
-@@ -713,6 +782,15 @@
+@@ -713,6 +792,15 @@
  	rk808->regmap = regmap;
  	dev_set_drvdata(dev, rk808);
  
@@ -161,7 +176,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
  	switch (rk808->variant) {
  	case RK805_ID:
  		rk808->regmap_irq_chip = &rk805_irq_chip;
-@@ -838,12 +916,25 @@
+@@ -853,12 +941,25 @@
  					 SLEEP_FUN);
  		break;
  	case RK809_ID:
@@ -192,7 +207,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
  	default:
  		break;
  	}
-@@ -859,12 +950,27 @@
+@@ -874,12 +975,27 @@
  
  	switch (rk808->variant) {
  	case RK809_ID:
