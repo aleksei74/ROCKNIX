@@ -11,7 +11,7 @@ uses built-in defaults that may not enable the deepest sleep modes
 The driver reads rockchip,sleep-mode-config and rockchip,wakeup-config
 from the device-tree rk3568-suspend node and passes them to BL31
 through SIP_SUSPEND_MODE (0x82000003).  This matches the BSP suspend
-configuration protocol.
+configuration protocol (rockchip_pm_config.c).
 
 Uses the "rk3568" namespace to avoid collisions with BSP.
 
@@ -19,9 +19,9 @@ Signed-off-by: ROCKNIX <rocknix@rocknix.org>
 ---
  drivers/soc/rockchip/Kconfig                   |   8 ++
  drivers/soc/rockchip/Makefile                  |   1 +
- drivers/soc/rockchip/rk3568_suspend_config.c   | 128 ++++++++++++++++++
+ drivers/soc/rockchip/rk3568_suspend_config.c   | 129 ++++++++++++++++++
  include/dt-bindings/suspend/rockchip-rk3568.h |  58 ++++++++
- 4 files changed, 195 insertions(+)
+ 4 files changed, 196 insertions(+)
  create mode 100644 drivers/soc/rockchip/rk3568_suspend_config.c
  create mode 100644 include/dt-bindings/suspend/rockchip-rk3568.h
 
@@ -55,7 +55,7 @@ new file mode 100644
 index 000000000000..b8e3a1f2c9d1
 --- /dev/null
 +++ b/drivers/soc/rockchip/rk3568_suspend_config.c
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,129 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * RK3568 suspend mode configuration driver
