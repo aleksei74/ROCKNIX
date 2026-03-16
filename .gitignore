@@ -41,6 +41,9 @@ tools/mkpkg/*.git
 # ignore old linux configs
 projects/**/*.old
 
+# research / notes
+research*.md
+
 # ROCKNIX
 /.rocknix
 /.cache
