@@ -525,7 +525,7 @@
 	 * centers, use PMIC LP, turn off PLLs, keep 32K, GPIO wake). It does not
 	 * touch any pins. The RK817 SLPPIN (GPIO0_PA2) is switched by rk8xx-core
 	 * (patch 0029) using pinctrl-names on the PMIC node: suspend → pmic-sleep,
-	 * power-off → pmic-power-off, so we keep BL31 config here and pin mux there.
+	 * resume → pmic-reset, power-off → pmic-power-off.
 	 */
 	rk3568-suspend {
 		compatible = "rk3568,pm-config";
@@ -812,10 +812,11 @@
 		interrupt-parent = <&gpio0>;
 		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
 
-		pinctrl-names = "default", "pmic-sleep", "pmic-power-off";
+		pinctrl-names = "default", "pmic-sleep", "pmic-power-off", "pmic-reset";
 		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>, <&soc_slppin_gpio>;
 		pinctrl-1 = <&soc_slppin_slp>;
 		pinctrl-2 = <&soc_slppin_gpio>;
+		pinctrl-3 = <&soc_slppin_gpio_idle>;
 		system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
@@ -1029,7 +1030,7 @@
 		rk817_charger: charger {
 			monitored-battery = <&battery>;
 			rockchip,resistor-sense-micro-ohms = <10000>;
-			rockchip,sleep-enter-current-microamp = <300000>;
+			rockchip,sleep-enter-current-microamp = <150000>;
 			rockchip,sleep-filter-current-microamp = <100000>;
 			/* Match stock: disable OTG 5V in suspend for lower power consumption */
 			rockchip,otg5v-suspend-enable = <0>;
@@ -1143,14 +1144,14 @@
 	/*
 	 * PMIC pins for rk817 (patch 0029 uses these via pinctrl-names on the PMIC node).
 	 * pmic_int: GPIO0_PA3, pull-up, level-low interrupt to SoC.
-	 * SLPPIN (GPIO0_PA2) has three states:
-	 *   soc_slppin_slp   — mux 1 = PMU_SLEEP. SoC PMU drives this during deep
-	 *                     suspend so RK817 applies regulator-state-mem; pull_none
-	 *                     to avoid fighting the PMU.
-	 *   soc_slppin_gpio  — GPIO, output low. Used for power-off so kernel/BL31
-	 *                     can assert SLPPIN and PMIC cuts power.
-	 *   soc_slppin_gpio_idle — GPIO, pull-up. Default when running; driver
-	 *                     switches to slp for suspend and gpio for shutdown.
+	 * SLPPIN (GPIO0_PA2) pinctrl states (matching BSP convention):
+	 *   soc_slppin_slp       — mux 1 = PMU_SLEEP; pull_none. Used for pmic-sleep:
+	 *                         SoC PMU drives this during deep suspend so RK817
+	 *                         applies regulator-state-mem.
+	 *   soc_slppin_gpio      — GPIO, output low. Used for pmic-power-off and
+	 *                         default: kernel/BL31 asserts SLPPIN to cut power.
+	 *   soc_slppin_gpio_idle — GPIO, pull-up. Used for pmic-reset (resume):
+	 *                         safely deasserts the SLPPIN line after wake-up.
 	 */
 	pmic {
 		pmic_int: pmic_int {
