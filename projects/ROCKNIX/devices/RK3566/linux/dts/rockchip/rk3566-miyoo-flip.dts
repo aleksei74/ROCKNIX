@@ -519,10 +519,13 @@
 	};
 
 	/*
-	 * Configure BL31 deep-sleep flags via SIP_SUSPEND_MODE SMC calls.
-	 * sleep-mode-config = 0x5ec matches stock firmware:
-	 *   CENTER_OFF | ARMOFF_LOGOFF | PMIC_LP | HW_PLLS_OFF |
-	 *   PMUALIVE_32K | OSC_DIS | 32K_PVTM
+	 * BL31 deep-sleep configuration only. This driver (patch 1013) sends
+	 * sleep-mode-config and wakeup-config to ATF via SIP_SUSPEND_MODE SMC;
+	 * BL31 then applies those flags when the CPU enters suspend (e.g. turn off
+	 * centers, use PMIC LP, turn off PLLs, keep 32K, GPIO wake). It does not
+	 * touch any pins. The RK817 SLPPIN (GPIO0_PA2) is switched by rk8xx-core
+	 * (patch 0029) using pinctrl-names on the PMIC node: suspend → pmic-sleep,
+	 * power-off → pmic-power-off, so we keep BL31 config here and pin mux there.
 	 */
 	rk3568-suspend {
 		compatible = "rk3568,pm-config";
@@ -786,7 +789,22 @@
         };
     };
 
-	/* RK817 PMIC @0x20: regulators, charger, codec, RTC. Stock same. system-power-controller + wakeup-source. */
+	/*
+	 * RK817 PMIC @0x20: regulators, charger, codec, RTC.
+	 *
+	 * Why pinctrl for SLPPIN (GPIO0_PA2): Suspend needs the SoC PMU to drive
+	 * the pin (PMU_SLEEP mux) so the PMIC applies regulator-state-mem. Power-off
+	 * needs the kernel/BL31 to drive it as GPIO so the PMIC actually cuts power.
+	 * Mainline rk8xx-core only wrote SLPPIN registers and never switched the
+	 * SoC pin mux; if the pin stayed in PMU_SLEEP at power-off, BL31 could not
+	 * drive it and the PMIC stayed on → battery drain.
+	 *
+	 * Patch 0029 adds BSP-style pinctrl: default = GPIO (idle); pmic-sleep =
+	 * PMU_SLEEP (rk8xx_suspend); pmic-power-off = GPIO low (rk8xx_shutdown).
+	 * The driver also masks all PMIC IRQs at shutdown and uses the full BSP
+	 * sequence (SLPPIN_NULL → SLPPOL_H → pinctrl → SLPPIN_DN_FUN + mdelay).
+	 * system-power-controller enables DEV_OFF as fallback (belt-and-suspenders).
+	 */
 	rk817: pmic@20 {
 		status = "okay";
 		compatible = "rockchip,rk817";
@@ -794,15 +812,11 @@
 		interrupt-parent = <&gpio0>;
 		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
 
-		pinctrl-names = "default";
-		/* soc_slppin_slp: enables the PMU_SLEEP signal (GPIO0_PA2)
-		 * so the SoC tells the RK817 to enter sleep mode during
-		 * suspend, applying all regulator-state-mem settings.
-		 * Without it, the PMIC stays fully awake during WFI. */
-		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>, <&soc_slppin_slp>;
-		/* No system-power-controller: DEV_OFF races with PSCI SYSTEM_OFF,
-		 * causing partial PMIC shutdown and battery drain. Let BL31 handle
-		 * power-off via SLPPIN_DN_FUN (set by rk8xx_shutdown). */
+		pinctrl-names = "default", "pmic-sleep", "pmic-power-off";
+		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>, <&soc_slppin_gpio>;
+		pinctrl-1 = <&soc_slppin_slp>;
+		pinctrl-2 = <&soc_slppin_gpio>;
+		system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
 		#sound-dai-cells = <0>;
@@ -1126,24 +1140,34 @@
 		};
 	};
 
-	/* PMIC: interrupt (GPIO0_PA3), PMU_SLEEP (GPIO0_PA2) for deep suspend. */
+	/*
+	 * PMIC pins for rk817 (patch 0029 uses these via pinctrl-names on the PMIC node).
+	 * pmic_int: GPIO0_PA3, pull-up, level-low interrupt to SoC.
+	 * SLPPIN (GPIO0_PA2) has three states:
+	 *   soc_slppin_slp   — mux 1 = PMU_SLEEP. SoC PMU drives this during deep
+	 *                     suspend so RK817 applies regulator-state-mem; pull_none
+	 *                     to avoid fighting the PMU.
+	 *   soc_slppin_gpio  — GPIO, output low. Used for power-off so kernel/BL31
+	 *                     can assert SLPPIN and PMIC cuts power.
+	 *   soc_slppin_gpio_idle — GPIO, pull-up. Default when running; driver
+	 *                     switches to slp for suspend and gpio for shutdown.
+	 */
 	pmic {
 		pmic_int: pmic_int {
 			rockchip,pins =
 				<0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 
-		/* SoC-side PMIC SLP pin (GPIO0_PA2) configurations.
-		 * Mux function 1 = PMU_SLEEP: the SoC's PMU hardware
-		 * drives this pin automatically during deep sleep to
-		 * signal the RK817 PMIC to enter its sleep state
-		 * (applying all regulator-state-mem settings). */
 		soc_slppin_slp: soc-slppin-slp {
-			rockchip,pins = <0 RK_PA2 1 &pcfg_pull_up>;
+			rockchip,pins = <0 RK_PA2 1 &pcfg_pull_none>;
 		};
 
 		soc_slppin_gpio: soc-slppin-gpio {
 			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_low>;
+		};
+
+		soc_slppin_gpio_idle: soc-slppin-gpio-idle {
+			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
