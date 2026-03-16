@@ -1,0 +1,194 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Zetarancio <zetarancio@users.noreply.github.com>
+Date: Sun, 15 Mar 2026 00:00:00 +0000
+Subject: [PATCH] mfd: rk8xx: add BSP-style PMIC pinctrl switching and
+ shutdown hardening for RK817/RK809
+
+Port the PMIC sleep-pin pinctrl switching and shutdown hardening from
+the Rockchip BSP rk808.c to the mainline rk8xx-core.c driver.
+
+The RK817/RK809 PMIC uses GPIO0_PA2 (SLPPIN) for two purposes:
+  - Suspend: the SoC PMU drives the pin (PMU_SLEEP mux) to signal
+    the PMIC to enter low-power mode.
+  - Power-off: BL31 drives the pin as GPIO to assert SLPPIN after
+    the kernel writes SLPPIN_DN_FUN.
+
+The mainline driver only does register writes (SLPPIN_SLP_FUN,
+SLPPIN_DN_FUN, SLPPIN_NULL_FUN) but never switches the SoC-side
+pin mux.  If the pin is stuck in PMU_SLEEP mux at power-off time,
+BL31 cannot drive it and the PMIC stays on, draining the battery.
+
+Changes ported from BSP:
+
+1) Add optional pinctrl lookup for "pmic-sleep" and "pmic-power-off"
+   states on the PMIC DT node (matching the BSP DTS convention):
+     - rk8xx_suspend(): select "pmic-sleep" after SLPPIN_SLP_FUN
+     - rk8xx_resume():  select "default" before SLPPIN_NULL_FUN
+     - rk8xx_shutdown(): select "pmic-power-off" before SLPPIN_DN_FUN
+
+2) Mask all PMIC interrupts at shutdown (INT_STS_MSK_REG0-2 and
+   RTC alarm) to prevent spurious wakeups from re-powering the PMIC
+   after power-off.
+
+3) Use the BSP's full SLPPIN shutdown sequence: clear the SLPPIN
+   function, set SLPPOL high, select power-off pinctrl, then assert
+   SLPPIN_DN_FUN with a 2 ms delay for I2C synchronization.
+
+Boards that do not define these pinctrl states are unaffected.
+
+Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
+---
+ drivers/mfd/rk8xx-core.c  | 76 ++++++++++++++++++++++++++++++++++++++
+ include/linux/mfd/rk808.h |  7 ++++
+ 2 files changed, 83 insertions(+)
+
+diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
+--- a/drivers/mfd/rk8xx-core.c
++++ b/drivers/mfd/rk8xx-core.c
+@@ -16,7 +16,9 @@
+ #include <linux/mfd/core.h>
+ #include <linux/module.h>
+ #include <linux/property.h>
++#include <linux/delay.h>
+ #include <linux/regmap.h>
++#include <linux/pinctrl/consumer.h>
+ #include <linux/reboot.h>
+ 
+ struct rk808_reg_data {
+@@ -603,6 +605,41 @@
+ 	.init_ack_masked = true,
+ };
+ 
++static void rk817_pinctrl_init(struct device *dev, struct rk808 *rk808)
++{
++	struct rk8xx_pin_info *pins;
++	struct pinctrl *p;
++
++	p = devm_pinctrl_get(dev);
++	if (IS_ERR(p))
++		return;
++
++	pins = devm_kzalloc(dev, sizeof(*pins), GFP_KERNEL);
++	if (!pins)
++		return;
++
++	pins->p = p;
++
++	pins->sleep = pinctrl_lookup_state(p, "pmic-sleep");
++	if (IS_ERR(pins->sleep)) {
++		pins->sleep = NULL;
++		dev_dbg(dev, "no pmic-sleep pinctrl state\n");
++	}
++
++	pins->power_off = pinctrl_lookup_state(p, "pmic-power-off");
++	if (IS_ERR(pins->power_off)) {
++		pins->power_off = NULL;
++		dev_dbg(dev, "no pmic-power-off pinctrl state\n");
++	}
++
++	if (pins->sleep || pins->power_off) {
++		rk808->pins = pins;
++		dev_info(dev, "PMIC pinctrl: sleep=%s power-off=%s\n",
++			 pins->sleep ? "yes" : "no",
++			 pins->power_off ? "yes" : "no");
++	}
++}
++
+ static int rk808_power_off(struct sys_off_data *data)
+ {
+ 	struct rk808 *rk808 = data->cb_data;
+@@ -679,10 +716,35 @@
+ 		break;
+ 	case RK809_ID:
+ 	case RK817_ID:
++		/* Mask all PMIC interrupts before power-off */
++		regmap_update_bits(rk808->regmap,
++				   RK817_INT_STS_MSK_REG0, 0xff, 0xff);
++		regmap_update_bits(rk808->regmap,
++				   RK817_INT_STS_MSK_REG1, 0xff, 0xff);
++		regmap_update_bits(rk808->regmap,
++				   RK817_INT_STS_MSK_REG2, 0xff, 0xff);
++		regmap_update_bits(rk808->regmap,
++				   RK817_RTC_INT_REG, (0x3 << 2), 0);
++
++		if (rk808->pins && rk808->pins->power_off) {
++			regmap_update_bits(rk808->regmap,
++					   RK817_SYS_CFG(3),
++					   RK817_SLPPIN_FUNC_MSK,
++					   SLPPIN_NULL_FUN);
++			regmap_update_bits(rk808->regmap,
++					   RK817_SYS_CFG(3),
++					   RK817_SLPPOL_MSK,
++					   RK817_SLPPOL_H);
++			pinctrl_select_state(rk808->pins->p,
++					     rk808->pins->power_off);
++		}
++
+ 		ret = regmap_update_bits(rk808->regmap,
+ 					 RK817_SYS_CFG(3),
+ 					 RK817_SLPPIN_FUNC_MSK,
+ 					 SLPPIN_DN_FUN);
++		/* PMIC needs the SCL clock to synchronize the register */
++		mdelay(2);
+ 		break;
+ 	default:
+ 		return;
+@@ -713,6 +775,15 @@
+ 	rk808->regmap = regmap;
+ 	dev_set_drvdata(dev, rk808);
+ 
++	switch (variant) {
++	case RK809_ID:
++	case RK817_ID:
++		rk817_pinctrl_init(dev, rk808);
++		break;
++	default:
++		break;
++	}
++
+ 	switch (rk808->variant) {
+ 	case RK805_ID:
+ 		rk808->regmap_irq_chip = &rk805_irq_chip;
+@@ -843,6 +914,9 @@
+ 					 RK817_SYS_CFG(3),
+ 					 RK817_SLPPIN_FUNC_MSK,
+ 					 SLPPIN_SLP_FUN);
++		if (!ret && rk808->pins && rk808->pins->sleep)
++			pinctrl_select_state(rk808->pins->p,
++					     rk808->pins->sleep);
+ 		break;
+ 	default:
+ 		break;
+@@ -860,6 +934,8 @@
+ 	switch (rk808->variant) {
+ 	case RK809_ID:
+ 	case RK817_ID:
++		if (rk808->pins && rk808->pins->p)
++			pinctrl_select_default_state(dev);
+ 		ret = regmap_update_bits(rk808->regmap,
+ 					 RK817_SYS_CFG(3),
+ 					 RK817_SLPPIN_FUNC_MSK,
+diff --git a/include/linux/mfd/rk808.h b/include/linux/mfd/rk808.h
+--- a/include/linux/mfd/rk808.h
++++ b/include/linux/mfd/rk808.h
+@@ -1341,6 +1341,12 @@
+ 	RK818_ID = 0x8180,
+ };
+ 
++struct rk8xx_pin_info {
++	struct pinctrl		*p;
++	struct pinctrl_state	*sleep;
++	struct pinctrl_state	*power_off;
++};
++
+ struct rk808 {
+ 	struct device			*dev;
+ 	struct regmap_irq_chip_data	*irq_data;
+@@ -1348,6 +1354,7 @@
+ 	long				variant;
+ 	const struct regmap_config	*regmap_cfg;
+ 	const struct regmap_irq_chip	*regmap_irq_chip;
++	struct rk8xx_pin_info		*pins;
+ };
+ 
+ void rk8xx_shutdown(struct device *dev);
