@@ -848,7 +848,7 @@
 		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>;
 		pinctrl-1 = <&soc_slppin_slp>;
 		pinctrl-2 = <&soc_slppin_gpio>;
-		pinctrl-3 = <&soc_slppin_gpio_idle>;
+		pinctrl-3 = <&soc_slppin_gpio>;
 		/* system-power-controller; */
 		wakeup-source;
 		#clock-cells = <1>;
@@ -1185,10 +1185,13 @@
 	 *   soc_slppin_slp       — mux 1 = PMU_SLEEP; pull_none. pmic-sleep state:
 	 *                         SoC PMU drives this during deep suspend so RK817
 	 *                         applies regulator-state-mem.
-	 *   soc_slppin_gpio      — GPIO, output low. pmic-power-off state:
-	 *                         kernel/BL31 asserts SLPPIN to cut power.
-	 *   soc_slppin_gpio_idle — GPIO, pull-up. pmic-reset (resume) state:
-	 *                         safely deasserts SLPPIN after wake-up.
+	 *   soc_slppin_gpio      — GPIO, output low. Used for both pmic-power-off
+	 *                         and pmic-reset (resume). BSP uses GPIO LOW for
+	 *                         both; SLPPIN is safely LOW while the driver
+	 *                         clears function/polarity registers on resume.
+	 *   soc_slppin_gpio_idle — GPIO, pull-up. Kept for reference but NOT
+	 *                         used: pull-up = HIGH can race with residual
+	 *                         SLPPOL_H and trigger PMIC power-off on resume.
 	 */
 	pmic {
 		pmic_int: pmic_int {
