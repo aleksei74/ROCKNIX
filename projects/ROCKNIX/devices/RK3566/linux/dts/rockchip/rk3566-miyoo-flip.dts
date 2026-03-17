@@ -357,36 +357,24 @@
 		};
 	};
 
-	/*
-	 * simple-battery: 3 Ah Li-ion. OCV 3.2–4.25 V (gentle charge 4.25 V, min 3.2 V).
-	 *
-	 * OCV curve: 25-point table. Mainline simple-battery binding accepts any
-	 * number of (voltage µV, capacity %) pairs; interpolation is linear between
-	 * points. Curve rescaled from merged v10/2025 calibration to span 3200–
-	 * 4250 mV. Extra points at 97/93/3/1% smooth steep regions.
-	 *
-	 * Charge: 4.25 V max, 1.8 A max (gentlest of v10/2025). Sleep enter 150 mA
-	 * (gentlest of 150–300 mA range).
-	 */
+	/* Power supply: simple-battery (3 Ah, 4.227 V max). Used by RK817 charger and userspace. */
 	battery: battery {
 		compatible = "simple-battery";
 		charge-full-design-microamp-hours = <3000000>;
 		charge-term-current-microamp = <300000>;
-		constant-charge-current-max-microamp = <1800000>;
-		constant-charge-voltage-max-microvolt = <4250000>;
+		constant-charge-current-max-microamp = <2500000>;
+		constant-charge-voltage-max-microvolt = <4300000>;
 		factory-internal-resistance-micro-ohms = <100000>;
-		voltage-max-design-microvolt = <4250000>;
-		voltage-min-design-microvolt = <3200000>;
+		voltage-max-design-microvolt = <4227000>;
+		voltage-min-design-microvolt = <3400000>;
 
 		ocv-capacity-celsius = <20>;
-		ocv-capacity-table-0 =
-			<4250000 100>, <4190000 97>, <4152000 95>, <4088000 93>,
-			<4034000 90>,  <3959000 85>, <3920000 80>, <3873000 75>,
-			<3813000 70>,  <3770000 65>, <3728000 60>, <3673000 55>,
-			<3609000 50>,  <3550000 45>, <3502000 40>, <3465000 35>,
-			<3437000 30>,  <3411000 25>, <3387000 20>, <3359000 15>,
-			<3327000 10>,  <3288000 5>,  <3251000 3>,  <3213000 1>,
-			<3200000 0>;
+		ocv-capacity-table-0 =  <4227000 100>, <4186000 95>, <3970000 90>, <3920000 85>,
+					<3873000 80>, <3836000 75>, <3790000 70>, <3759000 65>,
+					<3727000 60>, <3685000 55>, <3655000 50>, <3622000 45>,
+					<3585000 40>, <3566000 35>, <3540000 30>, <3516000 25>,
+					<3495000 20>, <3470000 15>, <3450000 10>, <3420000 5>,
+					<3400000 0>;
 	};
 
 	/* Volume keys (GPIO) and lid (hall sensor). Stock has vol + lid in gpio-keys-polled. */
