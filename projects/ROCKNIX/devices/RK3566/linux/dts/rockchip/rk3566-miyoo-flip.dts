@@ -106,23 +106,25 @@
 		 * Use 6 ms for balance of responsiveness and CPU. */
 		poll-interval = <6>;
 
-		/* Deadzone / fuzz / flat / tuning — same DTS properties as ADC joypads.
-		 * Requires patched rocknix-singleadc-joypad (0002-miyoo-serial patch).
-		 * Miyoo axis range is [-32760..32760]; deadzone is an absolute value in
-		 * that range.  4914 = ~15% radial deadzone.
-		 * Tuning 100 = no scaling; >100 amplifies, <100 attenuates. */
-		button-adc-deadzone = <4914>;
-		button-adc-fuzz = <32>;
-		button-adc-flat = <32>;
+		/* Miyoo serial joystick tuning.  Requires 0002-miyoo-serial patch.
+		 * Axis range [-32760..32760]; deadzone is absolute.
+		 * 4914 = ~15% radial deadzone.
+		 * Tuning 100 = no scaling; >100 amplifies, <100 attenuates.
+		 * Smoothing: EMA alpha 0-256; 256 = off, lower = heavier.
+		 * Default 160 (~10 ms time-constant at 160 fps). */
+		miyoo-deadzone = <4914>;
+		miyoo-fuzz = <32>;
+		miyoo-flat = <32>;
+		miyoo-smoothing = <160>;
 
-		abs_x-p-tuning = <90>;
-		abs_x-n-tuning = <90>;
-		abs_y-p-tuning = <90>;
-		abs_y-n-tuning = <90>;
-		abs_rx-p-tuning = <90>;
-		abs_rx-n-tuning = <90>;
-		abs_ry-p-tuning = <90>;
-		abs_ry-n-tuning = <90>;
+		miyoo-lx-p-tuning = <90>;
+		miyoo-lx-n-tuning = <90>;
+		miyoo-ly-p-tuning = <90>;
+		miyoo-ly-n-tuning = <90>;
+		miyoo-rx-p-tuning = <90>;
+		miyoo-rx-n-tuning = <90>;
+		miyoo-ry-p-tuning = <90>;
+		miyoo-ry-n-tuning = <90>;
 
 		sw1 {
 			gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_LOW>;
