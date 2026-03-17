@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: ROCKNIX <rocknix@rocknix.org>
+From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Thu, 20 Feb 2026 00:00:00 +0100
 Subject: [PATCH] net: rtl8733bu: fix SAE/WPA3 authentication and compat
 
@@ -55,7 +55,7 @@ within seconds due to a duplicate association storm.
    Bypass the _cancel_timer indirection and call timer_delete_sync /
    del_timer_sync directly.
 
-Signed-off-by: ROCKNIX <rocknix@rocknix.org>
+Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  include/osdep_service.h       |  8 +++++++-
  os_dep/linux/ioctl_cfg80211.c | 36 +++++++++++++++++++++++++-----------

@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: ROCKNIX <rocknix@rocknix.org>
+From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Mon, 17 Feb 2026 00:00:00 +0100
 Subject: [PATCH] net: rtl8733bu: use dev_addr_set() for kernel 6.x compat
 
@@ -17,7 +17,7 @@ mlme_linux.c and the CONFIG_PLATFORM_INTEL_BYT paths in os_intfs.c.)
 Fixes: "WARNING: CPU: ... at net/core/dev_addr_lists.c:520 dev_addr_check"
 Fixes: "connmanctl enable wifi" returning "wifi is not available"
 
-Signed-off-by: ROCKNIX <rocknix@rocknix.org>
+Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  os_dep/linux/mlme_linux.c | 2 +-
  os_dep/linux/os_intfs.c   | 4 ++--

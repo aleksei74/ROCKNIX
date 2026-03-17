@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: ROCKNIX <rocknix@rocknix.org>
+From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Sat, 1 Mar 2026 16:00:00 +0100
 Subject: [PATCH] miyoo-serial: use DTS deadzone/fuzz/flat/tuning like ADC path
 
@@ -25,6 +25,8 @@ for ADC-based joypads on other ROCKNIX devices.
 
 Note: Miyoo axis range is [-32760..32760] vs typical ADC [-1800..1800].
 Deadzone values must be scaled accordingly (e.g. deadzone=3276 for ~10%).
+
+Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  rocknix-singleadc-joypad.c | 122 ++++++++++++++++++++++++++++--------
  1 file changed, 97 insertions(+), 25 deletions(-)

@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: ROCKNIX <rocknix@rocknix.org>
+From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Sun, 23 Feb 2026 00:00:00 +0000
 Subject: [PATCH] devfreq-event: rockchip-dfi: add PM suspend/resume ops
 
@@ -19,7 +19,7 @@ the DDRMON hardware state when any user (perf or devfreq) is active.
 The resume handler also primes last_event_count so that the first
 get_event() after resume computes a valid delta.
 
-Signed-off-by: ROCKNIX <rocknix@rocknix.org>
+Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  drivers/devfreq/event/rockchip-dfi.c | 84 +++++++++++++++++++++++++++
  1 file changed, 84 insertions(+)
