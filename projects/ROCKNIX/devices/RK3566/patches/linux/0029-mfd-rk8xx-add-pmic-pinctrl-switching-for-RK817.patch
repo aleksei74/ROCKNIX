@@ -25,13 +25,14 @@ Changes ported from BSP:
 1) Add optional pinctrl lookup for "pmic-sleep", "pmic-power-off"
    and "pmic-reset" states on the PMIC DT node (BSP convention).
 
-2) Suspend: replace the single SLPPIN_SLP_FUN write with the BSP
-   sequence: SLPPIN_NULL_FUN -> SLPPOL_H -> SYS_STS sync read ->
-   2 ms delay -> select "pmic-sleep" pinctrl.
+2) Suspend: use the BSP init sequence (SLPPIN_NULL_FUN -> SLPPOL_H ->
+   SYS_STS sync -> 2 ms delay), then write SLPPIN_SLP_FUN explicitly
+   (BSP does this via PMIC-internal pinctrl rk817_slppin_slp which
+   does not exist in mainline), then select "pmic-sleep" SoC pinctrl.
 
-3) Resume: replace the single SLPPIN_NULL_FUN write with the BSP
-   sequence: select "pmic-reset" (or default) pinctrl ->
-   SLPPIN_NULL_FUN -> SLPPOL_L -> SYS_STS sync read -> 2 ms delay.
+3) Resume (BSP order — register writes before pinctrl): write
+   SLPPIN_NULL_FUN -> SLPPOL_L -> SYS_STS sync -> 2 ms delay ->
+   select "pmic-reset" (or default) pinctrl last.
 
 4) Shutdown: mask all PMIC interrupts (INT_STS_MSK_REG0-2 and
    RTC alarm), use the BSP's full SLPPIN sequence (clear function,
@@ -48,9 +49,9 @@ all state lookups are optional and NULL-checked.
 
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
- drivers/mfd/rk8xx-core.c  | 126 ++++++++++++++++++++++++++++++++++---
+ drivers/mfd/rk8xx-core.c  | 131 ++++++++++++++++++++++++++++++++++---
  include/linux/mfd/rk808.h |   8 +++
- 2 files changed, 124 insertions(+), 10 deletions(-)
+ 2 files changed, 129 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 --- a/drivers/mfd/rk8xx-core.c
@@ -176,7 +177,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
  	switch (rk808->variant) {
  	case RK805_ID:
  		rk808->regmap_irq_chip = &rk805_irq_chip;
-@@ -853,12 +941,25 @@
+@@ -853,12 +941,33 @@
  					 SLEEP_FUN);
  		break;
  	case RK809_ID:
@@ -188,6 +189,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 +	case RK817_ID: {
 +		unsigned int tmp;
 +
++		/* BSP init: clear function, set polarity, sync, delay */
 +		regmap_update_bits(rk808->regmap,
 +				   RK817_SYS_CFG(3),
 +				   RK817_SLPPIN_FUNC_MSK,
@@ -199,6 +201,13 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 +		regmap_read(rk808->regmap, RK817_SYS_STS, &tmp);
 +		mdelay(2);
 +
++		/* Set sleep function (BSP does this via rk817_slppin_slp
++		 * PMIC-internal pinctrl; mainline has no such driver). */
++		regmap_update_bits(rk808->regmap,
++				   RK817_SYS_CFG(3),
++				   RK817_SLPPIN_FUNC_MSK,
++				   SLPPIN_SLP_FUN);
++
 +		if (rk808->pins && rk808->pins->sleep)
 +			pinctrl_select_state(rk808->pins->p,
 +					     rk808->pins->sleep);
@@ -207,7 +216,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
  	default:
  		break;
  	}
-@@ -874,12 +975,27 @@
+@@ -874,12 +975,28 @@
  
  	switch (rk808->variant) {
  	case RK809_ID:
@@ -219,12 +228,7 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 +	case RK817_ID: {
 +		unsigned int tmp;
 +
-+		if (rk808->pins && rk808->pins->reset)
-+			pinctrl_select_state(rk808->pins->p,
-+					     rk808->pins->reset);
-+		else if (rk808->pins && rk808->pins->p)
-+			pinctrl_select_default_state(dev);
-+
++		/* BSP order: disarm registers first, pinctrl last */
 +		regmap_update_bits(rk808->regmap,
 +				   RK817_SYS_CFG(3),
 +				   RK817_SLPPIN_FUNC_MSK,
@@ -235,6 +239,12 @@ diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
 +				   RK817_SLPPOL_L);
 +		regmap_read(rk808->regmap, RK817_SYS_STS, &tmp);
 +		mdelay(2);
++
++		if (rk808->pins && rk808->pins->reset)
++			pinctrl_select_state(rk808->pins->p,
++					     rk808->pins->reset);
++		else if (rk808->pins && rk808->pins->p)
++			pinctrl_select_default_state(dev);
  		break;
 +	}
  	default:
