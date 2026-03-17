@@ -839,8 +839,9 @@
 		vcc6-supply = <&vccsys>;
 		vcc7-supply = <&vccsys>;
 		vcc8-supply = <&vccsys>;
-		/* vcc9 = input to PMIC BOOST block; must be vccsys (3.8V) not dcdc_boost
-		 * to avoid fw_devlink cycle pmic -> BOOST -> pmic (mainline 6.6+). */
+		/* vcc9 is the input supply for the PMIC BOOST block (LDO9/5V). It must be
+		 * vccsys (3.8V system rail), not dcdc_boost, to avoid fw_devlink dependency
+		 * cycle pmic -> BOOST -> pmic on mainline 6.6+. */
 		vcc9-supply = <&vccsys>;
 
 		pwrkey {
