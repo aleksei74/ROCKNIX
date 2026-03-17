@@ -23,7 +23,7 @@
 	compatible = "miyoo,flip", "rockchip,rk3566";
 
 	aliases {
-		mmc0 = &sdmmc0;
+		mmc0 = &sdmmc0; /*Right slot, used for booting*/
 		mmc1 = &sdmmc1;
 	};
 
@@ -1403,11 +1403,8 @@
 	status = "disabled";
 };
 
-/* SD slot 0 (primary / boot + games): 4-bit, 150 MHz, UHS-I SDR50.
- * Warm-reboot with UHS cards relies on the Jonas Karlman kernel patch
- * (mmc: core: set initial signal voltage on power off) which switches
- * the card back to 3.3V in mmc_power_off() before reboot, so SPL sees
- * 3.3V. See patches/linux/0027-mmc-set-initial-signal-voltage-on-power-off.patch. */
+/* SD slot 0 (primary):
+ * (miyoo355_fw_20250509213001): max 150 MHz, UHS-I SDR12/SDR25 only (no SDR50).
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1418,6 +1415,7 @@
 	sd-uhs-sdr12;
 	sd-uhs-sdr25;
 	sd-uhs-sdr50;
+	sd-uhs-sdr104;
 	vmmc-supply = <&vcc_sd>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
@@ -1425,7 +1423,8 @@
 	status = "okay";
 };
 
-/* SD slot 1 (second): no SDR50 — both slots share vqmmc (vccio_sd). Only one can use UHS 1.8V; primary slot gets SDR50. */
+/* SD slot 1 (secondary): 
+ * (miyoo355_fw_20250509213001):max 150 MHz, no UHS modes (high-speed only). */
 &sdmmc1 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1435,6 +1434,8 @@
 	disable-wp;
 	sd-uhs-sdr12;
 	sd-uhs-sdr25;
+	sd-uhs-sdr50;
+	sd-uhs-sdr104;
 	vmmc-supply = <&vcc_sd2>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
