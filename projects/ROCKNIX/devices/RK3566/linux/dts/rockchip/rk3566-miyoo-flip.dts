@@ -1568,9 +1568,14 @@
 	status = "okay";
 };
 
-/* USB2 PHY1 host: WiFi (RTL8733BU) on this PHY. */
+/* USB2 PHY1 host: WiFi (RTL8733BU) on this PHY.
+ * EXPERIMENTAL: 3.3V supply. RTL8733BU is 3.3V-capable (OpenIPC RTL873xBU);
+ * using vcc_3v3 avoids enabling the 5V boost for WiFi. Stock uses 5V.
+ * Enable is still GPIO0_PA0 via rtl8733bu_power.
+ * If WiFi/BT fail or are unstable, try uncommenting the 5V line below. */
 &usb2phy1_host {
-	phy-supply = <&vcc5v0_host>;
+	/* phy-supply = <&vcc5v0_host>; */	/* stock: 5V */
+	phy-supply = <&vcc_3v3>;		/* experimental: 3.3V */
 	status = "okay";
 };
 
