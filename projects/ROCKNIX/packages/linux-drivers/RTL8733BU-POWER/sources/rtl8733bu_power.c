@@ -8,13 +8,23 @@
  * is kept on if either WiFi or BT is unblocked; power is cut only when both
  * are blocked (maximum battery when both are off).  Uses the same GPIO as
  * the original vcc_wifi regulator (enable-active-low).
+ *
+ * After turning power on (and on resume), we wait 100 ms before returning so
+ * the chip is stable before USB enumerates; this avoids "WiFi not connected
+ * after resume" when the host enumerates before the module is ready (same
+ * idea as Rockchip wlan-platdata power sequencing).
  */
 
+#include <linux/delay.h>
 #include <linux/gpio/consumer.h>
 #include <linux/module.h>
 #include <linux/mod_devicetable.h>
 #include <linux/platform_device.h>
+#include <linux/pm.h>
 #include <linux/rfkill.h>
+
+/* Delay after asserting power so the chip is ready before USB enumerates. */
+#define RTL8733BU_POWER_STABLE_MS	100
 
 struct rtl8733bu_power {
 	struct gpio_desc *enable_gpio;
@@ -34,6 +44,10 @@ static void rtl8733bu_power_update_gpio(struct rtl8733bu_power *power)
 	 * gpiod_set_value(0) = deassert = power off.
 	 */
 	gpiod_set_value_cansleep(power->enable_gpio, on ? 1 : 0);
+
+	/* Let the chip stabilize before USB enumerates (avoids failed reconnect after resume). */
+	if (on)
+		msleep(RTL8733BU_POWER_STABLE_MS);
 }
 
 static int rtl8733bu_power_set_block_wlan(void *data, bool blocked)
@@ -135,6 +149,23 @@ static void rtl8733bu_power_remove(struct platform_device *pdev)
 	}
 }
 
+static int rtl8733bu_power_resume(struct device *dev)
+{
+	struct rtl8733bu_power *power = dev_get_drvdata(dev);
+
+	if (!power)
+		return 0;
+
+	/* Re-apply GPIO state so power is on before USB subsystem resumes.
+	 * rtl8733bu_power_update_gpio() includes the stability delay when power is on. */
+	rtl8733bu_power_update_gpio(power);
+	return 0;
+}
+
+static const struct dev_pm_ops rtl8733bu_power_pm_ops = {
+	.resume = rtl8733bu_power_resume,
+};
+
 static const struct of_device_id rtl8733bu_power_of_match[] = {
 	{ .compatible = "rockchip,rtl8733bu-power" },
 	{ }
@@ -147,10 +178,11 @@ static struct platform_driver rtl8733bu_power_driver = {
 	.driver = {
 		.name = "rtl8733bu-power",
 		.of_match_table = rtl8733bu_power_of_match,
+		.pm = pm_sleep_ptr(&rtl8733bu_power_pm_ops),
 	},
 };
 module_platform_driver(rtl8733bu_power_driver);
 
-MODULE_DESCRIPTION("RTL8733BU WiFi/BT power via rfkill (WLAN+BT); power off when both blocked");
+MODULE_DESCRIPTION("RTL8733BU WiFi/BT power via rfkill (WLAN+BT); power off when both blocked; delay on power-on/resume for stable USB reconnect");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("ROCKNIX");
