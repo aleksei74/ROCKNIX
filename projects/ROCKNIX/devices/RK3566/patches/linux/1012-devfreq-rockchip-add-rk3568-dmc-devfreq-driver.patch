@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: ROCKNIX <rocknix@rocknix.org>
+From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Sun, 23 Feb 2026 00:00:00 +0000
 Subject: [PATCH] devfreq: rockchip: add RK3568 DMC devfreq driver
 
@@ -16,12 +16,19 @@ DDR frequency scaling uses the BSP V2 SIP protocol with MCU-based DCF:
 This protocol follows the Rockchip BSP DMC driver behaviour (ATF
 version 0x102 or newer).
 
-Signed-off-by: ROCKNIX <rocknix@rocknix.org>
+Improvements over initial version, aligned with official BSP 6.6:
+- Enable DDR auto self-refresh (sr_idle_en) during suspend for lower
+  power, disable on resume.
+- Use regulator_set_voltage(target, INT_MAX) instead of exact matching,
+  matching BSP's regulator_set_voltage_triplet() robustness.
+- Rate-limit MCU completion timeout warnings to avoid log floods.
+
+Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  drivers/devfreq/Kconfig      |  12 +
  drivers/devfreq/Makefile     |   1 +
- drivers/devfreq/rk3568_dmc.c | 639 ++++++++++++++++++++++++++++++++++
- 3 files changed, 653 insertions(+)
+ drivers/devfreq/rk3568_dmc.c | 643 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 657 insertions(+)
  create mode 100644 drivers/devfreq/rk3568_dmc.c
 
 diff --git a/drivers/devfreq/Kconfig b/drivers/devfreq/Kconfig
@@ -63,7 +70,7 @@ new file mode 100644
 index 0000000..XXXXXXX
 --- /dev/null
 +++ b/drivers/devfreq/rk3568_dmc.c
-@@ -0,0 +1,639 @@
+@@ -0,0 +1,643 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * RK3566/RK3568 DMC (Dynamic Memory Controller) devfreq driver.
@@ -214,7 +221,7 @@ index 0000000..XXXXXXX
 +			   msecs_to_jiffies(wait_ctrl.wait_time_out_ms));
 +
 +	if (wait_ctrl.wait_flag != 0) {
-+		pr_warn("rk3568-dmc: MCU completion timed out, forcing POST_SET_RATE\n");
++		pr_err_ratelimited("rk3568-dmc: MCU completion timed out, forcing POST_SET_RATE\n");
 +		res = sip_smc_dram(SHARE_PAGE_TYPE_DDR, 0,
 +				   RK3568_SIP_DRAM_POST_SET_RATE);
 +		if (res.a0)
@@ -276,7 +283,7 @@ index 0000000..XXXXXXX
 +	/* Scaling up: raise voltage first */
 +	if (target_rate > old_rate) {
 +		err = regulator_set_voltage(dmcfreq->vdd_center,
-+					    target_volt, target_volt);
++					    target_volt, INT_MAX);
 +		if (err) {
 +			dev_err(dev, "Cannot set voltage %lu uV\n",
 +				target_volt);
@@ -290,14 +297,14 @@ index 0000000..XXXXXXX
 +			target_rate, err);
 +		if (target_rate > old_rate)
 +			regulator_set_voltage(dmcfreq->vdd_center,
-+					      dmcfreq->volt, dmcfreq->volt);
++					      dmcfreq->volt, INT_MAX);
 +		goto unlock;
 +	}
 +
 +	/* Scaling down: lower voltage after */
 +	if (target_rate < old_rate) {
 +		err = regulator_set_voltage(dmcfreq->vdd_center,
-+					    target_volt, target_volt);
++					    target_volt, INT_MAX);
 +		if (err)
 +			dev_err(dev, "Cannot set voltage %lu uV\n",
 +				target_volt);
@@ -404,11 +411,11 @@ index 0000000..XXXXXXX
 +			dev_pm_opp_put(opp);
 +			if (target_volt > dmcfreq->volt)
 +				regulator_set_voltage(dmcfreq->vdd_center,
-+						      target_volt, target_volt);
++						      target_volt, INT_MAX);
 +			rk3568_dmc_set_rate(dmcfreq->boot_rate);
 +			if (target_volt < dmcfreq->volt)
 +				regulator_set_voltage(dmcfreq->vdd_center,
-+						      target_volt, target_volt);
++						      target_volt, INT_MAX);
 +			dmcfreq->rate = dmcfreq->boot_rate;
 +			dmcfreq->volt = target_volt;
 +		}
@@ -416,6 +423,7 @@ index 0000000..XXXXXXX
 +
 +	if (ddr_psci_param) {
 +		ddr_psci_param->hz = 0;
++		ddr_psci_param->sr_idle_en = 1;
 +		ddr_psci_param->wait_flag1 = 0;
 +		ddr_psci_param->wait_flag0 = 0;
 +	}
@@ -439,6 +447,9 @@ index 0000000..XXXXXXX
 +	 * device resumes complete.
 +	 */
 +	dmcfreq->rate = clk_get_rate(dmcfreq->dmc_clk);
++
++	if (ddr_psci_param)
++		ddr_psci_param->sr_idle_en = 0;
 +
 +	dmcfreq->post_resume_scale_down = 3;
 +
