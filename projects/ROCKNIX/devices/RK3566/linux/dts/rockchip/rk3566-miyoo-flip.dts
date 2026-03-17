@@ -839,7 +839,8 @@
 		vcc6-supply = <&vccsys>;
 		vcc7-supply = <&vccsys>;
 		vcc8-supply = <&vccsys>;
-		/* vcc9 = vccsys to avoid fw_devlink cycle: pmic -> BOOST -> pmic (mainline 6.6+) */
+		/* vcc9 = input to PMIC BOOST block; must be vccsys (3.8V) not dcdc_boost
+		 * to avoid fw_devlink cycle pmic -> BOOST -> pmic (mainline 6.6+). */
 		vcc9-supply = <&vccsys>;
 
 		pwrkey {
@@ -1404,7 +1405,10 @@
 };
 
 /* SD slot 0 (primary):
- * (miyoo355_fw_20250509213001): max 150 MHz, UHS-I SDR12/SDR25 only (no SDR50). */
+ * (miyoo355_fw_20250509213001): max 150 MHz, UHS-I SDR12/SDR25 only (no SDR50).
+ * Slot 0 and slot 1 share vqmmc (vccio_sd); a single I/O voltage rail for both.
+ * Use cards that match voltage: both 3.3V (e.g. high-speed or SDR12/SDR25) or both
+ * 1.8V (UHS-I after switch). Mixing 3.3V and 1.8V cards in the two slots is unsafe. */
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
