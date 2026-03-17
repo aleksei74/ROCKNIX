@@ -1425,7 +1425,7 @@
 	status = "okay";
 };
 
-/* SD slot 1 (second): no UHS. Changed between miyoo355_fw_20241119 (SDR104) and miyoo355_fw_20250509 (no UHS). */
+/* SD slot 1 (second): no SDR50 — both slots share vqmmc (vccio_sd). Only one can use UHS 1.8V; primary slot gets SDR50. */
 &sdmmc1 {
 	max-frequency = <150000000>;
 	no-sdio;
@@ -1435,7 +1435,6 @@
 	disable-wp;
 	sd-uhs-sdr12;
 	sd-uhs-sdr25;
-	sd-uhs-sdr50;
 	vmmc-supply = <&vcc_sd2>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
