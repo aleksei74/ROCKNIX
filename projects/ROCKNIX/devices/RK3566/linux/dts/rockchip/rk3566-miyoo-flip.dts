@@ -766,24 +766,40 @@
 	status = "okay";
 };
 
-/* I2C0: PMIC (RK817 @0x20), CPU regulator (RK8600 @0x40). Stock same; 100 kHz for power (commit 601ccabc20). */
+/*
+ * I2C0: PMIC (RK817 @0x20), CPU regulator.
+ * There may be two board revisions: one with TCS4525 @0x1c, one with RK8600 @0x40.
+ * Stock firmware enables both; whichever is populated probes. This DTS uses RK8600;
+ * TCS4525 node is kept from stock (latest firmware) but disabled — enable it if your
+ * unit has the TCS4525 variant. 100 kHz for power (commit 601ccabc20).
+ */
 &i2c0 {
 	status = "okay";
-	/* 100 kHz Standard mode: minimal PMIC/regulator traffic, saves a little bus power vs 400 kHz; no UX impact. */
 	clock-frequency = <100000>;
 
-	/* TCS4525 at 0x1c: not populated on this board revision.
-	 * The Miyoo Flip V10 uses an RK8600 at 0x40 for the CPU rail.
-	 * Disabled to silence "fan53555-regulator 0-001c: Failed to get chip ID" error. */
+	/* CPU rail, TCS4525 variant @0x1c. From stock miyoo355_fw_20250509213001 DTB; disabled (this build uses RK8600). */
 	vdd_cpu: tcs4525@1c {
 		compatible = "tcs,tcs4525";
 		reg = <0x1c>;
+		vin-supply = <&vccsys>;
+		regulator-compatible = "fan53555-reg";
+		regulator-name = "vdd_cpu";
+		regulator-min-microvolt = <712500>;
+		regulator-max-microvolt = <1390000>;
+		regulator-init-microvolt = <900000>;
+		regulator-ramp-delay = <2300>;
+		fcs,suspend-voltage-selector = <1>;
+		regulator-boot-on;
+		regulator-always-on;
 		status = "disabled";
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
 	};
 
-    /* CPU rail: fan53555 driver probes this (RK8600 shares code). Must set fcs,suspend-voltage-selector
+    /* CPU rail, RK8600 variant @0x40. fan53555 driver probes this (RK8600 shares code). Must set fcs,suspend-voltage-selector
      * so driver uses correct VSEL; wrong value can drop CPU rail and hang right after "FAN53555 Detected!". */
-    vdd_cpu_rk860: rk8600@40{
+    vdd_cpu_rk860: rk8600@40 {
         compatible = "rockchip,rk8600";
         reg = <0x40>;
         vin-supply = <&vccsys>;
@@ -796,6 +812,7 @@
         fcs,suspend-voltage-selector = <1>;  /* driver only reads this property name; <1> = safe for RK3566 */
         regulator-boot-on;
         regulator-always-on;
+        status = "okay";
         regulator-state-mem {
             regulator-off-in-suspend;
         };
@@ -1192,7 +1209,7 @@
 		};
 	};
 
-	/* USB host 5V enable (GPIO4_PC5). Pad _d per datasheet → pull_down = 5V off when not driven. */
+	/* USB host 5V enable (GPIO4_PC5). Stock 2025 uses pull_none (0x100); we use pull_down so 5V is off when not driven. */
 	usb {
 		vcc5v0_host_en: vcc5v0-host-en {
 			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_down>;
@@ -1200,14 +1217,14 @@
 
 	};
 
-	/* SD slot 0/1 power enable GPIOs (active-low). */
+	/* SD slot 0/1 power enable (active-low). Stock 2025 uses pcfg 0x109 for both; we use pull_down for safe default when not driven. */
 	vcc-sd {
 		vcc_sd_h: vcc-sd-h {
 			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
 		vcc_sd2_h: vcc-sd2-h {
 			rockchip,pins = <2 RK_PB1 RK_FUNC_GPIO &pcfg_pull_down>;
-		};		
+		};
 	};
 
 	/*
