@@ -1404,7 +1404,7 @@
 };
 
 /* SD slot 0 (primary):
- * (miyoo355_fw_20250509213001): max 150 MHz, UHS-I SDR12/SDR25 only (no SDR50).
+ * (miyoo355_fw_20250509213001): max 150 MHz, UHS-I SDR12/SDR25 only (no SDR50). */
 &sdmmc0 {
 	max-frequency = <150000000>;
 	no-sdio;
