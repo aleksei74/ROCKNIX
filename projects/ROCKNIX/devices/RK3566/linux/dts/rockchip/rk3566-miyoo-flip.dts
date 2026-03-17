@@ -635,8 +635,9 @@
 	 * Backlight 800 Hz; stock "display mode" is userspace (DRM hue/sat, backlight). */
 	panel: panel@0 {
 		compatible = "rocknix,generic-dsi";
+		/* flags=0xa03 matches stock 2025 DTB; use 0xe03 if you need VIDEO_HSE */
 		panel_description =
-			"G size=68,121 delays=0,160,200,200,20 format=rgb888 lanes=2 flags=0xe03",
+			"G size=68,121 delays=0,160,200,200,20 format=rgb888 lanes=2 flags=0xa03",
 
 			"M clock=32000 horizontal=640,150,120,120 vertical=480,20,6,12 default=1", /* stock BSP ~59.94 Hz 518 lines */
 			"M clock=30900 horizontal=640,150,120,120 vertical=480,20,88,12",         /* PAL: 600 lines, 50 Hz; same H as stock (1030) to reduce flicker */
@@ -663,6 +664,7 @@
 			"I seq=e307070b0b0b0b00000000ff04c010",
 			"I seq=e9c810020000b0b11131232880b0b127080004020000000004020000008888ba60240888888888888888ba713518888888888800000001000000000000000000",
 			"I seq=ea970a820203070000000000008188ba17538888888888888088ba064288888888888823000002a500000000000000000000000000000000000000000000",
+			"I seq=a500",   /* stock 2025: explicit DCS 0xa5 0x00 before EF */
 			"I seq=efffff01";
 		reg = <0>;
 		pinctrl-names = "default";
