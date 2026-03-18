@@ -362,9 +362,9 @@ and keyboard to modify settings.</desc>
         <image>./images/calibrate-gamepad.svg</image>
     </game>
     <game>
-        <path>./Save Miyoo Joystick Cal.sh</path>
-        <name>Save Miyoo Joystick Cal</name>
-        <desc>Saves the current joystick calibration so it persists across reboots. The Miyoo Flip joysticks auto-calibrate during use — this tool just snapshots the learned values. To reset calibration, delete /storage/.config/miyoo-serial-joypad and restart.</desc>
+        <path>./Miyoo Stick Autocal Save.sh</path>
+        <name>Miyoo Stick Autocal Save</name>
+        <desc>A script to save autocalibration so it persists across reboots. To reset delete /STORAGE/.config/miyoo-serial-joypad and reboot.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>

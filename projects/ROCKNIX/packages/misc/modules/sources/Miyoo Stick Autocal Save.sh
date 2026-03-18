@@ -7,7 +7,7 @@
 SYSFS_DIR="/sys/devices/platform/rocknix-singleadc-joypad"
 CAL_DIR="/storage/.config/miyoo-serial-joypad"
 
-# Red foreground (works on Linux console and most terminals)
+# Red only for ASCII logo
 R=$'\033[31m'
 N=$'\033[0m'
 
@@ -24,7 +24,7 @@ show_logo() {
 
 exit_after_delay() {
   echo ""
-  echo "${R}Exiting in 5 seconds...${N}"
+  echo "Exiting in 5 seconds..."
   sleep 5
 }
 
@@ -32,21 +32,20 @@ clear
 show_logo
 
 if [ ! -f "${SYSFS_DIR}/miyoo_cal_left" ]; then
-  echo "${R}This tool is only for the Miyoo Flip.${N}"
-  echo "${R}This device does not use the Miyoo serial joypad driver.${N}"
+  echo "This tool is only for the Miyoo Flip."
+  echo "This device does not use the Miyoo serial joypad driver."
   exit_after_delay
   exit 0
 fi
 
-echo "${R}Joystick Calibration${N}"
+echo "Stick autocalibration save"
 echo ""
-echo "${R}The joysticks auto-calibrate during use.${N}"
-echo "${R}This tool saves the current values so${N}"
-echo "${R}they persist across reboots.${N}"
+echo "Sticks auto-calibrate during use. This saves current values"
+echo "so they persist across reboots."
 echo ""
-echo "${R}To reset: delete the folder${N}"
-echo "${R}  ${CAL_DIR}${N}"
-echo "${R}and restart the device.${N}"
+echo "To reset: delete the folder"
+echo "  ${CAL_DIR}"
+echo "and restart the device."
 echo ""
 
 mkdir -p "${CAL_DIR}"
@@ -55,7 +54,7 @@ for stick in left right; do
   sysfs="${SYSFS_DIR}/miyoo_cal_${stick}"
   if [ -f "${sysfs}" ]; then
     cat "${sysfs}" > "${CAL_DIR}/cal_${stick}"
-    echo "${R}Saved ${stick} stick: $(cat "${sysfs}")${N}"
+    echo "Saved ${stick} stick: $(cat "${sysfs}")"
   fi
 done
 
@@ -67,5 +66,5 @@ for param in expand_margin expand_hits; do
 done
 
 echo ""
-echo "${R}Calibration saved to ${CAL_DIR}${N}"
+echo "Calibration saved to ${CAL_DIR}"
 exit_after_delay

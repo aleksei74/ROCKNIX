@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
 # Miyoo Flip: restore saved joystick calibration to driver sysfs at boot.
+# Save via Tools module: Miyoo Stick Autocal Save.sh
 # Waits for /storage in the background so we don't block other quirks.
 
 SYSFS="/sys/devices/platform/rocknix-singleadc-joypad/miyoo_cal_left"
