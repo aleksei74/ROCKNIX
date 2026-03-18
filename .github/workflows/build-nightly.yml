@@ -3,11 +3,6 @@ name: Build
 on:
   workflow_dispatch:
     inputs:
-      release:
-        description: 'Official release'
-        required: false
-        default: false
-        type: boolean
       RK3326:
         description: 'RK3326'
         required: false
