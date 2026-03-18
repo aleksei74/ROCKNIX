@@ -1,0 +1,30 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
+# Miyoo Flip: restore saved joystick calibration to driver sysfs at boot.
+# Waits for /storage in the background so we don't block other quirks.
+
+SYSFS="/sys/devices/platform/rocknix-singleadc-joypad/miyoo_cal_left"
+[ -f "${SYSFS}" ] || exit 0
+
+SYSFS_DIR="/sys/devices/platform/rocknix-singleadc-joypad"
+CAL_DIR="/storage/.config/miyoo-serial-joypad"
+
+(
+  i=0
+  while [ $i -lt 30 ]; do
+    mountpoint -q /storage 2>/dev/null && break
+    sleep 1
+    i=$((i + 1))
+  done
+
+  for stick in left right; do
+    [ -f "${CAL_DIR}/cal_${stick}" ] && \
+      cat "${CAL_DIR}/cal_${stick}" > "${SYSFS_DIR}/miyoo_cal_${stick}" 2>/dev/null
+  done
+
+  for param in expand_margin expand_hits; do
+    [ -f "${CAL_DIR}/${param}" ] && \
+      cat "${CAL_DIR}/${param}" > "${SYSFS_DIR}/miyoo_${param}" 2>/dev/null
+  done
+) &

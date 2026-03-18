@@ -362,6 +362,18 @@ and keyboard to modify settings.</desc>
         <image>./images/calibrate-gamepad.svg</image>
     </game>
     <game>
+        <path>./Save Miyoo Joystick Cal.sh</path>
+        <name>Save Miyoo Joystick Cal</name>
+        <desc>Saves the current joystick calibration so it persists across reboots. The Miyoo Flip joysticks auto-calibrate during use — this tool just snapshots the learned values. To reset calibration, delete /storage/.config/miyoo-serial-joypad and restart.</desc>
+        <developer>ROCKNIX</developer>
+        <publisher>ROCKNIX</publisher>
+        <rating>5.0</rating>
+        <releasedate>2026</releasedate>
+        <genre>Tool</genre>
+        <players>1</players>
+        <image>./images/calibrate-gamepad.svg</image>
+    </game>
+    <game>
         <path>./Mount NFS.sh</path>
         <name>Mount NFS</name>
         <desc>Mounts an NFS share at a location defined in /storage/.nfs-mount and creates a merged storage with the games-internal card as the upper/writeable location</desc>
