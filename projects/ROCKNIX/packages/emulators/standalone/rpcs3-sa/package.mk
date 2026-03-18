@@ -7,8 +7,8 @@ PKG_SITE="https://github.com/RPCS3/rpcs3-binaries-linux"
 PKG_DEPENDS_TARGET="toolchain libevdev SDL2 qt6 mesa libcom-err"
 PKG_LONGDESC="PS3 Emulator appimage"
 PKG_TOOLCHAIN="manual"
-PKG_VERSION="16277576089e1733987deeac54b627b25d67d800"
-PKG_REL_VERSION="0.0.40-18950-16277576"
+PKG_VERSION="6523afa69a74bb60b0ffd994dd962a101c4d3ae3"
+PKG_REL_VERSION="0.0.40-19035-6523afa6"
 
 case ${TARGET_ARCH} in
   x86_64)
