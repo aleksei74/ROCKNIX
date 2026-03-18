@@ -261,7 +261,7 @@
 			240 241 242 243 244 245 246 247
 			248 249 250 251 252 253 254 255
 		>;
-		default-brightness-level = <200>;
+		default-brightness-level = <120>;
 	};
 
 	/* WiFi/BT power control: RTL8733BU combo chip, USB-attached.
