@@ -345,7 +345,10 @@
 	battery: battery {
 		compatible = "simple-battery";
 		charge-full-design-microamp-hours = <3000000>;
-		charge-term-current-microamp = <300000>;
+		/* rk817_charger: CHRG_TERM_ANA_SEL 0x00 = 150 mA (gentlest). Softer
+		 * end-of-charge than 300 mA (0x02); CV lasts longer so coulomb counter
+		 * tracks better before CHARGE_FINISH — helps degraded / smaller cells. */
+		charge-term-current-microamp = <150000>;
 		constant-charge-current-max-microamp = <1800000>;
 		constant-charge-voltage-max-microvolt = <4250000>;
 		factory-internal-resistance-micro-ohms = <100000>;
