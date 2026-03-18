@@ -22,7 +22,7 @@ make_target() {
        CONFIG_POWER_SAVING=y \
        CONFIG_IPS_MODE=1 \
        CONFIG_LPS_MODE=1 \
-       CONFIG_USB_AUTOSUSPEND=y \
+       CONFIG_USB_AUTOSUSPEND=n \
        CONFIG_MP_INCLUDED=n \
        CONFIG_P2P=n \
        CONFIG_TDLS=n
