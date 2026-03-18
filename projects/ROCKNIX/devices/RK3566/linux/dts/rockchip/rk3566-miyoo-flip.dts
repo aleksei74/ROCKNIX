@@ -337,10 +337,10 @@
 
 	/*
 	 * simple-battery: 3 Ah Li-ion. OCV 3.2–4.25 V, gentle charge 4.25 V / 1.8 A max.
-	 * OCV curve from 2025 firmware (miyoo355_fw_20250509213001) — 3.2 V = 0%,
-	 * 4.25 V = 100%, 20 points 3426–4057 mV in between (22 points). Fixes SOC
-	 * jump after power-off (driver re-inits from boot voltage when off >30 min).
-	 * Sleep enter 150 mA (charger node).
+	 * OCV curve from 2025 firmware (miyoo355_fw_20250509213001) — 4.25 V = 100%,
+	 * 3.2 V = 0%, 20 points 4057–3426 mV in between (22 points). Table MUST be
+	 * descending (power_supply_ocv2cap_simple requires it). Sleep enter 150 mA
+	 * (charger node).
 	 */
 	battery: battery {
 		compatible = "simple-battery";
@@ -354,11 +354,11 @@
 
 		ocv-capacity-celsius = <20>;
 		ocv-capacity-table-0 =
-			<3200000 0>,   <3426000 5>,   <3469000 10>,  <3500000 15>,  <3525000 20>,
-			<3547000 25>,  <3566000 30>,  <3587000 35>,  <3609000 40>,  <3638000 45>,
-			<3676000 50>,  <3722000 55>,  <3773000 60>,  <3816000 65>,  <3849000 70>,
-			<3883000 75>,  <3930000 80>,  <3967000 85>,  <3998000 90>,  <4057000 95>,
-			<4250000 100>;
+			<4250000 100>, <4057000 95>,  <3998000 90>,  <3967000 85>,  <3930000 80>,
+			<3883000 75>,  <3849000 70>,  <3816000 65>,  <3773000 60>,  <3722000 55>,
+			<3676000 50>,  <3638000 45>,  <3609000 40>,  <3587000 35>,  <3566000 30>,
+			<3547000 25>,  <3525000 20>,  <3500000 15>,  <3469000 10>,  <3426000 5>,
+			<3200000 0>;
 	};
 
 	/* Volume keys (GPIO) and lid (hall sensor). Stock has vol + lid in gpio-keys-polled. */
