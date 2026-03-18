@@ -376,6 +376,7 @@
 
 		button-volup {
 			autorepeat;
+			debounce-interval = <10>;	
 			gpios = <&gpio3 RK_PA7 GPIO_ACTIVE_LOW>;
 			label = "Volume Up";
 			linux,code = <KEY_VOLUMEUP>;
@@ -383,6 +384,7 @@
 
 		button-voldown {
 			autorepeat;
+			debounce-interval = <10>;
 			gpios = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
 			label = "Volume Down";
 			linux,code = <KEY_VOLUMEDOWN>;
@@ -394,7 +396,7 @@
 			linux,input-type = <EV_SW>;
 			linux,code = <SW_LID>;
 			wakeup-source;
-			debounce-interval = <500>;
+			debounce-interval = <1500>;	/*BSP Uses hall-mh248 with 10ms*/
 		};
 	};
 
