@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: ROCKNIX <rocknix@rocknix.org>
+From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Mon, 17 Mar 2026 23:30:00 +0100
 Subject: [PATCH] miyoo-serial: improved joystick with frame sync, report
  threshold, miyoo-* DTS properties
@@ -30,6 +30,9 @@ the stock miyoo_inputd behaviour:
    miyoo-flat, miyoo-threshold, miyoo-{lx,ly,rx,ry}-{p,n}-tuning).
 
 6. 100 calibration frames (was 50); removed static float deadzone.
+
+Attribution: serial framing, report threshold, and deadzone handling
+aligned with the stock Miyoo Flip joystick input path.
 
 DTS properties (Miyoo serial path):
   miyoo-deadzone    absolute deadzone in [-32760..32760] range
