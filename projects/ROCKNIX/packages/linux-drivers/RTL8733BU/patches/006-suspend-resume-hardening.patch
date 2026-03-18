@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Zetarancio <zetarancio@users.noreply.github.com>
 Date: Mon, 17 Mar 2026 00:00:00 +0100
-Subject: [PATCH] net: rtl8733bu: suspend/resume and USB RX hardening
+Subject: [PATCH] net: rtl8733bu: suspend/resume hardening
 
 1. Add dedicated rtw_reset_resume() handler — after a USB bus reset
    the firmware has lost all state.  The previous code aliased
@@ -14,20 +14,15 @@ Subject: [PATCH] net: rtl8733bu: suspend/resume and USB RX hardening
    not responding during a DVFS transition), the unbounded
    while-loop blocks the kernel suspend thread indefinitely.
 
-3. Add 2 ms backoff delay before USB RX URB resubmit on transient
-   errors (-EPROTO, -EILSEQ, -ETIME, -ECOMM, -EOVERFLOW) — without
-   this the driver immediately retries in a tight loop, wasting CPU
-   and potentially worsening USB bus contention during DVFS/suspend
-   transitions on embedded SoCs (e.g. RK3566).  Both the
-   CONFIG_USE_USB_BUFFER_ALLOC_RX and non-alloc code paths are
-   patched.
+Note: A prior revision added rtw_msleep_os() before RX URB resubmit in
+usb_ops_linux.c; that runs from URB completion (softirq) context and
+must not sleep — it caused panics/freezes when toggling WiFi.
 
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
- os_dep/linux/usb_intf.c       | 19 +++++++++++++++++++
- os_dep/linux/os_intfs.c       | 13 +++++++++++--
- os_dep/linux/usb_ops_linux.c  |  2 ++
- 3 files changed, 32 insertions(+), 2 deletions(-)
+ os_dep/linux/usb_intf.c | 19 +++++++++++++++++++
+ os_dep/linux/os_intfs.c | 13 +++++++++++--
+ 2 files changed, 30 insertions(+), 2 deletions(-)
 
 --- a/os_dep/linux/usb_intf.c
 +++ b/os_dep/linux/usb_intf.c
@@ -97,21 +92,3 @@ Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
  
  #ifdef CONFIG_IOL_READ_EFUSE_MAP
  	if (!padapter->bup) {
---- a/os_dep/linux/usb_ops_linux.c
-+++ b/os_dep/linux/usb_ops_linux.c
-@@ -825,6 +825,7 @@
- 				pHalData->srestpriv.Wifi_Error_Status = USB_READ_PORT_FAIL;
- 			}
- 			#endif
-+			rtw_msleep_os(2);
- 			rtw_read_port(padapter, precvpriv->ff_hwaddr, 0, (unsigned char *)precvbuf);
- 			break;
- 		case -EINPROGRESS:
-@@ -1026,6 +1027,7 @@
- 				pHalData->srestpriv.Wifi_Error_Status = USB_READ_PORT_FAIL;
- 			}
- 			#endif
-+			rtw_msleep_os(2);
- 			rtw_read_port(padapter, precvpriv->ff_hwaddr, 0, (unsigned char *)precvbuf);
- 			break;
- 		case -EINPROGRESS:
