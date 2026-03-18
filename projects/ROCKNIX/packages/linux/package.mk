@@ -32,7 +32,7 @@ case ${DEVICE} in
     ;;
   *)
     case ${DEVICE} in
-      SM8250|SM8550|SM8650|H700)
+      SM8250|SM8550|SM8650|SM8750|H700)
         PKG_VERSION="6.19.5"
         PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
         ;;
