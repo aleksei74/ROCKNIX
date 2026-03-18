@@ -221,19 +221,20 @@
 	 *   25000 Hz  period=40000 ns   brightness 45-90
 	 *   40000 Hz  period=25000 ns   brightness 65-115  (stock default in MainUI)
 	 * DTS sets the boot default; runtime switching via sysfs period write.
-	 * Linear brightness-levels[i]=i so ROCKNIX ES (raw=floor(percent/100*255))
-	 * tracks full-scale PWM: e.g. 5% UI -> raw 12-13 -> PWM 12-13/255 (~5%). */
+	 * Brightness index 0 disables the backlight; PWM 2/255 is the minimum that
+	 * lights this panel. */
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm4 0 1250000 0>;
 		brightness-levels = <
-			  0   1   2   3   4   5   6   7
-			  8   9  10  11  12  13  14  15
-			 16  17  18  19  20  21  22  23
-			 24  25  26  27  28  29  30  31
-			 32  33  34  35  36  37  38  39
-			 40  41  42  43  44  45  46  47
-			 48  49  50  51  52  53  54  55
+			  0   2   2   2   2   2   2   2
+			  2   2   2   2   2   2   2   2
+			  2   2   2   2   2   2   2   2
+			  2  15  16  17  18  19  20  21
+			 22  23  24  25  26  27  28  29
+			 30  31  32  33  34  35  36  37
+			 38  39  40  41  42  43  44  46
+			 47  48  49  50  52  53  54  55
 			 56  57  58  59  60  61  62  63
 			 64  65  66  67  68  69  70  71
 			 72  73  74  75  76  77  78  79
