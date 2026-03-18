@@ -110,12 +110,11 @@
 		 * Axis range [-32760..32760]; deadzone is absolute.
 		 * 4914 = ~15% radial deadzone.
 		 * Tuning 100 = no scaling; >100 amplifies, <100 attenuates.
-		 * Smoothing: EMA alpha 0-256; 256 = off, lower = heavier.
-		 * Default 160 (~10 ms time-constant at 160 fps). */
+		 * Threshold: min axis change to report (default 128, 0 = off). */
 		miyoo-deadzone = <4914>;
 		miyoo-fuzz = <32>;
 		miyoo-flat = <32>;
-		miyoo-smoothing = <160>;
+		miyoo-threshold = <128>;
 
 		miyoo-lx-p-tuning = <90>;
 		miyoo-lx-n-tuning = <90>;

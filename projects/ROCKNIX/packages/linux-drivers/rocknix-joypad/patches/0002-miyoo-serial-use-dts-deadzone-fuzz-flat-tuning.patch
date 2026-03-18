@@ -1,39 +1,41 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: ROCKNIX <rocknix@rocknix.org>
-Date: Mon, 17 Mar 2026 23:00:00 +0100
-Subject: [PATCH] miyoo-serial: improved joystick with frame sync, EMA
- smoothing, miyoo-* DTS properties
+Date: Mon, 17 Mar 2026 23:30:00 +0100
+Subject: [PATCH] miyoo-serial: improved joystick with frame sync, report
+ threshold, miyoo-* DTS properties
 
-Major improvements to the Miyoo serial joystick path:
+Improvements to the Miyoo serial joystick path, closely matching
+the stock miyoo_inputd behaviour:
 
-1. Byte-by-byte frame synchronisation (miyoo_read_frame):
+1. Simple radial deadzone (no remapping):
+   Zero values inside the deadzone without rescaling the output
+   range.  The previous remapping formula amplified quantisation
+   noise from the 8-bit MCU ADC near the deadzone boundary.
+
+2. Report threshold (miyoo-threshold DTS property, default 128):
+   Only update a reported axis value when the change from the last
+   report exceeds the threshold.  Stock miyoo_inputd uses
+   TRIMUI_AXIS_RANGE >> 8 = 128.  Suppresses jitter without
+   adding latency.
+
+3. Byte-by-byte frame synchronisation (miyoo_read_frame):
    Auto-recovers from UART desync instead of permanently misaligning
    on partial reads.
 
-2. Exponential Moving Average (EMA) smoothing:
-   The Miyoo MCU sends axis data as single bytes (0-255), giving only
-   ~115 usable steps per axis.  A configurable EMA (miyoo-smoothing
-   DTS property, 0-256, default 160) smooths calibrated values before
-   deadzone processing.
-
-3. VMIN=0 / VTIME=1 for non-blocking TTY reads:
+4. VMIN=0 / VTIME=1 for non-blocking TTY reads:
    Allows kthread_should_stop() and the inactivity timer to be checked
    periodically, enabling clean shutdown and reliable recovery.
 
-4. Miyoo-specific DTS properties (miyoo-deadzone, miyoo-fuzz,
-   miyoo-flat, miyoo-{lx,ly,rx,ry}-{p,n}-tuning, miyoo-smoothing)
-   instead of reusing the shared button-adc-* / abs_*-tuning names.
+5. Miyoo-specific DTS properties (miyoo-deadzone, miyoo-fuzz,
+   miyoo-flat, miyoo-threshold, miyoo-{lx,ly,rx,ry}-{p,n}-tuning).
 
-5. Calibration frames increased from 50 to 100 for a more accurate
-   zero-point determination.
-
-6. Removed the static float miyoo_deadzone_ratio.
+6. 100 calibration frames (was 50); removed static float deadzone.
 
 DTS properties (Miyoo serial path):
   miyoo-deadzone    absolute deadzone in [-32760..32760] range
   miyoo-fuzz        input fuzz for ABS params
   miyoo-flat        input flat for ABS params
-  miyoo-smoothing   EMA alpha 0-256 (256 = off, default 160)
+  miyoo-threshold   report change threshold (default 128, 0 = off)
   miyoo-{lx,ly,rx,ry}-{p,n}-tuning   per-axis scaling (100 = unity)
 ---
  rocknix-singleadc-joypad.c | 285 ++++++++++++++++++++++++++-----------
@@ -55,25 +57,29 @@ DTS properties (Miyoo serial path):
  
  struct miyoo_cal {
  	int x_min;
-@@ -116,6 +113,17 @@
+@@ -116,7 +113,20 @@
  	struct miyoo_cal left_cal;
  	struct miyoo_cal right_cal;
  
+-	/* We keep the last parsed values for x,y each stick */
 +	/* Per-axis tuning (percent), same as ADC path */
 +	int lx_tuning_p, lx_tuning_n;
 +	int ly_tuning_p, ly_tuning_n;
 +	int rx_tuning_p, rx_tuning_n;
 +	int ry_tuning_p, ry_tuning_n;
 +
-+	/* EMA smoothing state */
-+	int smooth_lx, smooth_ly;
-+	int smooth_rx, smooth_ry;
-+	int smoothing_alpha;
++	/* Report threshold: only update when change exceeds this */
++	int report_threshold;
 +
- 	/* We keep the last parsed values for x,y each stick */
++	/* Last reported values (for threshold comparison) */
++	int last_lx, last_ly;
++	int last_rx, last_ry;
++
++	/* Values reported to input subsystem */
  	int left_x;
  	int left_y;
-@@ -153,8 +161,8 @@
+ 	int right_x;
+@@ -153,8 +163,8 @@
  	newt.c_cflag = B9600 | CS8 | CREAD | CLOCAL;
  	newt.c_lflag = 0;
  	memset(newt.c_cc, 0, NCCS);
@@ -84,7 +90,7 @@ DTS properties (Miyoo serial path):
  
  	/*
  	 * This bypasses the userland copy checks, because we are
-@@ -945,13 +953,23 @@
+@@ -945,13 +955,23 @@
  	 */
  	if (joypad->use_miyoo_serial) {
  		input_set_abs_params(input, ABS_X,
@@ -112,7 +118,7 @@ DTS properties (Miyoo serial path):
  	}
  
  	/* Rumble setup */
-@@ -1053,46 +1071,122 @@
+@@ -1053,46 +1073,118 @@
  	return result;
  }
  
@@ -131,26 +137,22 @@ DTS properties (Miyoo serial path):
 -	if (magSq <= deadSq) {
 -		*px = 0;
 -		*py = 0;
-+	int mag;
 +
-+	/* Scaled radial deadzone, identical algorithm to joypad_adc_check() */
++	/* Simple radial deadzone — zero inside, no remapping.
++	 * Matches stock miyoo_inputd behaviour: compare squared
++	 * magnitude against squared deadzone to avoid int_sqrt. */
 +	if (joypad->bt_adc_deadzone) {
-+		mag = int_sqrt((unsigned long)((long long)x * x +
-+					       (long long)y * y));
-+		if (mag <= joypad->bt_adc_deadzone) {
-+			x = 0;
-+			y = 0;
-+		} else {
-+			x = (((MIYOO_AXIS_MAX * x) / mag) *
-+			     (mag - joypad->bt_adc_deadzone)) /
-+			    (MIYOO_AXIS_MAX - joypad->bt_adc_deadzone);
-+			y = (((MIYOO_AXIS_MAX * y) / mag) *
-+			     (mag - joypad->bt_adc_deadzone)) /
-+			    (MIYOO_AXIS_MAX - joypad->bt_adc_deadzone);
++		long long mag_sq = (long long)x * x + (long long)y * y;
++		long long dz = joypad->bt_adc_deadzone;
++
++		if (mag_sq <= dz * dz) {
++			*px = 0;
++			*py = 0;
++			return;
 +		}
  	}
 +
-+	/* Tuning (percentage scaling), identical to joypad_adc_check() */
++	/* Tuning (percentage scaling) */
 +	if (tuning_xn && x < 0)
 +		x = ADC_DATA_TUNING(x, tuning_xn);
 +	if (tuning_xp && x > 0)
@@ -260,7 +262,7 @@ DTS properties (Miyoo serial path):
  	}
  
  	if (framesRead == 0) {
-@@ -1112,38 +1206,57 @@
+@@ -1112,37 +1204,64 @@
  		joypad->miyoo.right_cal.x_zero = avgXR;
  		joypad->miyoo.right_cal.y_zero = avgYR;
  	}
@@ -275,7 +277,7 @@ DTS properties (Miyoo serial path):
 -	if (frame[0] != MIYOO_MAGIC_START || frame[5] != MIYOO_MAGIC_END) {
 +	int rawYL, rawXL, rawYR, rawXR;
 +	int lx, ly, rx, ry;
-+	int alpha;
++	int thr;
 +
 +	if (frame[0] != MIYOO_MAGIC_START || frame[5] != MIYOO_MAGIC_END)
  		return;
@@ -298,11 +300,6 @@ DTS properties (Miyoo serial path):
 -		miyoo_apply_deadzone(&lx, &ly);
 -		miyoo_apply_deadzone(&rx, &ry);
 -
--		joypad->miyoo.left_x  = lx;
--		joypad->miyoo.left_y  = ly;
--		joypad->miyoo.right_x = rx;
--		joypad->miyoo.right_y = ry;
--	}
 +	rawYL = frame[1];
 +	rawXL = frame[2];
 +	rawYR = frame[3];
@@ -313,20 +310,6 @@ DTS properties (Miyoo serial path):
 +	rx = miyoo_calibrate_axis_x(&joypad->miyoo.right_cal, rawXR);
 +	ry = miyoo_calibrate_axis_y(&joypad->miyoo.right_cal, rawYR);
 +
-+	/* EMA smoothing on calibrated values (before deadzone).
-+	 * alpha 256 = no smoothing; lower = heavier smoothing. */
-+	alpha = joypad->miyoo.smoothing_alpha;
-+	if (alpha < 256) {
-+		lx = (alpha * lx + (256 - alpha) * joypad->miyoo.smooth_lx) >> 8;
-+		ly = (alpha * ly + (256 - alpha) * joypad->miyoo.smooth_ly) >> 8;
-+		rx = (alpha * rx + (256 - alpha) * joypad->miyoo.smooth_rx) >> 8;
-+		ry = (alpha * ry + (256 - alpha) * joypad->miyoo.smooth_ry) >> 8;
-+	}
-+	joypad->miyoo.smooth_lx = lx;
-+	joypad->miyoo.smooth_ly = ly;
-+	joypad->miyoo.smooth_rx = rx;
-+	joypad->miyoo.smooth_ry = ry;
-+
 +	miyoo_apply_deadzone_tuning(joypad, &lx, &ly,
 +		joypad->miyoo.lx_tuning_p, joypad->miyoo.lx_tuning_n,
 +		joypad->miyoo.ly_tuning_p, joypad->miyoo.ly_tuning_n);
@@ -334,14 +317,35 @@ DTS properties (Miyoo serial path):
 +		joypad->miyoo.rx_tuning_p, joypad->miyoo.rx_tuning_n,
 +		joypad->miyoo.ry_tuning_p, joypad->miyoo.ry_tuning_n);
 +
-+	joypad->miyoo.left_x  = joypad->invert_absx  ? -lx : lx;
-+	joypad->miyoo.left_y  = joypad->invert_absy  ? -ly : ly;
-+	joypad->miyoo.right_x = joypad->invert_absrx ? -rx : rx;
-+	joypad->miyoo.right_y = joypad->invert_absry ? -ry : ry;
++	if (joypad->invert_absx)  lx = -lx;
++	if (joypad->invert_absy)  ly = -ly;
++	if (joypad->invert_absrx) rx = -rx;
++	if (joypad->invert_absry) ry = -ry;
++
++	/* Report threshold: only update stored value when the change
++	 * exceeds the threshold.  Matches stock miyoo_inputd which
++	 * uses TRIMUI_AXIS_RANGE >> 8 (= 128).  Suppresses jitter
++	 * from the 8-bit MCU ADC without adding any latency. */
++	thr = joypad->miyoo.report_threshold;
++	if (abs(lx - joypad->miyoo.last_lx) > thr) {
+ 		joypad->miyoo.left_x  = lx;
++		joypad->miyoo.last_lx = lx;
++	}
++	if (abs(ly - joypad->miyoo.last_ly) > thr) {
+ 		joypad->miyoo.left_y  = ly;
++		joypad->miyoo.last_ly = ly;
++	}
++	if (abs(rx - joypad->miyoo.last_rx) > thr) {
+ 		joypad->miyoo.right_x = rx;
++		joypad->miyoo.last_rx = rx;
++	}
++	if (abs(ry - joypad->miyoo.last_ry) > thr) {
+ 		joypad->miyoo.right_y = ry;
++		joypad->miyoo.last_ry = ry;
+ 	}
  }
  
- /* 
-@@ -1187,43 +1300,21 @@
+@@ -1187,43 +1306,21 @@
  	dev_info(joypad->dev, "Starting Miyoo serial read loop.\n");
  
  	while (!kthread_should_stop()) {
@@ -393,7 +397,7 @@ DTS properties (Miyoo serial path):
  			}
  		}
  	}
-@@ -1366,6 +1457,64 @@
+@@ -1366,6 +1463,66 @@
  		joypad->miyoo.left_y  = 0;
  		joypad->miyoo.right_x = 0;
  		joypad->miyoo.right_y = 0;
@@ -406,6 +410,18 @@ DTS properties (Miyoo serial path):
 +					&joypad->bt_adc_fuzz);
 +		device_property_read_u32(dev, "miyoo-flat",
 +					&joypad->bt_adc_flat);
++
++		/* Report threshold: suppress jitter by only reporting
++		 * when change exceeds this value.  Stock uses 128
++		 * (AXIS_RANGE >> 8).  0 = report every frame. */
++		if (device_property_read_u32(dev, "miyoo-threshold",
++					     &joypad->miyoo.report_threshold))
++			joypad->miyoo.report_threshold = 128;
++
++		joypad->miyoo.last_lx = 0;
++		joypad->miyoo.last_ly = 0;
++		joypad->miyoo.last_rx = 0;
++		joypad->miyoo.last_ry = 0;
 +
 +		/* Per-axis tuning from DTS (default 100 = no scaling) */
 +		if (device_property_read_u32(dev, "miyoo-lx-p-tuning",
@@ -433,21 +449,11 @@ DTS properties (Miyoo serial path):
 +					     &joypad->miyoo.ry_tuning_n))
 +			joypad->miyoo.ry_tuning_n = 100;
 +
-+		/* EMA smoothing alpha from DTS (default 160, 256 = off) */
-+		if (device_property_read_u32(dev, "miyoo-smoothing",
-+					     &joypad->miyoo.smoothing_alpha))
-+			joypad->miyoo.smoothing_alpha = 160;
-+
-+		joypad->miyoo.smooth_lx = 0;
-+		joypad->miyoo.smooth_ly = 0;
-+		joypad->miyoo.smooth_rx = 0;
-+		joypad->miyoo.smooth_ry = 0;
-+
 +		dev_info(dev,
-+			"%s : Miyoo deadzone=%d fuzz=%d flat=%d smooth=%d\n",
++			"%s : Miyoo deadzone=%d fuzz=%d flat=%d threshold=%d\n",
 +			__func__, joypad->bt_adc_deadzone,
 +			joypad->bt_adc_fuzz, joypad->bt_adc_flat,
-+			joypad->miyoo.smoothing_alpha);
++			joypad->miyoo.report_threshold);
 +		dev_info(dev,
 +			"%s : Miyoo tuning lx=%d/%d ly=%d/%d rx=%d/%d ry=%d/%d\n",
 +			__func__,
