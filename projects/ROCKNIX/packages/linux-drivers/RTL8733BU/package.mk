@@ -23,6 +23,7 @@ make_target() {
        CONFIG_IPS_MODE=1 \
        CONFIG_LPS_MODE=1 \
        CONFIG_USB_AUTOSUSPEND=n \
+       CONFIG_WOWLAN=n \
        CONFIG_MP_INCLUDED=n \
        CONFIG_P2P=n \
        CONFIG_TDLS=n
