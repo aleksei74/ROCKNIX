@@ -751,8 +751,8 @@
  * I2C0: PMIC (RK817 @0x20), CPU regulator.
  * There may be two board revisions: one with TCS4525 @0x1c, one with RK8600 @0x40.
  * Stock firmware enables both; whichever is populated probes. This DTS uses RK8600;
- * TCS4525 node is kept from stock (latest firmware) but disabled — enable it if your
- * unit has the TCS4525 variant. 100 kHz for power (commit 601ccabc20).
+ * TCS4525 node is kept from stock (latest firmware) and it's currently untested on
+ * TCS4525 variant (if it exists). 100 kHz for power (commit 601ccabc20).
  */
 &i2c0 {
 	status = "okay";
@@ -772,7 +772,7 @@
 		fcs,suspend-voltage-selector = <1>;
 		regulator-boot-on;
 		regulator-always-on;
-		status = "disabled";
+		status = "okay";
 		regulator-state-mem {
 			regulator-off-in-suspend;
 		};
