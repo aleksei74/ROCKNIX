@@ -336,7 +336,7 @@
 	};
 
 	/*
-	 * simple-battery: 3 Ah Li-ion. OCV 3.2–4.25 V, charge 4.25 V CC max below.
+	 * simple-battery: 3 Ah Li-ion. OCV 3.2–4.25 V, CC 4.25 V / 1.5 A max.
 	 * OCV curve from 2025 firmware (miyoo355_fw_20250509213001) — 4.25 V = 100%,
 	 * 3.2 V = 0%, 20 points 4057–3426 mV in between (22 points). Table MUST be
 	 * descending (power_supply_ocv2cap_simple requires it). Sleep enter 150 mA
@@ -349,10 +349,7 @@
 		 * end-of-charge than 300 mA (0x02); CV lasts longer so coulomb counter
 		 * tracks better before CHARGE_FINISH — helps degraded / smaller cells. */
 		charge-term-current-microamp = <150000>;
-		/* CC max: 1.5 A — ~2.3 h to full vs ~2 h at 2 A, much gentler on the cell.
-		 * rk817_charger only programs discrete currents (µA): 500k, 1M, 1.5M, 2M,
-		 * 2.5M, 2.75M, 3M, 3.5M; 1.8 A is not a step — DT 1.8 M was rounded down
-		 * to 1.5 A in hardware. */
+		/* rk817: discrete CC 0.5–3.5 A; 1.8 A not a valid step → use 1.5 A. */
 		constant-charge-current-max-microamp = <1500000>;
 		constant-charge-voltage-max-microvolt = <4250000>;
 		factory-internal-resistance-micro-ohms = <100000>;
