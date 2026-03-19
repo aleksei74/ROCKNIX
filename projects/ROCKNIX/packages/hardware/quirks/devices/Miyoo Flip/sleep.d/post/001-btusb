@@ -8,7 +8,9 @@
 
 . /etc/profile.d/001-functions
 
-if [ "$(get_setting controllers.bluetooth.enabled)" = "1" ]; then
+# Check if system is configured before reading settings
+if [ -e "/storage/.configured" ] && \
+   [ "$(get_setting controllers.bluetooth.enabled)" = "1" ]; then
   rfkill unblock bluetooth 2>/dev/null
   modprobe btusb 2>/dev/null
 fi

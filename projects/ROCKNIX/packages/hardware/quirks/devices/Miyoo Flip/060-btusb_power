@@ -13,7 +13,14 @@ modprobe rtl8733bu_power 2>/dev/null
 
 . /etc/profile.d/001-functions
 
-BT_ENABLED=$(get_setting controllers.bluetooth.enabled)
+# Check if system is configured (first boot detection)
+# On first boot, config may not be ready yet, so use safe defaults
+if [ -e "/storage/.configured" ]; then
+  BT_ENABLED=$(get_setting controllers.bluetooth.enabled)
+else
+  # First boot: default to disabled
+  BT_ENABLED=""
+fi
 
 if [ "${BT_ENABLED}" != "1" ]; then
   modprobe -r btusb 2>/dev/null
