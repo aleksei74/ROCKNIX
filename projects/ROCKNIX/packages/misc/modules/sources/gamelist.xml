@@ -362,9 +362,9 @@ and keyboard to modify settings.</desc>
         <image>./images/calibrate-gamepad.svg</image>
     </game>
     <game>
-        <path>./Miyoo Stick Autocal Save.sh</path>
-        <name>Miyoo Stick Autocal Save</name>
-        <desc>A script to save autocalibration so it persists across reboots. To reset delete /STORAGE/.config/miyoo-serial-joypad and reboot.</desc>
+        <path>./Save Miyoo Autocal.sh</path>
+        <name>Save Miyoo Autocal</name>
+        <desc>Save autocalibration so it persists. Delete .config/miyoo-serial-joypad and reboot to reset.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>

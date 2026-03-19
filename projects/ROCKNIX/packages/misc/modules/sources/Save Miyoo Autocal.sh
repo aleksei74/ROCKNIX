@@ -38,7 +38,7 @@ if [ ! -f "${SYSFS_DIR}/miyoo_cal_left" ]; then
   exit 0
 fi
 
-echo "Stick autocalibration save"
+echo "Miyoo autocalibration save"
 echo ""
 echo "Sticks auto-calibrate during use. This saves current values"
 echo "so they persist across reboots."
