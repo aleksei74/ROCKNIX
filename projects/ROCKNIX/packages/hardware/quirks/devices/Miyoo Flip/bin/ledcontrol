@@ -6,7 +6,15 @@
 . /etc/profile.d/001-functions
 
 LED_PATH="/sys/class/leds"
-LED_STATUS=$(get_setting led.color)
+
+# Check if system is configured (first boot detection)
+# On first boot, config may not be ready yet, so use default
+if [ -e "/storage/.configured" ]; then
+  LED_STATUS=$(get_setting led.color)
+else
+  # First boot: no saved status, will use default
+  LED_STATUS=""
+fi
 
 led_state() {
   [ -d "${LED_PATH}/${1}" ] && echo "${2}" >"${LED_PATH}/${1}/brightness" 2>/dev/null

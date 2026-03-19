@@ -4,4 +4,12 @@
 # Apply saved LED state at boot (DTS default-on would otherwise show green).
 
 . /etc/profile.d/001-functions
-/usr/bin/ledcontrol
+
+# Check if system is configured (first boot detection)
+# On first boot, config may not be ready yet, so use default LED state
+if [ -e "/storage/.configured" ]; then
+  /usr/bin/ledcontrol
+else
+  # First boot: set default green LED
+  /usr/bin/ledcontrol default
+fi

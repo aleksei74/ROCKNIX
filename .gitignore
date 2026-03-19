@@ -48,3 +48,6 @@ projects/**/*.old
 /.env
 /.es_cache
 /.config
+
+# Device documentation (auto-generated)
+documentation/PER_DEVICE_DOCUMENTATION/RK3566/SUPPORTED_EMULATORS_AND_CORES.md
