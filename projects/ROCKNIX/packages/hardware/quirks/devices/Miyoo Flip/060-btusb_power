@@ -6,8 +6,8 @@
 #
 # rtl8733bu-power registers two rfkill devices (WLAN + BLUETOOTH).
 # Chip power stays on while either is unblocked; power is cut only when
-# both are blocked.  This quirk ties the bluetooth rfkill state to the
-# bluetooth service lifecycle and boot setting.
+# both are blocked.  This quirk syncs both WiFi and BT rfkill state to
+# their respective settings at boot.
 
 modprobe rtl8733bu_power 2>/dev/null
 
@@ -16,12 +16,20 @@ modprobe rtl8733bu_power 2>/dev/null
 # Check if system is configured (first boot detection)
 # On first boot, config may not be ready yet, so use safe defaults
 if [ -e "/storage/.configured" ]; then
+  WIFI_ENABLED=$(get_setting wifi.enabled)
   BT_ENABLED=$(get_setting controllers.bluetooth.enabled)
 else
   # First boot: default to disabled
+  WIFI_ENABLED=""
   BT_ENABLED=""
 fi
 
+# Sync WiFi rfkill state to wifi.enabled setting
+if [ "${WIFI_ENABLED}" != "1" ]; then
+  rfkill block wifi 2>/dev/null
+fi
+
+# Sync BT rfkill state to controllers.bluetooth.enabled setting
 if [ "${BT_ENABLED}" != "1" ]; then
   modprobe -r btusb 2>/dev/null
   rfkill block bluetooth 2>/dev/null
