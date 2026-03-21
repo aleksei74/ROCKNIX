@@ -107,23 +107,21 @@
 		poll-interval = <6>;
 
 		/* Miyoo serial joystick tuning.  Requires 0002-miyoo-serial patch.
-		 * Axis range [-32760..32760]; deadzone is absolute.
-		 * 4914 = ~15% radial deadzone.
-		 * Tuning 100 = no scaling; >100 amplifies, <100 attenuates.
-		 * Threshold: min axis change to report (default 128, 0 = off). */
+		 * 4914 = ~15% radial deadzone.  Tuning <100 softens axis gain.
+		 * Higher fuzz/flat + threshold reduce cross-axis noise in evdev. */
 		miyoo-deadzone = <4914>;
-		miyoo-fuzz = <32>;
-		miyoo-flat = <32>;
-		miyoo-threshold = <128>;
+		miyoo-fuzz = <48>;
+		miyoo-flat = <48>;
+		miyoo-threshold = <192>;
 
-		miyoo-lx-p-tuning = <90>;
-		miyoo-lx-n-tuning = <90>;
-		miyoo-ly-p-tuning = <90>;
-		miyoo-ly-n-tuning = <90>;
-		miyoo-rx-p-tuning = <90>;
-		miyoo-rx-n-tuning = <90>;
-		miyoo-ry-p-tuning = <90>;
-		miyoo-ry-n-tuning = <90>;
+		miyoo-lx-p-tuning = <76>;
+		miyoo-lx-n-tuning = <76>;
+		miyoo-ly-p-tuning = <76>;
+		miyoo-ly-n-tuning = <76>;
+		miyoo-rx-p-tuning = <76>;
+		miyoo-rx-n-tuning = <76>;
+		miyoo-ry-p-tuning = <76>;
+		miyoo-ry-n-tuning = <76>;
 
 		sw1 {
 			gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_LOW>;
