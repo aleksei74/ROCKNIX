@@ -829,7 +829,7 @@
 		pinctrl-1 = <&soc_slppin_slp>;
 		pinctrl-2 = <&soc_slppin_gpio>;
 		pinctrl-3 = <&soc_slppin_gpio>;
-		/* system-power-controller; */
+		system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
 		#sound-dai-cells = <0>;
