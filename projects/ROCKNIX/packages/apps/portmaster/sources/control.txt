@@ -45,11 +45,6 @@ case "${QUIRK_DEVICE}" in
     LOWRES="N"
     ANALOG_STICKS="2"
   ;;
-  "Miyoo Flip")
-    param_device="rg353m"
-    LOWRES="Y"
-    ANALOG_STICKS="2"
-  ;;
   "Anbernic RG351M")
     param_device="anbernic"
     LOWRES="Y"
