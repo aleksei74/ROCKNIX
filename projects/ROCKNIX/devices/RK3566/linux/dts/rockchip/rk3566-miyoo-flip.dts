@@ -974,7 +974,8 @@
 				regulator-max-microvolt = <3300000>;
 				regulator-name = "vccio_sd";
 				regulator-state-mem {
-					regulator-off-in-suspend;
+					regulator-on-in-suspend;
+					regulator-suspend-microvolt = <3300000>;
 				};
 			};
 
@@ -1424,6 +1425,8 @@
 	no-sdio;
 	no-mmc;
 	bus-width = <4>;
+	/* Avoid runtime PM / suspend losing slot state; shared vqmmc with sdmmc1 (see vccio_sd). */
+	keep-power-in-suspend;
 	cap-sd-highspeed;
 	disable-wp;
 	sd-uhs-sdr12;
@@ -1444,6 +1447,7 @@
 	no-sdio;
 	no-mmc;
 	bus-width = <4>;
+	keep-power-in-suspend;
 	cap-sd-highspeed;
 	disable-wp;
 	sd-uhs-sdr12;
