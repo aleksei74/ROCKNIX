@@ -513,9 +513,8 @@
 	 * sleep-mode-config and wakeup-config to ATF via SIP_SUSPEND_MODE SMC;
 	 * BL31 then applies those flags when the CPU enters suspend (e.g. turn off
 	 * centers, use PMIC LP, turn off PLLs, keep 32K, GPIO wake). It does not
-	 * touch any pins. The RK817 SLPPIN (GPIO0_PA2) is switched by rk8xx-core
-	 * (patch 0029) using pinctrl-names on the PMIC node: suspend → pmic-sleep,
-	 * resume → pmic-reset, power-off → pmic-power-off.
+	 * touch any pins. SLPPIN register writes are handled by vanilla rk8xx-core
+	 * (SLPPIN_SLP_FUN on suspend, SLPPIN_NULL_FUN on resume).
 	 */
 	rk3568-suspend {
 		compatible = "rk3568,pm-config";
@@ -801,21 +800,16 @@
 	/*
 	 * RK817 PMIC @0x20: regulators, charger, codec, RTC.
 	 *
-	 * Why pinctrl for SLPPIN (GPIO0_PA2): Suspend needs the SoC PMU to drive
-	 * the pin (PMU_SLEEP mux) so the PMIC applies regulator-state-mem. Power-off
-	 * needs the kernel/BL31 to drive it as GPIO so the PMIC actually cuts power.
-	 * Mainline rk8xx-core only wrote SLPPIN registers and never switched the
-	 * SoC pin mux; if the pin stayed in PMU_SLEEP at power-off, BL31 could not
-	 * drive it and the PMIC stayed on → battery drain.
+	 * Power-off: system-power-controller enables DEV_OFF — a direct I2C
+	 * register write that commands the PMIC to shut down.
 	 *
-	 * Patch 0029 adds BSP-style pinctrl: default does NOT touch SLPPIN
-	 * (matching stock DTS — avoids race where SLPPIN_DN_FUN retained from
-	 * previous shutdown triggers power-off when pin goes HIGH at probe);
-	 * pmic-sleep = PMU_SLEEP (rk8xx_suspend); pmic-power-off = GPIO low
-	 * (rk8xx_shutdown). The driver writes SLPPIN_NULL_FUN at probe to clear
-	 * any residual state, masks all PMIC IRQs at shutdown, and uses the full
-	 * BSP sequence (SLPPIN_NULL → SLPPOL_H → pinctrl → SLPPIN_DN_FUN + mdelay).
-	 * system-power-controller enables DEV_OFF as fallback (belt-and-suspenders).
+	 * Suspend: soc_slppin_slp in pinctrl-0 muxes GPIO0_PA2 to PMU_SLEEP
+	 * (function 1) so the SoC PMU hardware can drive it during deep sleep.
+	 * Vanilla rk8xx-core writes SLPPIN_SLP_FUN to the PMIC so it enters
+	 * low-power mode (regulator-state-mem) when PMU_SLEEP goes active.
+	 * Miyoo Flip's BL31 does not handle this mux internally (unlike the
+	 * standard Rockchip BL31 used on X55/Anbernic), so pinctrl-0 is
+	 * required.
 	 */
 	rk817: pmic@20 {
 		status = "okay";
@@ -824,11 +818,8 @@
 		interrupt-parent = <&gpio0>;
 		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
 
-		pinctrl-names = "default", "pmic-sleep", "pmic-power-off", "pmic-reset";
-		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>;
-		pinctrl-1 = <&soc_slppin_slp>;
-		pinctrl-2 = <&soc_slppin_gpio>;
-		pinctrl-3 = <&soc_slppin_gpio>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>, <&soc_slppin_slp>;
 		system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
@@ -1157,24 +1148,12 @@
 	};
 
 	/*
-	 * PMIC pins for rk817 (patch 0029 uses these via pinctrl-names on the PMIC node).
+	 * PMIC pins for rk817.
 	 * pmic_int: GPIO0_PA3, pull-up, level-low interrupt to SoC.
-	 * SLPPIN (GPIO0_PA2) pinctrl states (matching stock BSP convention):
-	 *   (default/pinctrl-0 does NOT include any soc_slppin_* — stock DTS
-	 *    only has pmic_int there. Touching SLPPIN at probe time is unsafe
-	 *    because SLPPIN_DN_FUN may survive across power cycles and a HIGH
-	 *    level would trigger immediate PMIC power-off before the driver
-	 *    can clear it with SLPPIN_NULL_FUN.)
-	 *   soc_slppin_slp       — mux 1 = PMU_SLEEP; pull_none. pmic-sleep state:
-	 *                         SoC PMU drives this during deep suspend so RK817
-	 *                         applies regulator-state-mem.
-	 *   soc_slppin_gpio      — GPIO, output low. Used for both pmic-power-off
-	 *                         and pmic-reset (resume). BSP uses GPIO LOW for
-	 *                         both; SLPPIN is safely LOW while the driver
-	 *                         clears function/polarity registers on resume.
-	 *   soc_slppin_gpio_idle — GPIO, pull-up. Kept for reference but NOT
-	 *                         used: pull-up = HIGH can race with residual
-	 *                         SLPPOL_H and trigger PMIC power-off on resume.
+	 * soc_slppin_slp: GPIO0_PA2 mux 1 = PMU_SLEEP. Referenced from PMIC
+	 *   pinctrl-0 so the SoC PMU can drive the sleep signal to the PMIC.
+	 * soc_slppin_gpio / soc_slppin_gpio_idle: kept for reference, not
+	 *   currently referenced.
 	 */
 	pmic {
 		pmic_int: pmic_int {
