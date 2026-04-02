@@ -37,11 +37,11 @@ case ${DEVICE} in
         PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
         ;;
       S922X|RK3399|RK3566|SM6115)
-        PKG_VERSION="6.18.13"
+        PKG_VERSION="6.18.20"
         PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
         ;;
       *)
-        PKG_VERSION="6.12.61"
+        PKG_VERSION="6.12.79"
         PKG_PATCH_DIRS+=" 6.12-LTS"
         PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
         ;;

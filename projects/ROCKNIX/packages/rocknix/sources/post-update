@@ -199,7 +199,7 @@ grep -q "^global\.bezel=" /storage/.config/system/configs/system.cfg ||
 
 # set the default suspend shutdown delays if they doesn't already exist
 grep -q "^system\.shutdown_delay=" /storage/.config/system/configs/system.cfg ||
-  sed -i '$ a\system.shutdown_delay=0' /storage/.config/system/configs/system.cfg
+  sed -i '$ a\system.shutdown_delay=900' /storage/.config/system/configs/system.cfg
 
 grep -q "^system\.shutdown_delay_running_game=" /storage/.config/system/configs/system.cfg ||
   sed -i '$ a\system.shutdown_delay_running_game=900' /storage/.config/system/configs/system.cfg
@@ -212,8 +212,9 @@ grep -q "^system\.suspend\.park_cores=" /storage/.config/system/configs/system.c
 grep -q "^system\.suspend\.dpms=" /storage/.config/system/configs/system.cfg ||
     sed -i '$ a\system.suspend.dpms=1' /storage/.config/system/configs/system.cfg
 
-# Wipe azahar gptokeyb mappings as they have changed
-rm -rf /storage/.config/azahar/*.gptk
+# Wipe azahar gptokeyb mappings and config file as they have changed
+rm -f /storage/.config/azahar/*.gptk
+rm -f /storage/.config/azahar/qt-config.ini
 
 # Clean RGB10X mupen64plus-sa config
 if echo ${QUIRK_DEVICE} | grep RGB10X; then
