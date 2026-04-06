@@ -509,12 +509,10 @@
 	};
 
 	/*
-	 * BL31 deep-sleep configuration only. This driver (patch 1013) sends
-	 * sleep-mode-config and wakeup-config to ATF via SIP_SUSPEND_MODE SMC;
-	 * BL31 then applies those flags when the CPU enters suspend (e.g. turn off
-	 * centers, use PMIC LP, turn off PLLs, keep 32K, GPIO wake). It does not
-	 * touch any pins. SLPPIN register writes are handled by vanilla rk8xx-core
-	 * (SLPPIN_SLP_FUN on suspend, SLPPIN_NULL_FUN on resume).
+	 * BL31 deep-sleep configuration (patch 1013).  Sends sleep-mode-config
+	 * and wakeup-config to BL31 via SIP_SUSPEND_MODE SMC at probe and
+	 * before each suspend.  SLPPIN register writes are handled separately
+	 * by vanilla rk8xx-core (SLPPIN_SLP_FUN on suspend, NULL_FUN on resume).
 	 */
 	rk3568-suspend {
 		compatible = "rk3568,pm-config";
@@ -807,9 +805,6 @@
 	 * (function 1) so the SoC PMU hardware can drive it during deep sleep.
 	 * Vanilla rk8xx-core writes SLPPIN_SLP_FUN to the PMIC so it enters
 	 * low-power mode (regulator-state-mem) when PMU_SLEEP goes active.
-	 * Miyoo Flip's BL31 does not handle this mux internally (unlike the
-	 * standard Rockchip BL31 used on X55/Anbernic), so pinctrl-0 is
-	 * required.
 	 */
 	rk817: pmic@20 {
 		status = "okay";
@@ -819,7 +814,7 @@
 		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
 
 		pinctrl-names = "default";
-		pinctrl-0 = <&pmic_int>, <&i2s1m0_mclk>, <&soc_slppin_slp>;
+		pinctrl-0 = <&pmic_int_l>, <&i2s1m0_mclk>, <&soc_slppin_slp>;
 		system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
@@ -1147,30 +1142,14 @@
 		};
 	};
 
-	/*
-	 * PMIC pins for rk817.
-	 * pmic_int: GPIO0_PA3, pull-up, level-low interrupt to SoC.
-	 * soc_slppin_slp: GPIO0_PA2 mux 1 = PMU_SLEEP. Referenced from PMIC
-	 *   pinctrl-0 so the SoC PMU can drive the sleep signal to the PMIC.
-	 * soc_slppin_gpio / soc_slppin_gpio_idle: kept for reference, not
-	 *   currently referenced.
-	 */
 	pmic {
-		pmic_int: pmic_int {
+		pmic_int_l: pmic-int-l {
 			rockchip,pins =
 				<0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 
 		soc_slppin_slp: soc-slppin-slp {
 			rockchip,pins = <0 RK_PA2 1 &pcfg_pull_none>;
-		};
-
-		soc_slppin_gpio: soc-slppin-gpio {
-			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_low>;
-		};
-
-		soc_slppin_gpio_idle: soc-slppin-gpio-idle {
-			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
@@ -1525,9 +1504,12 @@
 	status = "okay";
 };
 
-/* USB2 PHY0 host: 5V from vcc5v0_host (GPIO). Used when host port has device. */
+/* USB2 PHY0 host: PHY analog supply.
+ * Stock uses phy-supply → vcc5v0_host → dcdc_boost (5V step-up always-on).
+ * Nothing on this PHY needs 5V VBUS; use vcc_3v3 to avoid holding dcdc_boost
+ * enabled at idle.  Restore vcc5v0_host if a USB-A port is routed here. */
 &usb2phy0_host {
-	phy-supply = <&vcc5v0_host>;
+	phy-supply = <&vcc_3v3>;
 	status = "okay";
 };
 
