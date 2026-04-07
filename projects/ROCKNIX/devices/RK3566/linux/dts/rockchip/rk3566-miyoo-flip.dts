@@ -1044,9 +1044,8 @@
 	};
 };
 
-/* &i2c3: Stock had muic@30 (gi,muic). This unit has a device at 0x3d only.
- * Register dump (0xfd = 0x2a, pattern in low regs) identified it as Hynitron
- * CST3xx-family touch controller. Miyoo Flip has no touchscreen so disable it. */
+/* Redundant: already disabled in rk356x-base.dtsi.
+ * Stock had a touch controller at 0x3d (Hynitron CST3xx). Miyoo Flip has no touchscreen. */
 &i2c3 {
 	status = "disabled";
 };
@@ -1362,9 +1361,7 @@
 	vref-supply = <&vcc_1v8>;
 };
 
-/* sdhci (fc000000): eMMC controller — disabled.
- * The Miyoo Flip has no eMMC; internal storage is SPI-NAND (via SFC).
- * The two SD card slots use sdmmc0 and sdmmc1. */
+/* Redundant: already disabled in rk356x-base.dtsi. No eMMC on this board. */
 &sdhci {
 	status = "disabled";
 };
@@ -1532,6 +1529,7 @@
 	status = "disabled";
 };
 
+/* Redundant: already disabled in rk356x-base.dtsi */
 &usb_host0_ehci {
 	status = "disabled";
 };
@@ -1569,10 +1567,12 @@
 	status = "okay";
 };
 
+/* Redundant: already disabled in rk356x-base.dtsi */
 &usb_host0_ohci {
 	status = "disabled";
 };
 
+/* Redundant: already disabled in rk356x-base.dtsi */
 &usb_host1_ohci {
 	status = "disabled";
 };
@@ -1608,13 +1608,12 @@
 	status = "okay";
 };
 
-/* combphy1/combphy2: combo PHYs for USB3/SATA/PCIe.
- * Nothing on the Miyoo Flip uses USB3, SATA, or PCIe.
- * Disabling allows PD_PIPE power domain to gate — saves power. */
+/* Redundant: already disabled in rk356x-base.dtsi. No USB3/SATA/PCIe on this board. */
 &combphy1 {
 	status = "disabled";
 };
 
+/* Redundant: already disabled in rk356x-base.dtsi */
 &combphy2 {
 	status = "disabled";
 };
