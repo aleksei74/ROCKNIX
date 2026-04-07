@@ -602,6 +602,7 @@
 };
 
 /* DFI: devfreq-event for DMC (DDRMON). Patch 1011 adds PM suspend/resume to re-init after deep sleep. */
+/* Redundant: default okay in rk356x-base.dtsi */
 &dfi {
 	status = "okay";
 };
@@ -1576,13 +1577,12 @@
 	status = "disabled";
 };
 
-/* VPU (video decoder), VEPU (H.264 encoder), RGA (2D blitter):
- * All use mainline drivers with runtime PM — power domains gate when idle. */
+/* Redundant: default okay in rk356x-base.dtsi */
 &vpu {
 	status = "okay";
 };
 
-/* VDPU/VEPU MMU: iommu for video decoder/encoder. Required when vpu/vepu are enabled. */
+/* Redundant: default okay in rk356x-base.dtsi */
 &vdpu_mmu {
 	status = "okay";
 };
