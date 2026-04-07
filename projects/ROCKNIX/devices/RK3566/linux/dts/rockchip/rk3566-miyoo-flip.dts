@@ -503,11 +503,6 @@
 		regulator-name = "vcc_sd2";
 	};
 
-	/* test-power: stock BSP node for factory testing. Not needed for normal use. */
-	test-power {
-		status = "disabled";
-	};
-
 	/*
 	 * BL31 deep-sleep configuration (patch 1013).  Sends sleep-mode-config
 	 * and wakeup-config to BL31 via SIP_SUSPEND_MODE SMC at probe and
