@@ -397,9 +397,9 @@
 		};
 	};
 
-	/* Status LEDs: power (GPIO0_PB4), charger (GPIO0_PC2). Names match RK3566 platform ledcontrol
-	 * (green:power, red:charging). Platform ledcontrol uses green + red.
-	 * GPIO-only — no PWM on these pins; brightness is on/off only. */
+	/* Status LEDs: same sysfs names as Anbernic RG DS (green:power, red:status, amber:charging).
+	 * Hardware: green on GPIO0_PB4; red/amber on GPIO0_PC2 (single physical LED — two DT nodes share
+	 * the same line so ledcontrol matches stock RG DS; if leds probe fails, remove led-amber). */
 	leds: leds {
 		compatible = "gpio-leds";
 		work_led: led-power {
@@ -407,11 +407,16 @@
 			color = <LED_COLOR_ID_GREEN>;
 			function = LED_FUNCTION_POWER;
 			gpios = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
-			/* No default-trigger: boot with LED off; 500-enable-led applies saved state. */
+		};
+		status_led: led-status {
+			label = "red:status";
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
 		};
 		charger_led: led-charging {
-			label = "red:charging";
-			color = <LED_COLOR_ID_RED>;
+			label = "amber:charging";
+			color = <LED_COLOR_ID_AMBER>;
 			function = LED_FUNCTION_CHARGING;
 			gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "battery-charging";
@@ -497,7 +502,7 @@
 	 * by vanilla rk8xx-core (SLPPIN_SLP_FUN on suspend, NULL_FUN on resume).
 	 */
 	rk3568-suspend {
-		compatible = "rk3568,pm-config";
+		compatible = "rockchip,rk3568-suspend";
 		status = "okay";
 		rockchip,sleep-debug-en = <0>;	/* Set 1 + no_console_suspend for serial across suspend */
 		rockchip,sleep-mode-config = <

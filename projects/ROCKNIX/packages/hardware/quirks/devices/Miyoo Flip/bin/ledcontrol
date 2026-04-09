@@ -1,94 +1,96 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
-# Copyright (C) 2024 ROCKNIX (https://github.com/ROCKNIX)
-# Miyoo Flip: 2 LEDs (green:power, red:charging), on/off only. Pattern from RK3588 2-LED ledcontrol. No brightness menu (010-led_control sets DEVICE_LED_BRIGHTNESS=false).
+# Copyright (C) 2024 JELOS (https://github.com/JustEnoughLinuxOS)
 
+# Minimal OS variable loading for performance
 . /etc/profile.d/001-functions
 
 LED_PATH="/sys/class/leds"
+LED_STATUS=$(get_setting led.color)
+DEFAULT=green
 
-# Check if system is configured (first boot detection)
-# On first boot, config may not be ready yet, so use default
-if [ -e "/storage/.configured" ]; then
-  LED_STATUS=$(get_setting led.color)
+function led_state() {
+  echo ${2} >${LED_PATH}/${1}/brightness
+}
+
+function led_off() {
+    led_state green:power 0
+    led_state red:status 0
+    led_state amber:charging 0
+}
+
+function brightness() {
+  led_off
+  case ${1} in
+    green)
+      led_state green:power $2
+    ;;
+    red)
+      led_state red:status $2
+    ;;
+    amber)
+      led_state amber:charging $2
+    ;;
+  esac
+}
+
+GETBRIGHTNESS=$(get_setting led.brightness)
+if [ ! -z "${2}" ]
+then
+  LEDBRIGHTNESS=${2}
 else
-  # First boot: no saved status, will use default
-  LED_STATUS=""
+  LEDBRIGHTNESS=${GETBRIGHTNESS:-max}
 fi
 
-led_state() {
-  [ -d "${LED_PATH}/${1}" ] && echo "${2}" >"${LED_PATH}/${1}/brightness" 2>/dev/null
-}
-
-led_off() {
-  led_state green:power 0
-  led_state red:charging 0
-}
-
-led_green() {
-  led_off
-  led_state green:power 1
-}
-
-led_red() {
-  led_off
-  led_state red:charging 1
-}
-
-# No argument: read config and apply saved state (or default). Callers can run "ledcontrol" alone.
-if [ -z "${1}" ]; then
-  set -- "${LED_STATUS:-default}"
+# on first run (no setting) or on new brightness update settings
+if [[ ${LEDBRIGHTNESS} != ${GETBRIGHTNESS} ]]; then
+  set_setting led.brightness ${LEDBRIGHTNESS}
 fi
+
+# expand aliases
+case ${LEDBRIGHTNESS} in
+  max)
+    LEDBRIGHTNESS=255
+  ;;
+  mid)
+    LEDBRIGHTNESS=63
+  ;;
+  min)
+    LEDBRIGHTNESS=15
+  ;;
+esac
 
 case ${1} in
-  green)
-    led_green
-    set_setting led.color ${1}
-    ;;
-  amber)
-    led_red
-    set_setting led.color red
-    ;;
-  red)
-    led_red
-    set_setting led.color ${1}
-    ;;
-  off)
-    led_off
-    set_setting led.color ${1}
-    ;;
-  discharging)
-    if [ -n "${LED_STATUS}" ] && [ "${LED_STATUS}" != "off" ]; then
-      ledcontrol ${LED_STATUS}
-    else
-      led_green
-    fi
-    ;;
-  charging)
-    if [ "${LED_STATUS}" != "off" ]; then
-      led_red
-    else
-      led_off
-    fi
-    ;;
   default)
     del_setting led.color
-    led_green
-    ;;
+    brightness ${DEFAULT} ${LEDBRIGHTNESS}
+  ;;
+  green|red|amber|off)
+    brightness ${1} ${LEDBRIGHTNESS}
+    set_setting led.color ${1}
+  ;;
+  discharging)
+    brightness ${LED_STATUS:-${DEFAULT}} ${LEDBRIGHTNESS}
+  ;;
+  charging)
+    if [ ! "${LED_STATUS}" = "off" ]
+    then
+      brightness amber ${LEDBRIGHTNESS}
+    fi
+  ;;
   poweroff)
     led_off
-    ;;
+  ;;
   brightness)
-    if [ -n "${LED_STATUS}" ] && [ "${LED_STATUS}" != "off" ]; then
-      ledcontrol ${LED_STATUS}
-    else
-      led_off
-    fi
-    ;;
+    brightness ${LED_STATUS:-${DEFAULT}} ${LEDBRIGHTNESS}
+  ;;
   list)
-    echo "default"
-    echo "off"
-    echo "green"
-    echo "red"
-    ;;
+cat <<EOF
+default
+off
+green
+red
+amber
+EOF
+  ;;
 esac
