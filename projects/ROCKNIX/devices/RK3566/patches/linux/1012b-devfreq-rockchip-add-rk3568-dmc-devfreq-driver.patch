@@ -23,23 +23,26 @@ During suspend the driver restores the boot-time DDR frequency (as
 expected by the ATF resume path) and enables DDR auto self-refresh for
 lower power consumption.
 
+Regenerated against Linux 6.18.21 with diff -ruN (paths normalized to
+git-style diff --git) so include/soc/rockchip/rockchip_sip.h matches the
+tree.  Fixes "malformed patch" at the rk3568_dmc.c hunk boundary.
+
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
- drivers/devfreq/Kconfig                |  12 +
+ drivers/devfreq/Kconfig                |  13 +
  drivers/devfreq/Makefile               |   1 +
- drivers/devfreq/rk3568_dmc.c           | 640 +++++++++++++++++++++++++
- include/soc/rockchip/rockchip_sip.h    |  10 +
- 4 files changed, 663 insertions(+)
+ drivers/devfreq/rk3568_dmc.c           | 580 ++++++++++++++++++++++++++
+ include/soc/rockchip/rockchip_sip.h    |  11 +
+ 4 files changed, 605 insertions(+)
  create mode 100644 drivers/devfreq/rk3568_dmc.c
 
 diff --git a/drivers/devfreq/Kconfig b/drivers/devfreq/Kconfig
-index XXXXXXX..XXXXXXX 100644
---- a/drivers/devfreq/Kconfig
-+++ b/drivers/devfreq/Kconfig
-@@ -145,6 +145,18 @@ config ARM_RK3399_DMC_DEVFREQ
- 	  This adds the DEVFREQ driver for the RK3399 DMC(Dynamic Memory Controller).
+--- a/drivers/devfreq/Kconfig	2026-04-10 00:53:53.938113862 +0200
++++ b/drivers/devfreq/Kconfig	2026-04-10 00:53:53.943113871 +0200
+@@ -152,6 +152,19 @@
  	  It sets the frequency for the memory controller and reads the usage counts
  	  from hardware.
+ 
 +
 +config ARM_RK3568_DMC_DEVFREQ
 +	tristate "ARM RK3568 DMC DEVFREQ Driver"
@@ -52,43 +55,25 @@ index XXXXXXX..XXXXXXX 100644
 +	  This adds the DEVFREQ driver for the RK3566/RK3568 DMC (Dynamic
 +	  Memory Controller).  DDR frequency scaling is performed via ARM
 +	  Trusted Firmware using a shared-memory SIP protocol.
- 
++
  config ARM_SUN8I_A33_MBUS_DEVFREQ
  	tristate "sun8i/sun50i MBUS DEVFREQ Driver"
+ 	depends on ARCH_SUNXI || COMPILE_TEST
 diff --git a/drivers/devfreq/Makefile b/drivers/devfreq/Makefile
-index XXXXXXX..XXXXXXX 100644
---- a/drivers/devfreq/Makefile
-+++ b/drivers/devfreq/Makefile
-@@ -16,4 +16,5 @@ obj-$(CONFIG_ARM_MEDIATEK_CCI_DEVFREQ)	+= mtk-cci-devfreq.o
+--- a/drivers/devfreq/Makefile	2026-04-10 00:53:53.939113864 +0200
++++ b/drivers/devfreq/Makefile	2026-04-10 00:53:53.946113876 +0200
+@@ -14,6 +14,7 @@
+ obj-$(CONFIG_ARM_IMX8M_DDRC_DEVFREQ)	+= imx8m-ddrc.o
+ obj-$(CONFIG_ARM_MEDIATEK_CCI_DEVFREQ)	+= mtk-cci-devfreq.o
  obj-$(CONFIG_ARM_RK3399_DMC_DEVFREQ)	+= rk3399_dmc.o
 +obj-$(CONFIG_ARM_RK3568_DMC_DEVFREQ)	+= rk3568_dmc.o
  obj-$(CONFIG_ARM_SUN8I_A33_MBUS_DEVFREQ)	+= sun8i-a33-mbus.o
  obj-$(CONFIG_ARM_TEGRA_DEVFREQ)		+= tegra30-devfreq.o
  
-diff --git a/include/soc/rockchip/rockchip_sip.h b/include/soc/rockchip/rockchip_sip.h
-index XXXXXXX..XXXXXXX 100644
---- a/include/soc/rockchip/rockchip_sip.h
-+++ b/include/soc/rockchip/rockchip_sip.h
-@@ -20,4 +20,14 @@
- #define ROCKCHIP_SIP_CONFIG_DRAM_SET_ODT_PD	0x08
- 
-+/* SIP: shared memory (RK3568+) */
-+#define ROCKCHIP_SIP_SHARE_MEM			0x82000009
-+#define ROCKCHIP_SIP_SHARE_PAGE_DDR		2
-+
-+/* RK3568+ DRAM SIP V2 sub-commands (protocol differs from RK3399) */
-+#define ROCKCHIP_SIP_CONFIG_DRAM_GET_VERSION	0x08
-+#define ROCKCHIP_SIP_CONFIG_DRAM_POST_SET_RATE	0x09
-+#define ROCKCHIP_SIP_CONFIG_DRAM_MCU_START	0x0c
-+#define ROCKCHIP_SIP_CONFIG_DRAM_GET_FREQ_INFO	0x0e
-+
- #endif
 diff --git a/drivers/devfreq/rk3568_dmc.c b/drivers/devfreq/rk3568_dmc.c
-new file mode 100644
-index 0000000..XXXXXXX
---- /dev/null
-+++ b/drivers/devfreq/rk3568_dmc.c
-@@ -0,0 +1,640 @@
+--- a/drivers/devfreq/rk3568_dmc.c	1970-01-01 01:00:00.000000000 +0100
++++ b/drivers/devfreq/rk3568_dmc.c	2026-04-10 00:53:53.953113888 +0200
+@@ -0,0 +1,580 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * RK3566/RK3568 DMC (Dynamic Memory Controller) devfreq driver.
@@ -669,6 +654,22 @@ index 0000000..XXXXXXX
 +MODULE_LICENSE("GPL");
 +MODULE_AUTHOR("Zetarancio <zetarancio@users.noreply.github.com>");
 +MODULE_DESCRIPTION("RK3566/RK3568 DMC devfreq driver");
--- 
-2.34.1
-
+diff --git a/include/soc/rockchip/rockchip_sip.h b/include/soc/rockchip/rockchip_sip.h
+--- a/include/soc/rockchip/rockchip_sip.h	2026-04-10 00:53:53.940492665 +0200
++++ b/include/soc/rockchip/rockchip_sip.h	2026-04-10 00:53:53.949113881 +0200
+@@ -20,4 +20,15 @@
+ #define ROCKCHIP_SIP_CONFIG_DRAM_SET_PARAM	0x07
+ #define ROCKCHIP_SIP_CONFIG_DRAM_SET_ODT_PD	0x08
+ 
++
++/* SIP: shared memory (RK3568+) */
++#define ROCKCHIP_SIP_SHARE_MEM			0x82000009
++#define ROCKCHIP_SIP_SHARE_PAGE_DDR		2
++
++/* RK3568+ DRAM SIP V2 sub-commands (protocol differs from RK3399) */
++#define ROCKCHIP_SIP_CONFIG_DRAM_GET_VERSION	0x08
++#define ROCKCHIP_SIP_CONFIG_DRAM_POST_SET_RATE	0x09
++#define ROCKCHIP_SIP_CONFIG_DRAM_MCU_START	0x0c
++#define ROCKCHIP_SIP_CONFIG_DRAM_GET_FREQ_INFO	0x0e
++
+ #endif
