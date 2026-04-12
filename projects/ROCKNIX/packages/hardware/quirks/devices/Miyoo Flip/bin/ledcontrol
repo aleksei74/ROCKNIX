@@ -60,6 +60,12 @@ case ${LEDBRIGHTNESS} in
   ;;
 esac
 
+# sleep.sh (post) and powerstate.sh call ledcontrol with no args when led.color
+# is unset; map that to default. RG DS image relies on the same global scripts.
+if [ -z "${1}" ]; then
+  set -- "${LED_STATUS:-default}"
+fi
+
 case ${1} in
   default)
     del_setting led.color
