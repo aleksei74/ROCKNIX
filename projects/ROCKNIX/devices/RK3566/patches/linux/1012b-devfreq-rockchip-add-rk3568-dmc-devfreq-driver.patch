@@ -16,6 +16,9 @@ with the ARM Trusted Firmware (ATF version >= 0x102):
   5. MCU performs the hardware frequency change and fires GIC SPI 10.
   6. IRQ handler calls POST_SET_RATE for cleanup.
 
+The completion interrupt's hardware IRQ number is written into the
+shared page so ATF can signal completion on the correct GIC line.
+
 Voltage scaling follows standard devfreq OPP practices: raise voltage
 before scaling up, lower voltage after scaling down.
 
@@ -23,17 +26,13 @@ During suspend the driver restores the boot-time DDR frequency (as
 expected by the ATF resume path) and enables DDR auto self-refresh for
 lower power consumption.
 
-Regenerated against Linux 6.18.21 with diff -ruN (paths normalized to
-git-style diff --git) so include/soc/rockchip/rockchip_sip.h matches the
-tree.  Fixes "malformed patch" at the rk3568_dmc.c hunk boundary.
-
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  drivers/devfreq/Kconfig                |  13 +
  drivers/devfreq/Makefile               |   1 +
- drivers/devfreq/rk3568_dmc.c           | 580 ++++++++++++++++++++++++++
+ drivers/devfreq/rk3568_dmc.c           | 593 ++++++++++++++++++++++++++
  include/soc/rockchip/rockchip_sip.h    |  11 +
- 4 files changed, 605 insertions(+)
+ 4 files changed, 618 insertions(+)
  create mode 100644 drivers/devfreq/rk3568_dmc.c
 
 diff --git a/drivers/devfreq/Kconfig b/drivers/devfreq/Kconfig
@@ -73,7 +72,7 @@ diff --git a/drivers/devfreq/Makefile b/drivers/devfreq/Makefile
 diff --git a/drivers/devfreq/rk3568_dmc.c b/drivers/devfreq/rk3568_dmc.c
 --- a/drivers/devfreq/rk3568_dmc.c	1970-01-01 01:00:00.000000000 +0100
 +++ b/drivers/devfreq/rk3568_dmc.c	2026-04-10 00:53:53.953113888 +0200
-@@ -0,0 +1,580 @@
+@@ -0,0 +1,593 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * RK3566/RK3568 DMC (Dynamic Memory Controller) devfreq driver.
@@ -92,6 +91,7 @@ diff --git a/drivers/devfreq/rk3568_dmc.c b/drivers/devfreq/rk3568_dmc.c
 +#include <linux/devfreq.h>
 +#include <linux/devfreq-event.h>
 +#include <linux/interrupt.h>
++#include <linux/irq.h>
 +#include <linux/io.h>
 +#include <linux/module.h>
 +#include <linux/mutex.h>
@@ -199,7 +199,7 @@ diff --git a/drivers/devfreq/rk3568_dmc.c b/drivers/devfreq/rk3568_dmc.c
 +
 +	cpu_latency_qos_update_request(&dmcfreq->pm_qos, 0);
 +
-+	res = sip_smc_dram(0, 0, ROCKCHIP_SIP_CONFIG_DRAM_MCU_START);
++	res = sip_smc_dram(0, 0, ROCKCHIP_SIP_CONFIG_MCU_START);
 +	if (res.a0) {
 +		dev_err(dmcfreq->dev, "MCU_START error: %lx\n", res.a0);
 +		goto out;
@@ -541,6 +541,18 @@ diff --git a/drivers/devfreq/rk3568_dmc.c b/drivers/devfreq/rk3568_dmc.c
 +		return dev_err_probe(dev, ret, "cannot request complete IRQ\n");
 +	disable_irq(complt_irq);
 +
++	{
++		struct irq_data *irqd;
++		u32 complt_hwirq;
++
++		irqd = irq_get_irq_data(complt_irq);
++		if (!irqd)
++			return dev_err_probe(dev, -EINVAL,
++					     "cannot map complete IRQ to irq_data\n");
++		complt_hwirq = irqd_to_hwirq(irqd);
++		writel_relaxed(complt_hwirq, &data->share_params->complt_hwirq);
++	}
++
 +	/* Initialize DRAM scaling in ATF */
 +	res = sip_smc_dram(ROCKCHIP_SIP_SHARE_PAGE_DDR, 0,
 +			   ROCKCHIP_SIP_CONFIG_DRAM_INIT);
@@ -669,7 +681,7 @@ diff --git a/include/soc/rockchip/rockchip_sip.h b/include/soc/rockchip/rockchip
 +/* RK3568+ DRAM SIP V2 sub-commands (protocol differs from RK3399) */
 +#define ROCKCHIP_SIP_CONFIG_DRAM_GET_VERSION	0x08
 +#define ROCKCHIP_SIP_CONFIG_DRAM_POST_SET_RATE	0x09
-+#define ROCKCHIP_SIP_CONFIG_DRAM_MCU_START	0x0c
++#define ROCKCHIP_SIP_CONFIG_MCU_START		0x0c
 +#define ROCKCHIP_SIP_CONFIG_DRAM_GET_FREQ_INFO	0x0e
 +
  #endif
