@@ -9,8 +9,8 @@ wakeup sources) to the ARM Trusted Firmware via SIP SMC calls.
 
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
- .../soc/rockchip/rockchip,rk3568-suspend.yaml | 63 ++++++++++++++++
- 1 file changed, 63 insertions(+)
+ .../soc/rockchip/rockchip,rk3568-suspend.yaml | 75 ++++++++++++++++
+ 1 file changed, 75 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/soc/rockchip/rockchip,rk3568-suspend.yaml
 
 diff --git a/Documentation/devicetree/bindings/soc/rockchip/rockchip,rk3568-suspend.yaml b/Documentation/devicetree/bindings/soc/rockchip/rockchip,rk3568-suspend.yaml
@@ -18,7 +18,7 @@ new file mode 100644
 index 000000000000..111111111111
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/soc/rockchip/rockchip,rk3568-suspend.yaml
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,75 @@
 +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +# %YAML 1.2
 +---
@@ -39,6 +39,10 @@ index 000000000000..111111111111
 +
 +  Without this node (or with status = "disabled") BL31 uses its
 +  compiled-in defaults, which may not enable the deepest sleep modes.
++
++  This binding covers only the SIP_SUSPEND_MODE path used for deep-sleep
++  flags; it is intentionally smaller than vendor "rockchip-pm-config"
++  nodes that also drive regulator and pin settings.
 +
 +  Flag definitions are in include/dt-bindings/suspend/rockchip-rk3568.h.
 +
