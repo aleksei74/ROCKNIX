@@ -12,22 +12,21 @@ PMIC low-power, center power domain off, etc.).  The driver reads
 sleep-mode and wakeup-source bitmasks from the device tree and passes
 them to BL31 at probe time and again before each suspend.
 
+Log non-zero SMC returns from firmware (mode, wakeup, and debug paths)
+without treating specific error codes as stable across ATF revisions.
+
 Also add SIP_SUSPEND_MODE sub-command definitions to rockchip_sip.h
 and clean up the dt-bindings header to follow upstream conventions
 (inline shift expressions instead of redefining BIT()).
-
-Regenerated against Linux 6.18.21 with diff -ruN (git-style paths) on
-top of the RK3568 DMC SIP additions.  Fixes "malformed patch" at the
-rk3568_suspend_config.c / dt-bindings boundary.
 
 Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  drivers/soc/rockchip/Kconfig                   |   9 +
  drivers/soc/rockchip/Makefile                    |   1 +
- drivers/soc/rockchip/rk3568_suspend_config.c    | 108 +++++++++++++++++++++
+ drivers/soc/rockchip/rk3568_suspend_config.c    | 133 +++++++++++++++++++++++++++++
  include/dt-bindings/suspend/rockchip-rk3568.h    |  43 +++++++++
  include/soc/rockchip/rockchip_sip.h              |   6 +
- 5 files changed, 167 insertions(+)
+ 5 files changed, 192 insertions(+)
  create mode 100644 drivers/soc/rockchip/rk3568_suspend_config.c
  create mode 100644 include/dt-bindings/suspend/rockchip-rk3568.h
 
@@ -59,7 +58,7 @@ diff --git a/drivers/soc/rockchip/Makefile b/drivers/soc/rockchip/Makefile
 diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip/rk3568_suspend_config.c
 --- a/drivers/soc/rockchip/rk3568_suspend_config.c	1970-01-01 01:00:00.000000000 +0100
 +++ b/drivers/soc/rockchip/rk3568_suspend_config.c	2026-04-10 00:53:53.972113921 +0200
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,133 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * RK3568/RK3566 suspend mode configuration driver
@@ -79,28 +78,51 @@ diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip
 +struct rk3568_suspend {
 +	u32	mode_config;
 +	u32	wakeup_config;
++	bool	have_debug;
++	u32	debug_en;
 +};
 +
-+static int sip_set_suspend_mode(u32 ctrl, u32 config1, u32 config2)
++/*
++ * Issue a SIP_SUSPEND_MODE SMC sub-command.  BL31 returns 0 on success.
++ * Non-zero values are logged; firmware revisions do not use a single
++ * stable error space across parts.
++ */
++static int rk3568_sip_suspend_mode(struct device *dev, u32 ctrl, u32 cfg1, u32 cfg2)
 +{
 +	struct arm_smccc_res res;
++	long err;
 +
-+	arm_smccc_smc(ROCKCHIP_SIP_SUSPEND_MODE, ctrl, config1, config2,
++	arm_smccc_smc(ROCKCHIP_SIP_SUSPEND_MODE, ctrl, cfg1, cfg2,
 +		      0, 0, 0, 0, &res);
-+	return res.a0;
++	err = (long)res.a0;
++	if (err)
++		dev_warn(dev, "SIP_SUSPEND_MODE ctrl=0x%x failed, ret=%ld\n",
++			 ctrl, err);
++	return err ? -EIO : 0;
 +}
 +
-+static int rk3568_suspend_send_config(struct rk3568_suspend *s)
++static int rk3568_suspend_apply(struct device *dev, struct rk3568_suspend *s)
 +{
-+	int ret = 0;
++	int ret = 0, err;
 +
-+	if (s->mode_config)
-+		ret = sip_set_suspend_mode(ROCKCHIP_SIP_SUSPEND_MODE_CONFIG,
-+					   s->mode_config, 0);
-+
-+	if (s->wakeup_config)
-+		sip_set_suspend_mode(ROCKCHIP_SIP_SUSPEND_WKUP_CONFIG,
-+				     s->wakeup_config, 0);
++	if (s->mode_config) {
++		err = rk3568_sip_suspend_mode(dev, ROCKCHIP_SIP_SUSPEND_MODE_CONFIG,
++					       s->mode_config, 0);
++		if (err && !ret)
++			ret = err;
++	}
++	if (s->wakeup_config) {
++		err = rk3568_sip_suspend_mode(dev, ROCKCHIP_SIP_SUSPEND_WKUP_CONFIG,
++					       s->wakeup_config, 0);
++		if (err && !ret)
++			ret = err;
++	}
++	if (s->have_debug) {
++		err = rk3568_sip_suspend_mode(dev, ROCKCHIP_SIP_SUSPEND_DEBUG_EN,
++					       s->debug_en, 0);
++		if (err && !ret)
++			ret = err;
++	}
 +
 +	return ret;
 +}
@@ -109,7 +131,7 @@ diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip
 +{
 +	struct rk3568_suspend *s = dev_get_drvdata(dev);
 +
-+	rk3568_suspend_send_config(s);
++	rk3568_suspend_apply(dev, s);
 +	return 0;
 +}
 +
@@ -122,7 +144,6 @@ diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip
 +	struct device *dev = &pdev->dev;
 +	struct device_node *node = dev->of_node;
 +	struct rk3568_suspend *s;
-+	u32 debug_en;
 +	int ret;
 +
 +	s = devm_kzalloc(dev, sizeof(*s), GFP_KERNEL);
@@ -137,15 +158,18 @@ diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip
 +				 &s->wakeup_config))
 +		dev_warn(dev, "wakeup-config not set\n");
 +
-+	if (!of_property_read_u32(node, "rockchip,sleep-debug-en", &debug_en))
-+		sip_set_suspend_mode(ROCKCHIP_SIP_SUSPEND_DEBUG_EN,
-+				     debug_en, 0);
++	if (of_property_read_u32(node, "rockchip,sleep-debug-en", &s->debug_en))
++		s->have_debug = false;
++	else
++		s->have_debug = true;
 +
 +	platform_set_drvdata(pdev, s);
 +
-+	ret = rk3568_suspend_send_config(s);
-+	dev_info(dev, "sleep-mode-config=0x%x wakeup-config=0x%x (smc ret=%d)\n",
-+		 s->mode_config, s->wakeup_config, ret);
++	ret = rk3568_suspend_apply(dev, s);
++	if (ret)
++		dev_warn(dev, "suspend SMC configuration incomplete (ret=%d)\n", ret);
++	dev_info(dev, "sleep-mode-config=0x%x wakeup-config=0x%x\n",
++		 s->mode_config, s->wakeup_config);
 +
 +	return 0;
 +}
