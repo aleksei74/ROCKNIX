@@ -400,7 +400,8 @@
 	/* Status LEDs: green on GPIO0_PB4; status/charging on GPIO0_PC2 (one GPIO, one sysfs LED).
 	 * Do not register a second DT node on PC2 (duplicate gpios break gpio-leds probe) and do not
 	 * bind battery-charging trigger here — ROCKNIX uses ledcontrol + powerstate for charging color.
-	 * ledcontrol maps RG DS "amber" to red:status when amber:charging is absent. */
+	 * Device ledcontrol matches quirks/platforms/RK3566 (charging uses red); menu "amber"
+	 * maps to this same GPIO since there is no separate amber:charging sysfs entry. */
 	leds: leds {
 		compatible = "gpio-leds";
 		work_led: led-power {

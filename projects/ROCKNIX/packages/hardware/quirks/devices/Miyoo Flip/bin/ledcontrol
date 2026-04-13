@@ -1,31 +1,29 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2024 JELOS (https://github.com/JustEnoughLinuxOS)
+#
+# Miyoo Flip: same behavior and arguments as quirks/platforms/RK3566/bin/ledcontrol
+# (ROCKNIX standard for sleep.sh, powerstate.sh, and the UI).
+#
+# DTS exposes one sysfs LED for the status/charging line (red:status). There is no
+# separate amber:charging device; "amber" in the menu and charging both use that GPIO.
 
-# Minimal OS variable loading for performance
 . /etc/profile.d/001-functions
 
 LED_PATH="/sys/class/leds"
 LED_STATUS=$(get_setting led.color)
 DEFAULT=green
 
-# RG DS exposes amber:charging; Miyoo Flip uses one GPIO for status/charging (red:status only).
-LED_RED="red:status"
-LED_AMBER="amber:charging"
-[ ! -d "${LED_PATH}/${LED_AMBER}" ] && LED_AMBER="${LED_RED}"
+# Sysfs name for the red / status / charging GPIO (see rk3566-miyoo-flip.dts leds).
+LED_RED_SYSFS="red:status"
 
 function led_state() {
-  [ -d "${LED_PATH}/${1}" ] || return 0
-  if [ -e "${LED_PATH}/${1}/trigger" ]; then
-    echo none >"${LED_PATH}/${1}/trigger" 2>/dev/null
-  fi
   echo "${2}" >"${LED_PATH}/${1}/brightness"
 }
 
 function led_off() {
     led_state green:power 0
-    led_state "${LED_RED}" 0
-    [ "${LED_AMBER}" != "${LED_RED}" ] && led_state "${LED_AMBER}" 0
+    led_state "${LED_RED_SYSFS}" 0
 }
 
 function brightness() {
@@ -35,10 +33,10 @@ function brightness() {
       led_state green:power $2
     ;;
     red)
-      led_state "${LED_RED}" $2
+      led_state "${LED_RED_SYSFS}" $2
     ;;
     amber)
-      led_state "${LED_AMBER}" $2
+      led_state "${LED_RED_SYSFS}" $2
     ;;
   esac
 }
@@ -69,8 +67,7 @@ case ${LEDBRIGHTNESS} in
   ;;
 esac
 
-# sleep.sh (post) and powerstate.sh call ledcontrol with no args when led.color
-# is unset; map that to default. RG DS image relies on the same global scripts.
+# sleep.sh (post) and powerstate.sh invoke ledcontrol with no args when led.color is unset.
 if [ -z "${1}" ]; then
   set -- "${LED_STATUS:-default}"
 fi
@@ -90,7 +87,7 @@ case ${1} in
   charging)
     if [ ! "${LED_STATUS}" = "off" ]
     then
-      brightness amber ${LEDBRIGHTNESS}
+      brightness red ${LEDBRIGHTNESS}
     fi
   ;;
   poweroff)
