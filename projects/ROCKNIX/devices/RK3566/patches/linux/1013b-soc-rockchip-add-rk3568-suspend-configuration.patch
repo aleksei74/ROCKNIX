@@ -12,6 +12,11 @@ PMIC low-power, center power domain off, etc.).  The driver reads
 sleep-mode and wakeup-source bitmasks from the device tree and passes
 them to BL31 at probe time and again before each suspend.
 
+Before each suspend the driver also sends the current Linux PM state
+(mem/standby/freeze) to BL31 via LINUX_PM_STATE (sub-command 0x09),
+matching the BSP rockchip_pm_config behaviour.  ATF uses this value
+to decide how to sequence power domain save/restore on resume.
+
 Log non-zero SMC returns from firmware (mode, wakeup, and debug paths)
 without treating specific error codes as stable across ATF revisions.
 
@@ -23,10 +28,10 @@ Signed-off-by: Zetarancio <zetarancio@users.noreply.github.com>
 ---
  drivers/soc/rockchip/Kconfig                   |   9 +
  drivers/soc/rockchip/Makefile                    |   1 +
- drivers/soc/rockchip/rk3568_suspend_config.c    | 133 +++++++++++++++++++++++++++++
+ drivers/soc/rockchip/rk3568_suspend_config.c    | 136 +++++++++++++++++++++++++++++
  include/dt-bindings/suspend/rockchip-rk3568.h    |  43 +++++++++
- include/soc/rockchip/rockchip_sip.h              |   6 +
- 5 files changed, 192 insertions(+)
+ include/soc/rockchip/rockchip_sip.h              |   7 +
+ 5 files changed, 196 insertions(+)
  create mode 100644 drivers/soc/rockchip/rk3568_suspend_config.c
  create mode 100644 include/dt-bindings/suspend/rockchip-rk3568.h
 
@@ -58,7 +63,7 @@ diff --git a/drivers/soc/rockchip/Makefile b/drivers/soc/rockchip/Makefile
 diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip/rk3568_suspend_config.c
 --- a/drivers/soc/rockchip/rk3568_suspend_config.c	1970-01-01 01:00:00.000000000 +0100
 +++ b/drivers/soc/rockchip/rk3568_suspend_config.c	2026-04-10 00:53:53.972113921 +0200
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,136 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * RK3568/RK3566 suspend mode configuration driver
@@ -72,6 +77,7 @@ diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip
 +#include <linux/module.h>
 +#include <linux/of.h>
 +#include <linux/platform_device.h>
++#include <linux/suspend.h>
 +
 +#include <soc/rockchip/rockchip_sip.h>
 +
@@ -131,6 +137,8 @@ diff --git a/drivers/soc/rockchip/rk3568_suspend_config.c b/drivers/soc/rockchip
 +{
 +	struct rk3568_suspend *s = dev_get_drvdata(dev);
 +
++	rk3568_sip_suspend_mode(dev, ROCKCHIP_SIP_SUSPEND_LINUX_PM_STATE,
++				mem_sleep_current, 0);
 +	rk3568_suspend_apply(dev, s);
 +	return 0;
 +}
@@ -242,7 +250,7 @@ diff --git a/include/dt-bindings/suspend/rockchip-rk3568.h b/include/dt-bindings
 diff --git a/include/soc/rockchip/rockchip_sip.h b/include/soc/rockchip/rockchip_sip.h
 --- a/include/soc/rockchip/rockchip_sip.h	2026-04-10 00:53:53.949113881 +0200
 +++ b/include/soc/rockchip/rockchip_sip.h	2026-04-10 00:53:53.969113916 +0200
-@@ -9,6 +9,12 @@
+@@ -9,6 +9,13 @@
  #define ROCKCHIP_SIP_SUSPEND_MODE		0x82000003
  #define ROCKCHIP_SLEEP_PD_CONFIG		0xff
  
@@ -250,6 +258,7 @@ diff --git a/include/soc/rockchip/rockchip_sip.h b/include/soc/rockchip/rockchip
 +#define ROCKCHIP_SIP_SUSPEND_MODE_CONFIG	0x01
 +#define ROCKCHIP_SIP_SUSPEND_WKUP_CONFIG	0x02
 +#define ROCKCHIP_SIP_SUSPEND_DEBUG_EN		0x05
++#define ROCKCHIP_SIP_SUSPEND_LINUX_PM_STATE	0x09
 +
 +
  #define ROCKCHIP_SIP_DRAM_FREQ			0x82000008
