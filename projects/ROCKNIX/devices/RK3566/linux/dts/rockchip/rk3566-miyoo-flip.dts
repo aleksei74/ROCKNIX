@@ -397,9 +397,10 @@
 		};
 	};
 
-	/* Status LEDs: same sysfs names as Anbernic RG DS (green:power, red:status, amber:charging).
-	 * Hardware: green on GPIO0_PB4; red/amber on GPIO0_PC2 (single physical LED — two DT nodes share
-	 * the same line so ledcontrol matches stock RG DS; if leds probe fails, remove led-amber). */
+	/* Status LEDs: green on GPIO0_PB4; status/charging on GPIO0_PC2 (one GPIO, one sysfs LED).
+	 * Do not register a second DT node on PC2 (duplicate gpios break gpio-leds probe) and do not
+	 * bind battery-charging trigger here — ROCKNIX uses ledcontrol + powerstate for charging color.
+	 * ledcontrol maps RG DS "amber" to red:status when amber:charging is absent. */
 	leds: leds {
 		compatible = "gpio-leds";
 		work_led: led-power {
@@ -413,14 +414,6 @@
 			color = <LED_COLOR_ID_RED>;
 			function = LED_FUNCTION_STATUS;
 			gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
-		};
-		charger_led: led-charging {
-			label = "amber:charging";
-			color = <LED_COLOR_ID_AMBER>;
-			function = LED_FUNCTION_CHARGING;
-			gpios = <&gpio0 RK_PC2 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "battery-charging";
-			retain-state-suspended;
 		};
 	};
 

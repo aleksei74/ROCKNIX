@@ -9,14 +9,23 @@ LED_PATH="/sys/class/leds"
 LED_STATUS=$(get_setting led.color)
 DEFAULT=green
 
+# RG DS exposes amber:charging; Miyoo Flip uses one GPIO for status/charging (red:status only).
+LED_RED="red:status"
+LED_AMBER="amber:charging"
+[ ! -d "${LED_PATH}/${LED_AMBER}" ] && LED_AMBER="${LED_RED}"
+
 function led_state() {
-  echo ${2} >${LED_PATH}/${1}/brightness
+  [ -d "${LED_PATH}/${1}" ] || return 0
+  if [ -e "${LED_PATH}/${1}/trigger" ]; then
+    echo none >"${LED_PATH}/${1}/trigger" 2>/dev/null
+  fi
+  echo "${2}" >"${LED_PATH}/${1}/brightness"
 }
 
 function led_off() {
     led_state green:power 0
-    led_state red:status 0
-    led_state amber:charging 0
+    led_state "${LED_RED}" 0
+    [ "${LED_AMBER}" != "${LED_RED}" ] && led_state "${LED_AMBER}" 0
 }
 
 function brightness() {
@@ -26,10 +35,10 @@ function brightness() {
       led_state green:power $2
     ;;
     red)
-      led_state red:status $2
+      led_state "${LED_RED}" $2
     ;;
     amber)
-      led_state amber:charging $2
+      led_state "${LED_AMBER}" $2
     ;;
   esac
 }
@@ -43,7 +52,7 @@ else
 fi
 
 # on first run (no setting) or on new brightness update settings
-if [[ ${LEDBRIGHTNESS} != ${GETBRIGHTNESS} ]]; then
+if [ "${LEDBRIGHTNESS}" != "${GETBRIGHTNESS}" ]; then
   set_setting led.brightness ${LEDBRIGHTNESS}
 fi
 
