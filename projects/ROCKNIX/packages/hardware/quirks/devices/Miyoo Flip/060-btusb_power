@@ -35,20 +35,37 @@ if [ "${BT_ENABLED}" != "1" ]; then
   rfkill block bluetooth 2>/dev/null
 fi
 
-# Override systemd bluetooth service to manage btusb module and
-# rfkill state together.  When bluetooth starts -> unblock rfkill
-# and load btusb.  When bluetooth stops -> unload btusb and block
-# rfkill so the chip can power off if WiFi is also off.
+# Override systemd bluetooth.service to manage btusb module and
+# rfkill state together.  When bluetooth starts -> load btusb, unblock
+# rfkill, then wait for hci0 before bluetoothd runs.  When bluetooth stops
+# -> unload btusb and block rfkill so the chip can power off if WiFi is off.
+#
+# RTL8733BU: hci0 appears only after btusb binds and firmware loads; if
+# bluetoothd starts first, BlueZ has no adapter and the UI stays on
+# "scanning for devices" forever.
 OVERRIDE_DIR="/etc/systemd/system/bluetooth.service.d"
-OVERRIDE_FILE="${OVERRIDE_DIR}/btusb-miyoo.conf"
-if [ ! -f "${OVERRIDE_FILE}" ]; then
+OVERRIDE_FILE="${OVERRIDE_DIR}/70-btusb-miyoo-flip.conf"
+
+write_bt_override() {
   mkdir -p "${OVERRIDE_DIR}"
-  cat <<'EOF' >"${OVERRIDE_FILE}"
+  # Remove legacy drop-in so we do not stack duplicate ExecStartPre lines.
+  rm -f "${OVERRIDE_DIR}/btusb-miyoo.conf"
+  cat <<'EOF' >"${OVERRIDE_FILE}.tmp"
 [Service]
-ExecStartPre=/usr/sbin/rfkill unblock bluetooth
-ExecStartPre=/usr/sbin/modprobe btusb
+# Load driver before clearing soft block (order matters on USB combo).
+ExecStartPre=-/usr/sbin/modprobe btusb
+ExecStartPre=-/usr/sbin/rfkill unblock bluetooth
+# Wait up to ~5s for hci0 so bluetoothd sees an adapter (busybox sh).
+ExecStartPre=-/bin/sh -c 'i=0; while [ "$i" -lt 100 ]; do [ -e /sys/class/bluetooth/hci0 ] && exit 0; i=$((i+1)); sleep 0.05; done; logger -t btusb-miyoo "hci0 not ready after 5s (continuing)"; exit 0'
 ExecStopPost=-/usr/sbin/modprobe -r btusb
 ExecStopPost=-/usr/sbin/rfkill block bluetooth
 EOF
-  systemctl daemon-reload
-fi
+  if ! cmp -s "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}" 2>/dev/null; then
+    mv "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}"
+    systemctl daemon-reload
+  else
+    rm -f "${OVERRIDE_FILE}.tmp"
+  fi
+}
+
+write_bt_override
