@@ -9,6 +9,13 @@
  * are blocked (maximum battery when both are off).  Uses the same GPIO as
  * the original vcc_wifi regulator (enable-active-low).
  *
+ * Combo dependency: the RTL8733BU is a single USB device whose Bluetooth
+ * function only works after the WiFi driver (8733bu) has loaded and
+ * initialized the firmware/combo block.  When the BT rfkill is unblocked
+ * we ensure 8733bu is loaded via request_module() even if the user has
+ * WiFi disabled in the UI (WLAN rfkill stays soft-blocked — the radio is
+ * off but the module is present so BT can function).
+ *
  * After turning power on (and on resume), we wait 100 ms before returning so
  * the chip is stable before USB enumerates; this avoids "WiFi not connected
  * after resume" when the host enumerates before the module is ready (same
@@ -17,14 +24,19 @@
 
 #include <linux/delay.h>
 #include <linux/gpio/consumer.h>
+#include <linux/kmod.h>
 #include <linux/module.h>
 #include <linux/mod_devicetable.h>
 #include <linux/platform_device.h>
 #include <linux/pm.h>
 #include <linux/rfkill.h>
+#include <linux/workqueue.h>
 
-/* Delay after asserting power so the chip is ready before USB enumerates. */
 #define RTL8733BU_POWER_STABLE_MS	100
+
+static char *wifi_module = "8733bu";
+module_param(wifi_module, charp, 0644);
+MODULE_PARM_DESC(wifi_module, "WiFi driver module to load for combo BT (default: 8733bu)");
 
 struct rtl8733bu_power {
 	struct gpio_desc *enable_gpio;
@@ -32,22 +44,38 @@ struct rtl8733bu_power {
 	struct rfkill *rfkill_bt;
 	bool wlan_blocked;
 	bool bt_blocked;
+	struct work_struct combo_work;
+	struct device *dev;
 };
 
 static void rtl8733bu_power_update_gpio(struct rtl8733bu_power *power)
 {
-	/* Power on if at least one of WiFi or BT is unblocked. */
 	bool on = !power->wlan_blocked || !power->bt_blocked;
 
-	/*
-	 * gpiod handles active-low: gpiod_set_value(1) = assert = power on,
-	 * gpiod_set_value(0) = deassert = power off.
-	 */
 	gpiod_set_value_cansleep(power->enable_gpio, on ? 1 : 0);
 
-	/* Let the chip stabilize before USB enumerates (avoids failed reconnect after resume). */
 	if (on)
 		msleep(RTL8733BU_POWER_STABLE_MS);
+}
+
+/*
+ * Load the WiFi combo module from a work queue (request_module sleeps).
+ * Called when BT is unblocked so the combo firmware path is alive.
+ */
+static void rtl8733bu_combo_work_fn(struct work_struct *work)
+{
+	struct rtl8733bu_power *power =
+		container_of(work, struct rtl8733bu_power, combo_work);
+	int ret;
+
+	ret = request_module("%s", wifi_module);
+	if (ret)
+		dev_warn(power->dev,
+			 "request_module(%s) returned %d (BT may not work)\n",
+			 wifi_module, ret);
+	else
+		dev_info(power->dev,
+			 "loaded combo WiFi module %s for BT\n", wifi_module);
 }
 
 static int rtl8733bu_power_set_block_wlan(void *data, bool blocked)
@@ -65,6 +93,10 @@ static int rtl8733bu_power_set_block_bt(void *data, bool blocked)
 
 	power->bt_blocked = blocked;
 	rtl8733bu_power_update_gpio(power);
+
+	if (!blocked)
+		schedule_work(&power->combo_work);
+
 	return 0;
 }
 
@@ -85,6 +117,9 @@ static int rtl8733bu_power_probe(struct platform_device *pdev)
 	power = devm_kzalloc(dev, sizeof(*power), GFP_KERNEL);
 	if (!power)
 		return -ENOMEM;
+
+	power->dev = dev;
+	INIT_WORK(&power->combo_work, rtl8733bu_combo_work_fn);
 
 	power->enable_gpio = devm_gpiod_get(dev, "enable", GPIOD_OUT_HIGH);
 	if (IS_ERR(power->enable_gpio)) {
@@ -124,7 +159,8 @@ static int rtl8733bu_power_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, power);
-	dev_info(dev, "rtl8733bu-power: WiFi/BT power via rfkill (power off when both blocked)\n");
+	dev_info(dev, "rtl8733bu-power: WiFi/BT rfkill (combo module: %s)\n",
+		 wifi_module);
 	return 0;
 
 err_unregister_wlan:
@@ -139,6 +175,7 @@ static void rtl8733bu_power_remove(struct platform_device *pdev)
 
 	if (!power)
 		return;
+	cancel_work_sync(&power->combo_work);
 	if (power->rfkill_bt) {
 		rfkill_unregister(power->rfkill_bt);
 		rfkill_destroy(power->rfkill_bt);
@@ -149,6 +186,16 @@ static void rtl8733bu_power_remove(struct platform_device *pdev)
 	}
 }
 
+static void rtl8733bu_power_shutdown(struct platform_device *pdev)
+{
+	struct rtl8733bu_power *power = platform_get_drvdata(pdev);
+
+	if (!power)
+		return;
+	cancel_work_sync(&power->combo_work);
+	gpiod_set_value_cansleep(power->enable_gpio, 0);
+}
+
 static int rtl8733bu_power_resume(struct device *dev)
 {
 	struct rtl8733bu_power *power = dev_get_drvdata(dev);
@@ -156,8 +203,6 @@ static int rtl8733bu_power_resume(struct device *dev)
 	if (!power)
 		return 0;
 
-	/* Re-apply GPIO state so power is on before USB subsystem resumes.
-	 * rtl8733bu_power_update_gpio() includes the stability delay when power is on. */
 	rtl8733bu_power_update_gpio(power);
 	return 0;
 }
@@ -173,9 +218,10 @@ static const struct of_device_id rtl8733bu_power_of_match[] = {
 MODULE_DEVICE_TABLE(of, rtl8733bu_power_of_match);
 
 static struct platform_driver rtl8733bu_power_driver = {
-	.probe  = rtl8733bu_power_probe,
-	.remove = rtl8733bu_power_remove,
-	.driver = {
+	.probe    = rtl8733bu_power_probe,
+	.remove   = rtl8733bu_power_remove,
+	.shutdown = rtl8733bu_power_shutdown,
+	.driver   = {
 		.name = "rtl8733bu-power",
 		.of_match_table = rtl8733bu_power_of_match,
 		.pm = pm_sleep_ptr(&rtl8733bu_power_pm_ops),
@@ -183,6 +229,6 @@ static struct platform_driver rtl8733bu_power_driver = {
 };
 module_platform_driver(rtl8733bu_power_driver);
 
-MODULE_DESCRIPTION("RTL8733BU WiFi/BT power via rfkill (WLAN+BT); power off when both blocked; delay on power-on/resume for stable USB reconnect");
+MODULE_DESCRIPTION("RTL8733BU WiFi/BT power via rfkill; auto-loads combo WiFi module for BT");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("ROCKNIX");

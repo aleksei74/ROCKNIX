@@ -8,6 +8,10 @@
 # Chip power stays on while either is unblocked; power is cut only when
 # both are blocked.  This quirk syncs both WiFi and BT rfkill state to
 # their respective settings at boot.
+#
+# The kernel driver (rtl8733bu_power) handles the combo dependency:
+# when BT rfkill is unblocked it auto-loads 8733bu via request_module()
+# so BT works even when WiFi is off in the UI.
 
 modprobe rtl8733bu_power 2>/dev/null
 
@@ -35,28 +39,20 @@ if [ "${BT_ENABLED}" != "1" ]; then
   rfkill block bluetooth 2>/dev/null
 fi
 
-# Override systemd bluetooth.service to manage btusb module and
-# rfkill state together.  When bluetooth starts -> load btusb, unblock
-# rfkill, then wait for hci0 before bluetoothd runs.  When bluetooth stops
-# -> unload btusb and block rfkill so the chip can power off if WiFi is off.
-#
-# RTL8733BU: hci0 appears only after btusb binds and firmware loads; if
-# bluetoothd starts first, BlueZ has no adapter and the UI stays on
-# "scanning for devices" forever.
+# Override systemd bluetooth.service to manage btusb module and rfkill.
+# btusb must be loaded + BT rfkill unblocked before bluetoothd runs;
+# hci0 appears after btusb binds + firmware, so wait before bluetoothd.
 OVERRIDE_DIR="/etc/systemd/system/bluetooth.service.d"
 OVERRIDE_FILE="${OVERRIDE_DIR}/70-btusb-miyoo-flip.conf"
 
 write_bt_override() {
   mkdir -p "${OVERRIDE_DIR}"
-  # Remove legacy drop-in so we do not stack duplicate ExecStartPre lines.
   rm -f "${OVERRIDE_DIR}/btusb-miyoo.conf"
   cat <<'EOF' >"${OVERRIDE_FILE}.tmp"
 [Service]
-# Load driver before clearing soft block (order matters on USB combo).
 ExecStartPre=-/usr/sbin/modprobe btusb
 ExecStartPre=-/usr/sbin/rfkill unblock bluetooth
-# Wait up to ~5s for hci0 so bluetoothd sees an adapter (busybox sh).
-ExecStartPre=-/bin/sh -c 'i=0; while [ "$i" -lt 100 ]; do [ -e /sys/class/bluetooth/hci0 ] && exit 0; i=$((i+1)); sleep 0.05; done; logger -t btusb-miyoo "hci0 not ready after 5s (continuing)"; exit 0'
+ExecStartPre=-/bin/sh -c 'i=0; while [ "$i" -lt 100 ]; do [ -e /sys/class/bluetooth/hci0 ] && exit 0; i=$((i+1)); sleep 0.05; done; exit 0'
 ExecStopPost=-/usr/sbin/modprobe -r btusb
 ExecStopPost=-/usr/sbin/rfkill block bluetooth
 EOF
