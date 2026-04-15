@@ -1260,11 +1260,8 @@
 	status = "okay";
 };
 
-/* SFC: SPI Flash Controller — accesses the internal SPI-NAND (BSP boot media).
- * ROCKNIX boots from SD card, so this is unused at runtime. Kept here
- * (disabled) with the BSP partition layout for reference.
- * Chip is ESMT (0xc8); mainline has no ESMT SPI-NAND table. */
-/*
+/* SFC: internal SPI NAND — only the preloader region is exported to Linux so userspace can restore the preloader.
+ */
 &sfc {
 	status = "okay";
 	#address-cells = <1>;
@@ -1282,33 +1279,39 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 
+			partition@0 {
+				label = "preloader";
+				reg = <0x0 0x200000>;
+			};
+
+			/*
 			partition@200000 {
 				label = "vnvm";
 				reg = <0x200000 0x100000>;
 			};
+
 			partition@300000 {
 				label = "uboot";
 				reg = <0x300000 0x400000>;
 			};
+
 			partition@700000 {
 				label = "boot";
 				reg = <0x700000 0x2600000>;
 			};
+
 			partition@2d00000 {
 				label = "rootfs";
 				reg = <0x2d00000 0x4000000>;
 			};
+
 			partition@6d00000 {
 				label = "userdata";
 				reg = <0x6d00000 0x1260000>;
 			};
+			*/
 		};
 	};
-};
-
-*/
-&sfc {
-	status = "disabled";
 };
 
 &tsadc {
@@ -1481,10 +1484,15 @@
 };
 
 /*
- * Unused-pin management: holds ~50 GPIOs with explicit pull-up/pull-down so
- * they don't float (CMOS shoot-through).  Not required for functionality —
- * stock firmware and other ROCKNIX boards leave them floating.  Kept for
- * conservative power hygiene.
+ * Unused-pin management: holds GPIOs with explicit pull-up/pull-down so they
+ * don't float.  Not required for functionality — stock leaves many floating.
+ *
+ * IMPORTANT: Do NOT include unused_emmc_pins here while &sfc is enabled.
+ * GPIO1 B4–D4 (and neighbours in that group) are the FSPI / SFC NAND pins
+ * (same ball group as unused eMMC).  Hogging them as GPIO causes:
+ *   rockchip-sfc fe300000.spi: Error applying setting, reverse things back
+ * and no MTD devices.  unused_emmc_pins is kept below for reference if SFC
+ * is ever disabled again.
  */
 
 / {
@@ -1493,7 +1501,7 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&unused_emmc_pins &unused_gpio0_pins &unused_gpio0_d_pins
+		pinctrl-0 = <&unused_gpio0_pins &unused_gpio0_d_pins
 			    &unused_gpio1_a01_pins &unused_gpio2_pins &unused_gpio2_c7d_pins
 			    &unused_gpio3_pins &unused_gpio4_pins &unused_gpio4_d2_pins
 			    &unused_i2s1_pins>;
