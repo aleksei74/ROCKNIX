@@ -14,7 +14,7 @@
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/soc/rockchip,vop2.h>
-#include <dt-bindings/suspend/rockchip-rk3568.h>
+/* #include <dt-bindings/suspend/rockchip-rk3568.h> -- disabled while 1013 patches are out for testing */
 #include "rk3566.dtsi"
 
 / {
@@ -494,11 +494,14 @@
 	 * and wakeup-config to BL31 via SIP_SUSPEND_MODE SMC at probe and
 	 * before each suspend.  SLPPIN register writes are handled separately
 	 * by vanilla rk8xx-core (SLPPIN_SLP_FUN on suspend, NULL_FUN on resume).
+	 * Currently disabled.
 	 */
+	/*
 	rk3568-suspend {
 		compatible = "rockchip,rk3568-suspend";
 		status = "okay";
-		rockchip,sleep-debug-en = <0>;	/* Set 1 + no_console_suspend for serial across suspend */
+		// Set sleep-debug-en to 1 + no_console_suspend in cmdline for serial across suspend
+		rockchip,sleep-debug-en = <0>;
 		rockchip,sleep-mode-config = <
 			(0
 			| RKPM_SLP_CENTER_OFF
@@ -516,6 +519,7 @@
 			)
 		>;
 	};
+	*/
 
 	/* DMC devfreq: DDR frequency scaling via ATF SIP. DFI provides load; governor scales 324–1056 MHz. Stock uses same SIP. */
 	dmc: dmc {
@@ -838,13 +842,14 @@
 				regulator-initial-mode = <0x2>;
 				regulator-name = "vdd_logic";
 				/*
-				 * vdd_logic off in suspend — matches stock firmware.
-				 * The rk3568-suspend driver configures BL31 with
-				 * RKPM_SLP_ARMOFF_LOGOFF so TF-A properly
-				 * saves/restores the logic domain on resume.
+				 * Without the rk3568-suspend driver (1013 patches),
+				 * vdd_logic must stay on — BL31 defaults don't
+				 * expect ARMOFF_LOGOFF and can't restore the logic
+				 * domain.  Re-enable off-in-suspend when the 1013
+				 * patches are active again.
 				 */
 				regulator-state-mem {
-					regulator-off-in-suspend;
+					regulator-on-in-suspend;
 				};
 			};
 
