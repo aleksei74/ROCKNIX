@@ -2,66 +2,56 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
 
-# RTL8733BU WiFi+BT combo chip power management (Miyoo Flip).
+# RTL8733BU WiFi+BT combo chip — boot-time rfkill sync (Miyoo Flip).
 #
-# rtl8733bu-power registers two rfkill devices (WLAN + BLUETOOTH).
-# Chip power stays on while either is unblocked; power is cut only when
-# both are blocked.  This quirk syncs both WiFi and BT rfkill state to
-# their respective settings at boot.
-#
-# The kernel driver (rtl8733bu_power) handles the combo dependency:
-# when BT rfkill is unblocked it auto-loads 8733bu via request_module()
-# so BT works even when WiFi is off in the UI.
-
-modprobe rtl8733bu_power 2>/dev/null
+# btusb is blacklisted in modprobe.d (udev auto-load at boot triggers a
+# chip-level reset via btrtl firmware download before 8733bu has fully
+# initialized the combo block, disconnecting the entire USB device).
+# This quirk syncs rfkill state to the user's settings, and creates a
+# bluetooth.service drop-in that explicitly loads btusb when BT is needed.
 
 . /etc/profile.d/001-functions
 
-# Check if system is configured (first boot detection)
-# On first boot, config may not be ready yet, so use safe defaults
 if [ -e "/storage/.configured" ]; then
   WIFI_ENABLED=$(get_setting wifi.enabled)
   BT_ENABLED=$(get_setting controllers.bluetooth.enabled)
 else
-  # First boot: default to disabled
   WIFI_ENABLED=""
   BT_ENABLED=""
 fi
-
-# Sync WiFi rfkill state to wifi.enabled setting
 if [ "${WIFI_ENABLED}" != "1" ]; then
   rfkill block wifi 2>/dev/null
 fi
 
-# Sync BT rfkill state to controllers.bluetooth.enabled setting
 if [ "${BT_ENABLED}" != "1" ]; then
   modprobe -r btusb 2>/dev/null
   rfkill block bluetooth 2>/dev/null
 fi
 
-# Override systemd bluetooth.service to manage btusb module and rfkill.
-# btusb must be loaded + BT rfkill unblocked before bluetoothd runs;
-# hci0 appears after btusb binds + firmware, so wait before bluetoothd.
-OVERRIDE_DIR="/etc/systemd/system/bluetooth.service.d"
+# bluetooth.service drop-in: load btusb + wait for hci0 before bluetoothd,
+# unload btusb + block BT rfkill on stop.  btusb is blacklisted so this
+# explicit modprobe is the ONLY way it gets loaded.
+# /etc/ is read-only squashfs; use /run/systemd/system/ (tmpfs, writable).
+OVERRIDE_DIR="/run/systemd/system/bluetooth.service.d"
 OVERRIDE_FILE="${OVERRIDE_DIR}/70-btusb-miyoo-flip.conf"
 
-write_bt_override() {
-  mkdir -p "${OVERRIDE_DIR}"
-  rm -f "${OVERRIDE_DIR}/btusb-miyoo.conf"
-  cat <<'EOF' >"${OVERRIDE_FILE}.tmp"
+mkdir -p "${OVERRIDE_DIR}"
+cat <<'EOF' >"${OVERRIDE_FILE}.tmp"
 [Service]
+# bluetooth.service restricts CapabilityBoundingSet (no CAP_SYS_MODULE),
+# so modprobe in ExecStartPre/ExecStopPost fails "Operation not permitted".
+# Reset and re-add the original caps plus CAP_SYS_MODULE.
+CapabilityBoundingSet=
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_FOWNER CAP_SYS_MODULE
 ExecStartPre=-/usr/sbin/modprobe btusb
 ExecStartPre=-/usr/sbin/rfkill unblock bluetooth
 ExecStartPre=-/bin/sh -c 'i=0; while [ "$i" -lt 100 ]; do [ -e /sys/class/bluetooth/hci0 ] && exit 0; i=$((i+1)); sleep 0.05; done; exit 0'
 ExecStopPost=-/usr/sbin/modprobe -r btusb
 ExecStopPost=-/usr/sbin/rfkill block bluetooth
 EOF
-  if ! cmp -s "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}" 2>/dev/null; then
-    mv "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}"
-    systemctl daemon-reload
-  else
-    rm -f "${OVERRIDE_FILE}.tmp"
-  fi
-}
-
-write_bt_override
+if ! cmp -s "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}" 2>/dev/null; then
+  mv "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}"
+  systemctl daemon-reload
+else
+  rm -f "${OVERRIDE_FILE}.tmp"
+fi
