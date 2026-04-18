@@ -24,13 +24,16 @@ if [ "${WIFI_ENABLED}" != "1" ]; then
 fi
 
 if [ "${BT_ENABLED}" != "1" ]; then
-  modprobe -r btusb 2>/dev/null
   rfkill block bluetooth 2>/dev/null
 fi
 
 # bluetooth.service drop-in: load btusb + wait for hci0 before bluetoothd,
-# unload btusb + block BT rfkill on stop.  btusb is blacklisted so this
-# explicit modprobe is the ONLY way it gets loaded.
+# block BT rfkill on stop. btusb is blacklisted so this explicit modprobe
+# is the ONLY way it gets loaded; once loaded it stays resident for the
+# rest of the session (unloading it while WiFi is active kills the shared
+# USB device). The rtl8733bu-power driver drops the chip GPIO when both
+# wifi and bt rfkills are blocked, which cleanly disconnects the USB
+# device and fires btusb/8733bu .disconnect callbacks automatically.
 # /etc/ is read-only squashfs; use /run/systemd/system/ (tmpfs, writable).
 OVERRIDE_DIR="/run/systemd/system/bluetooth.service.d"
 OVERRIDE_FILE="${OVERRIDE_DIR}/70-btusb-miyoo-flip.conf"
@@ -39,14 +42,13 @@ mkdir -p "${OVERRIDE_DIR}"
 cat <<'EOF' >"${OVERRIDE_FILE}.tmp"
 [Service]
 # bluetooth.service restricts CapabilityBoundingSet (no CAP_SYS_MODULE),
-# so modprobe in ExecStartPre/ExecStopPost fails "Operation not permitted".
+# so modprobe in ExecStartPre fails "Operation not permitted".
 # Reset and re-add the original caps plus CAP_SYS_MODULE.
 CapabilityBoundingSet=
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_FOWNER CAP_SYS_MODULE
 ExecStartPre=-/usr/sbin/modprobe btusb
 ExecStartPre=-/usr/sbin/rfkill unblock bluetooth
 ExecStartPre=-/bin/sh -c 'i=0; while [ "$i" -lt 100 ]; do [ -e /sys/class/bluetooth/hci0 ] && exit 0; i=$((i+1)); sleep 0.05; done; exit 0'
-ExecStopPost=-/usr/sbin/modprobe -r btusb
 ExecStopPost=-/usr/sbin/rfkill block bluetooth
 EOF
 if ! cmp -s "${OVERRIDE_FILE}.tmp" "${OVERRIDE_FILE}" 2>/dev/null; then

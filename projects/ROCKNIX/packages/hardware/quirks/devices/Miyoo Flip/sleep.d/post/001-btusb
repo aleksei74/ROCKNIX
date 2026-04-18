@@ -3,28 +3,25 @@
 # Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
 
 # RTL8733BU combo chip: sync WiFi and BT rfkill state to settings after resume.
-# The driver's resume hook re-applies GPIO based on internal rfkill state, which
-# may not match the wifi.enabled setting. Sync both to ensure UI and hardware
-# state match. Note: BT connections (e.g. headphones) are dropped during sleep
-# when the chip powers off; user may need to reconnect or the stack may auto-reconnect.
+# The rtl8733bu-power driver's resume hook re-applies GPIO based on its rfkill
+# state; sleep.sh itself handles start/stop of bluetooth.service and wifictl,
+# so this quirk only needs to make sure rfkill matches the user intent.
+# btusb stays loaded — GPIO-off handles USB disconnect; GPIO-on handles probe.
+# Note: BT connections (e.g. headphones) drop during sleep when the chip
+# powers off; the stack may auto-reconnect.
 
 . /etc/profile.d/001-functions
 
-# Check if system is configured before reading settings
 if [ -e "/storage/.configured" ]; then
-  # Sync WiFi rfkill state to wifi.enabled setting
   if [ "$(get_setting wifi.enabled)" = "1" ]; then
     rfkill unblock wifi 2>/dev/null
   else
     rfkill block wifi 2>/dev/null
   fi
 
-  # Sync BT rfkill state to controllers.bluetooth.enabled setting
   if [ "$(get_setting controllers.bluetooth.enabled)" = "1" ]; then
     rfkill unblock bluetooth 2>/dev/null
-    modprobe btusb 2>/dev/null
   else
     rfkill block bluetooth 2>/dev/null
-    modprobe -r btusb 2>/dev/null
   fi
 fi

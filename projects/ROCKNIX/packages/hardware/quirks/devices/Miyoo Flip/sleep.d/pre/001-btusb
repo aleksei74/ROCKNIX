@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2025 ROCKNIX (https://github.com/ROCKNIX)
 
-# RTL8733BU combo chip: unload btusb and block BT rfkill before suspend
-# so the chip can fully power down (if WiFi is also blocked by sleep.sh).
+# RTL8733BU combo chip: soft-block BT before suspend. btusb stays loaded —
+# the rtl8733bu-power driver drops the chip GPIO when both wifi and bt
+# rfkills are blocked, which cleanly disconnects the USB device (firing
+# btusb/8733bu .disconnect callbacks for us). Unloading btusb directly
+# while 8733bu is active would break the shared USB device.
 
-if lsmod | grep -q btusb; then
-  modprobe -r btusb 2>/dev/null
-fi
 rfkill block bluetooth 2>/dev/null
