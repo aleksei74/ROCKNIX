@@ -393,7 +393,8 @@
 			linux,input-type = <EV_SW>;
 			linux,code = <SW_LID>;
 			wakeup-source;
-			debounce-interval = <1500>;	/*BSP Uses hall-mh248 with 10ms*/
+			wakeup-event-action = <2>;
+			debounce-interval = <20>;
 		};
 	};
 
