@@ -22,8 +22,7 @@ PKG_MESON_OPTS_TARGET="
   -Dsystemd_journal=false
   -Dlibaudit=no
   -Dlibpsl=false
-
-  -Dwifi=true
+  -Dwifi=false
   -Dwext=false
   -Diwd=false
   -Dppp=false
@@ -37,14 +36,11 @@ PKG_MESON_OPTS_TARGET="
   -Dnm_cloud_setup=false
   -Dbluez5_dun=false
   -Debpf=false
-
   -Difcfg_rh=false
   -Difupdown=false
-
   -Ddhclient=no
   -Ddhcpcd=no
   -Dconfig_dhcp_default=internal
-
   -Dintrospection=false
   -Dvapi=false
   -Ddocs=false
@@ -52,9 +48,20 @@ PKG_MESON_OPTS_TARGET="
   -Dfirewalld_zone=false
   -Dmore_logging=false
   -Dvalgrind=no
-
-
   -Dqt=false
   -Dreadline=none
   -Dconfig_plugins_default=keyfile
+  -Dcrypto=null
 "
+
+post_makeinstall_target() {
+  rm -rf ${INSTALL}/mnt
+  rm -rf ${INSTALL}/usr/bin
+  rm -rf ${INSTALL}/usr/sbin
+  rm -rf ${INSTALL}/usr/share
+  rm -rf ${INSTALL}/usr/include
+  rm -rf ${INSTALL}/usr/lib/pkgconfig
+  rm -rf ${INSTALL}/usr/lib/nm*
+  rm -rf ${INSTALL}/usr/lib/NetworkManager
+
+}

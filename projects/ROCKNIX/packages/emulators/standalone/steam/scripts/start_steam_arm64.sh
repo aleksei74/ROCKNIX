@@ -36,9 +36,23 @@ fi
   echo "CPU CORES set to: ${EMUPERF}"
   echo "GAMESCOPE set to: ${GAMESCOPE}"
 
-systemctl stop systemd-binfmt
+echo 0 > /proc/sys/fs/binfmt_misc/x86_64
+echo 0 > /proc/sys/fs/binfmt_misc/x86
 mkdir -p "/storage/.local/share/Steam/steamapps/common/Proton 11.0 (ARM64)/"
 cp -f "/storage/toolmanifest.vdf" "/storage/.local/share/Steam/steamapps/common/Proton 11.0 (ARM64)/"
+
+eval $(swaymsg -t get_outputs | jq -r '
+  .[] | select(.focused == true) |
+  "W=\(.current_mode.width) H=\(.current_mode.height) TRANSFORM=\(.transform) REFRESH=\(.current_mode.refresh // 60000)"
+')
+REFRESH_HZ=$((REFRESH / 1000))
+if [[ "$TRANSFORM" == "90" || "$TRANSFORM" == "270" || "$TRANSFORM" == "flipped-90" || "$TRANSFORM" == "flipped-270" ]]; then
+  WIDTH=$H
+  HEIGHT=$W
+else
+  WIDTH=$W
+  HEIGHT=$H
+fi
 
 if [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then
   swaymsg 'seat seat1 fallback true'
@@ -49,16 +63,16 @@ if [[ "$1" == *.desktop && -f "$1" && "$(basename "$1")" != "Steam.desktop" ]]; 
     if [ "${GAMESCOPE}" = "0" ]; then
         SDL_VIDEODRIVER=x11 LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ ${EMUPERF} /storage/.local/share/Steam/steamrtarm64/steam -bigpicture "$GAME_URI"
     else
-        LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ ${EMUPERF} gamescope -w 1920 -h 1080 -e -- /storage/.local/share/Steam/steamrtarm64/steam -bigpicture "$GAME_URI"
+        LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ ${EMUPERF} gamescope -w $WIDTH -h $HEIGHT -W $WIDTH -H $HEIGHT -r $REFRESH_HZ -f -e -- /storage/.local/share/Steam/steamrtarm64/steam -bigpicture "$GAME_URI"
     fi
 else
     if [ "${GAMESCOPE}" = "0" ]; then
         SDL_VIDEODRIVER=x11 LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ ${EMUPERF} /storage/.local/share/Steam/steamrtarm64/steam -bigpicture
     else
-        LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ ${EMUPERF} gamescope -w 1920 -h 1080 -e -- /storage/.local/share/Steam/steamrtarm64/steam -bigpicture
+        LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ ${EMUPERF} gamescope -w $WIDTH -h $HEIGHT -W $WIDTH -H $HEIGHT -r $REFRESH_HZ -f -e -- /storage/.local/share/Steam/steamrtarm64/steam -bigpicture
     fi
 fi
 if [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then
   swaymsg 'seat seat1 fallback false'
 fi
-systemctl start systemd-binfmt
+systemctl restart systemd-binfmt

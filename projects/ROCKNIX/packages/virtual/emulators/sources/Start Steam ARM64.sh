@@ -35,19 +35,33 @@ if [ ! -d "/storage/.local/share/Steam/steamrtarm64" ]; then
   ln -sf "/storage/.local/share/Steam/linuxarm64" "/storage/.steam/sdkarm64"
   mkdir -p "/storage/.local/share/Steam/compatibilitytools.d/"
   ln -sf "/storage/.local/share/Steam/steamapps/common/Proton 11.0 (ARM64)/" "/storage/.local/share/Steam/compatibilitytools.d/Proton11ARM"
-  ln -sf  "/usr/share/steam/compatibilitytool.vdf" "/storage/.local/share/Steam/compatibilitytools.d/"
+  cp -f  "/usr/share/steam/compatibilitytool.vdf" "/storage/.local/share/Steam/compatibilitytools.d/"
   LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ /storage/.local/share/Steam/steamrtarm64/steam
+fi
+
+eval $(swaymsg -t get_outputs | jq -r '
+  .[] | select(.focused == true) |
+  "W=\(.current_mode.width) H=\(.current_mode.height) TRANSFORM=\(.transform) REFRESH=\(.current_mode.refresh // 60000)"
+')
+REFRESH_HZ=$((REFRESH / 1000))
+if [[ "$TRANSFORM" == "90" || "$TRANSFORM" == "270" || "$TRANSFORM" == "flipped-90" || "$TRANSFORM" == "flipped-270" ]]; then
+  WIDTH=$H
+  HEIGHT=$W
+else
+  WIDTH=$W
+  HEIGHT=$H
 fi
 
 mkdir -p "/storage/.local/share/Steam/steamapps/common/Proton 11.0 (ARM64)/"
 cp -f "/usr/share/steam/toolmanifest.vdf" "/storage/.local/share/Steam/steamapps/common/Proton 11.0 (ARM64)/"
-systemctl stop systemd-binfmt
+echo 0 > /proc/sys/fs/binfmt_misc/x86_64
+echo 0 > /proc/sys/fs/binfmt_misc/x86
 if [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then
   swaymsg 'seat seat1 fallback true'
 fi
 swaymsg for_window [instance="steamwebhelper"] fullscreen enable
-LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ gamescope -w 1920 -h 1080 -e -- /storage/.local/share/Steam/steamrtarm64/steam -bigpicture
+LD_LIBRARY_PATH=/storage/.local/share/Steam/lib/aarch64-linux-gnu/ gamescope -w $WIDTH -h $HEIGHT -W $WIDTH -H $HEIGHT -r $REFRESH_HZ -f -e -- /storage/.local/share/Steam/steamrtarm64/steam -bigpicture
 if [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then
   swaymsg 'seat seat1 fallback false'
 fi
-systemctl start systemd-binfmt
+systemctl restart systemd-binfmt

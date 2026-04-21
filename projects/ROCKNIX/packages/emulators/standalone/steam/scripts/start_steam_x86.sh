@@ -71,6 +71,19 @@ export GSK_RENDERER=gl
   echo "GAMESCOPE set to: ${GAMESCOPE}"
   echo "VSYNC set to: ${VSYNC}"
 
+eval $(swaymsg -t get_outputs | jq -r '
+  .[] | select(.focused == true) |
+  "W=\(.current_mode.width) H=\(.current_mode.height) TRANSFORM=\(.transform) REFRESH=\(.current_mode.refresh // 60000)"
+')
+REFRESH_HZ=$((REFRESH / 1000))
+if [[ "$TRANSFORM" == "90" || "$TRANSFORM" == "270" || "$TRANSFORM" == "flipped-90" || "$TRANSFORM" == "flipped-270" ]]; then
+  WIDTH=$H
+  HEIGHT=$W
+else
+  WIDTH=$W
+  HEIGHT=$H
+fi
+
 systemctl stop systemd-binfmt
 if [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then
   swaymsg 'seat seat1 fallback true'
@@ -81,13 +94,13 @@ if [[ "$1" == *.desktop && -f "$1" && "$(basename "$1")" != "Steam.desktop" ]]; 
     if [ "${GAMESCOPE}" = "0" ]; then
         ${EMUPERF} FEX /usr/bin/steam -bigpicture "$GAME_URI"
     else
-        ${EMUPERF} gamescope -w 1920 -h 1080 -W 1920 -H 1080 -f -e -- FEX /usr/bin/steam -bigpicture "$GAME_URI"
+        ${EMUPERF} gamescope -w $WIDTH -h $HEIGHT -W $WIDTH -H $HEIGHT -r $REFRESH_HZ -f -e -- FEX /usr/bin/steam -bigpicture "$GAME_URI"
     fi
 else
     if [ "${GAMESCOPE}" = "0" ]; then
         ${EMUPERF} FEX /usr/bin/steam -bigpicture
     else
-        ${EMUPERF} gamescope -w 1920 -h 1080 -W 1920 -H 1080 -f -e -- FEX /usr/bin/steam -bigpicture
+        ${EMUPERF} gamescope -w $WIDTH -h $HEIGHT -W $WIDTH -H $HEIGHT -r $REFRESH_HZ -f -e -- FEX /usr/bin/steam -bigpicture
     fi
 fi
 if [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then

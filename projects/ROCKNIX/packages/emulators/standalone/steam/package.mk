@@ -21,9 +21,10 @@ unpack() {
 makeinstall_target() {
   sed -i '/^# Don'\''t allow running as root$/,/^fi$/d' "${PKG_BUILD}/usr/lib/steam/bin_steam.sh"
   mkdir -p ${INSTALL}/usr/config/modules
+  mkdir -p ${INSTALL}/usr/share/steam
   cp -rf ${PKG_BUILD}/usr/bin ${INSTALL}/usr/bin
   cp -rf ${PKG_BUILD}/usr/lib ${INSTALL}/usr/lib
   cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
-  cp -rf ${PKG_BUILD}/resources/compatibilitytool.vdf ${INSTALL}/usr/share/steam
-  cp -rf ${PKG_BUILD}/resources/toolmanifest.vdf ${INSTALL}/usr/share/steam
+  cp -rf ${PKG_DIR}/resources/compatibilitytool.vdf ${INSTALL}/usr/share/steam
+  cp -rf ${PKG_DIR}/resources/toolmanifest.vdf ${INSTALL}/usr/share/steam
 }
