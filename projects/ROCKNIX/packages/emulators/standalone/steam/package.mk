@@ -6,7 +6,7 @@ PKG_VERSION="1.0.0.85"
 PKG_LICENSE="proprietary"
 PKG_SITE="https://steampowered.com"
 PKG_URL="https://repo.steampowered.com/steam/archive/stable/steam-launcher_${PKG_VERSION}_amd64.deb"
-PKG_DEPENDS_TARGET="mesa:host fex-emu gamescope"
+PKG_DEPENDS_TARGET="mesa:host fex-emu gamescope nss networkmanager"
 PKG_LONGDESC="Steam is the ultimate destination for playing, discussing, and creating games"
 PKG_TOOLCHAIN="manual"
 
@@ -24,4 +24,6 @@ makeinstall_target() {
   cp -rf ${PKG_BUILD}/usr/bin ${INSTALL}/usr/bin
   cp -rf ${PKG_BUILD}/usr/lib ${INSTALL}/usr/lib
   cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
+  cp -rf ${PKG_BUILD}/resources/compatibilitytool.vdf ${INSTALL}/usr/share/steam
+  cp -rf ${PKG_BUILD}/resources/toolmanifest.vdf ${INSTALL}/usr/share/steam
 }
