@@ -1,0 +1,14 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
+for iface in /sys/bus/usb/drivers/xpad/*/; do
+  vid=$(cat "${iface}../idVendor" 2>/dev/null)
+  pid=$(cat "${iface}../idProduct" 2>/dev/null)
+  if [ -n "$vid" ] && [ -n "$pid" ]; then
+    echo "$vid:$pid:2" > /sys/module/usbcore/parameters/interrupt_interval_override
+
+    dev=$(basename "$iface")
+    echo "$dev" > /sys/bus/usb/drivers/xpad/unbind
+    echo "$dev" > /sys/bus/usb/drivers/xpad/bind
+  fi
+done
