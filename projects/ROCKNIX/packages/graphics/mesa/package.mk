@@ -35,6 +35,7 @@ pre_configure_host() {
   fi
 
   if listcontains "${GRAPHIC_DRIVERS}" "freedreno"; then
+    export CXX=g++-12
     export HOST_CFLAGS="${HOST_CFLAGS} -fno-strict-aliasing"
     export HOST_CXXFLAGS="${HOST_CXXFLAGS} -fno-strict-aliasing"
     export CFLAGS="${HOST_CFLAGS}"
