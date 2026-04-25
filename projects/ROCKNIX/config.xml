@@ -10,7 +10,9 @@
     <file>sun50i-h700-anbernic-rg35xx-2024</file>
     <file>sun50i-h700-anbernic-rg35xx-2024-rev6-panel</file>
     <file>sun50i-h700-anbernic-rg40xx-h</file>
+    <file>sun50i-h700-anbernic-rg40xx-h-v2-panel</file>
     <file>sun50i-h700-anbernic-rg40xx-v</file>
+    <file>sun50i-h700-anbernic-rg40xx-v-v2-panel</file>
     <file>sun50i-h700-anbernic-rgcubexx</file>
     <file>sun50i-h700-anbernic-rg28xx</file>
     <file>sun50i-h700-anbernic-rg34xx</file>
@@ -61,6 +63,9 @@
       <file>rk3568-anbernic-rg-ds</file>
     </Specific>
   </RK3566>
+  <RK3576 mkimage_options="dtb,extlinux,uboot" fdt="device_trees/rk3576-anbernic-rg-vita-pro.dtb" fdt_type="fdt" dtb_prefix="rockchip">
+    <file>rk3576-anbernic-rg-vita-pro</file>
+  </RK3576>
   <RK3588 mkimage_options="dtb,extlinux,uboot" fdt="device_trees/rk3588s-gameforce-ace.dtb" fdt_type="fdt" dtb_prefix="rockchip">
     <file>rk3588s-gameforce-ace</file>
     <file>rk3588s-retro-lite-cm5</file>
@@ -70,10 +75,11 @@
     <file>meson-g12b-odroid-go-ultra</file>
     <file>meson-g12b-powkiddy-rgb10-max-3-pro</file>
   </S922X>
-  <SDM845 mkimage_options="grub,dtb" dtb_prefix="qcom">
-    <file short="odin" full="AYN Odin" rotation="3">sdm845-ayn-odin</file>
-  </SDM845>
-  <SM8250 mkimage_options="abl" dtb_prefix="qcom">
+  <SM6115 mkimage_options="abl" dtb_prefix="qcom">
+    <file short="airx-mq66" full="MANGMI Air X MQ66">sm6115-mangmi-air-x-mq66</file>
+    <file short="airx-mq65" full="MANGMI Air X MQ65">sm6115-mangmi-air-x-mq65</file>
+  </SM6115>
+  <SM8250 mkimage_options="grub,dtb" dtb_prefix="qcom">
     <file short="rp5" full="Retroid Pocket 5" rotation="3">sm8250-retroidpocket-rp5</file>
     <file short="rpflip2" full="Retroid Pocket Flip2" rotation="3">sm8250-retroidpocket-flip2</file>
     <file short="rpmini" full="Retroid Pocket Mini" rotation="1">sm8250-retroidpocket-rpmini</file>

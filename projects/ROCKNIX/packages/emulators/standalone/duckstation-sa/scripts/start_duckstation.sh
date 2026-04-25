@@ -4,7 +4,7 @@
 # Copyright (C) 2022-present JELOS (https://github.com/JustEnoughLinuxOS)
 
 . /etc/profile
-set_kill set "-9 duckstation-mini"
+set_kill set "-9 AppRun.wrapped"
 
 # Filesystem vars
 IMMUTABLE_CONF_DIR="/usr/config/duckstation"
@@ -120,7 +120,10 @@ fi
   fi
 
 #Retroachievements
-/usr/bin/cheevos_duckstation.sh
+# Disabled, not working. Seems like Duckstation changed the token encruption...
+# /usr/bin/cheevos_duckstation.sh
+sed -i '/\[Cheevos\]/,/^\s*$/s/Enabled =.*/Enabled = false/' ${CONF_FILE}
+
 
 #Run Duckstation
 ${EMUPERF} duckstation-sa -fullscreen -bigpicture -nogui -- "${1}" > /dev/null 2>&1

@@ -3,16 +3,16 @@
 
 PKG_NAME="gopher64-sa"
 PKG_LICENSE="GPLv3"
-PKG_VERSION="acf5e08b97d8526e7f25578bdaa202557c42c200"
+PKG_VERSION="ca4a20f52403bb14f819db53f1cb161d41894666"
 PKG_SITE="https://github.com/gopher64/gopher64"
 PKG_URL="${PKG_SITE}.git"
-PKG_DEPENDS_TARGET="toolchain SDL3 cargo:host cargo rust mesa libXss ${VULKAN}"
+PKG_DEPENDS_TARGET="toolchain SDL3 SDL3_ttf cargo:host cargo rust mesa libXss ${VULKAN}"
 PKG_LONGDESC="Gopher64 - Highly compatible N64 emulator"
 PKG_TOOLCHAIN="manual"
 
 make_target() {
   unset CMAKE
-  export RUSTFLAGS="-A unpredictable_function_pointer_comparisons -C link-arg=-ldrm -C link-arg=-lgbm -C link-arg=-lasound -C link-arg=-lvulkan -C link-arg=-lvolk"
+  export RUSTFLAGS="-A unpredictable_function_pointer_comparisons -C link-arg=-ldrm -C link-arg=-lgbm -C link-arg=-lasound -C link-arg=-lvulkan -C link-arg=-lvolk -C link-arg=-lfreetype"
   export PKG_CONFIG_ALLOW_CROSS=1
 
   export CC=${TARGET_NAME}-gcc
@@ -31,9 +31,11 @@ make_target() {
   extra_cflags=[]
   extra_asmflags=[]
   "
+  export SKIA_BINARIES_URL="https://github.com/rust-skia/skia-binaries/releases/download/0.90.0/skia-binaries-da4579b39b75fa2187c5-aarch64-unknown-linux-gnu-gl-pdf-textlayout-vulkan.tar.gz"
 
   cargo build \
     --target ${TARGET_NAME} \
+    --no-default-features \
     --release
 }
 

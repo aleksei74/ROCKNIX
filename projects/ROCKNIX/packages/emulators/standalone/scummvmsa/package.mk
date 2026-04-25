@@ -3,7 +3,7 @@
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="scummvmsa"
-PKG_VERSION="2026.1.0"
+PKG_VERSION="2026.2.0"
 PKG_LICENSE="GPL2"
 PKG_SITE="https://github.com/scummvm/scummvm"
 PKG_URL="${PKG_SITE}/archive/refs/tags/v${PKG_VERSION}.tar.gz"
@@ -18,7 +18,6 @@ pre_configure_target() {
 post_makeinstall_target() {
   mkdir -p ${INSTALL}/usr/config/scummvm/
   cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/scummvm/
-  chmod 0755 ${INSTALL}/usr/config/scummvm/games/*sh
 
   mkdir -p ${INSTALL}/usr/config/scummvm/themes
   cp -rf ${PKG_BUILD}/gui/themes ${INSTALL}/usr/config/scummvm/themes

@@ -4,13 +4,15 @@
 
 PKG_NAME="dolphin-sa"
 PKG_LICENSE="GPLv2"
-PKG_DEPENDS_TARGET="toolchain libevdev libdrm ffmpeg zlib libpng lzo libusb zstd ecm openal-soft pulseaudio alsa-lib libfmt hidapi curl"
+PKG_DEPENDS_TARGET="toolchain libevdev libdrm ffmpeg zlib libpng lzo libusb zstd ecm openal-soft pulseaudio alsa-lib libfmt hidapi curl SDL3"
 PKG_LONGDESC="Dolphin is a GameCube / Wii / Triforce emulator, allowing you to play games for these two platforms on PC with improvements. "
 PKG_TOOLCHAIN="cmake"
 
 case ${DEVICE} in
-  SM8250|SM8550|SDM845|RK3399|SM8650|SM8750)
-    PKG_VERSION="9323074ada4b1d372809dc71ed092efe8d0e4c8e"
+  SM8250|SM8550|RK3399|SM8650|SM8750)
+    PKG_VERSION="cddffd2e2a40a00ad1da6821e98e9a06bf02d97d"
+    PKG_DOLPHIN_VERSION_MAJOR="2603"
+    PKG_DOLPHIN_VERSION_MINOR="1"
     PKG_SITE="https://github.com/dolphin-emu/dolphin"
     PKG_URL="${PKG_SITE}.git"
     PKG_DEPENDS_TARGET+=" qt6"
@@ -62,6 +64,7 @@ pre_configure_target() {
                            -DDISTRIBUTOR="ROCKNIX" \
                            -DENABLE_NOGUI=ON \
                            -DENABLE_EVDEV=ON \
+                           -DENABLE_SDL=ON \
                            -DUSE_DISCORD_PRESENCE=OFF \
                            -DBUILD_SHARED_LIBS=OFF \
                            -DLINUX_LOCAL_DEV=OFF \
@@ -79,6 +82,12 @@ pre_configure_target() {
 
   sed -i 's~#include <cstdlib>~#include <cstdlib>\n#include <cstdint>~g' ${PKG_BUILD}/Externals/VulkanMemoryAllocator/include/vk_mem_alloc.h
   sed -i 's~#include <cstdint>~#include <cstdint>\n#include <string>~g' ${PKG_BUILD}/Externals/VulkanMemoryAllocator/include/vk_mem_alloc.h
+
+  if [ -n "${PKG_DOLPHIN_VERSION_MAJOR=}" ]; then
+    sed -e "s/@PKG_DOLPHIN_VERSION_MAJOR@/${PKG_DOLPHIN_VERSION_MAJOR}/g" -i ${PKG_BUILD}/CMake/ScmRevGen.cmake
+    sed -e "s/@PKG_DOLPHIN_VERSION_MINOR@/${PKG_DOLPHIN_VERSION_MINOR}/g" -i ${PKG_BUILD}/CMake/ScmRevGen.cmake
+  fi
+
 }
 
 makeinstall_target() {

@@ -2,7 +2,7 @@
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="portmaster"
-PKG_VERSION="2025.12.07-0332"
+PKG_VERSION="2026.04.01-1426"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/PortsMaster/PortMaster-GUI"
@@ -28,9 +28,5 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/compat
     curl -Lo ${PKG_BUILD}/compat.tar.gz ${COMPAT_URL}
     tar -xvf ${PKG_BUILD}/compat.tar.gz -C ${INSTALL}/usr/lib
-    if [ "${PREFER_GLES}" = "yes" ]; then
-      mv ${INSTALL}/usr/lib/compat/libSDL2-2.0.so.0.gles ${INSTALL}/usr/lib/compat/libSDL2-2.0.so.0
-    else
-      rm -rf ${INSTALL}/usr/lib/compat/libSDL2-2.0.so.0.gles
-    fi
+    rm -rf ${INSTALL}/usr/lib/compat/libSDL2-2.0.so.0*
 }
