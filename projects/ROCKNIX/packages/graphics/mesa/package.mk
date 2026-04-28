@@ -15,6 +15,11 @@ PKG_PATCH_DIRS+=" ${DEVICE}"
 PKG_VERSION="26.0.5"
 PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
 
+if [ "${DEVICE}" = "SM8750" ]; then
+  PKG_VERSION="d2c4653ee953dba73f0be8e9eab872269813582b"
+  PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/${PKG_VERSION}/mesa-${PKG_VERSION}.tar.gz"
+fi
+
 if listcontains "${GRAPHIC_DRIVERS}" "panfrost" || \
    listcontains "${GRAPHIC_DRIVERS}" "freedreno"; then
   PKG_DEPENDS_TARGET+=" mesa:host"
@@ -35,6 +40,7 @@ pre_configure_host() {
   fi
 
   if listcontains "${GRAPHIC_DRIVERS}" "freedreno"; then
+    export CXX=g++-12
     export HOST_CFLAGS="${HOST_CFLAGS} -fno-strict-aliasing"
     export HOST_CXXFLAGS="${HOST_CXXFLAGS} -fno-strict-aliasing"
     export CFLAGS="${HOST_CFLAGS}"
