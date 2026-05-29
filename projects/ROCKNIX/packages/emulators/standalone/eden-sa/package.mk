@@ -123,7 +123,7 @@ make_target() {
     -DYUZU_ROOM_STANDALONE=OFF
     -DYUZU_CMD=OFF
     -DVulkanHeaders_FORCE_BUNDLED=ON
-    -DENABLE_LTO=OFf
+    -DENABLE_LTO=OFF
     -DUSE_FAST_MATH=ON
   )
 
