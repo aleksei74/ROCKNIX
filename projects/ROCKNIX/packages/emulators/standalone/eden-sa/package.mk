@@ -27,7 +27,7 @@ EDEN_LLVM_BIN="${TOOLCHAIN}/bin"
 
 # PGO 데이터 설정
 PGO_URL="https://github.com/Eden-CI/PGO/releases/download/v020525/eden.profdata"
-PGO_FILE="${BUILD_DIR}/eden.profdata"
+PGO_FILE="${PKG_BUILD}/eden.profdata"
 
 post_unpack_target() {
   # -Werror 제거 (단일 find 명령으로 통합)
@@ -123,7 +123,7 @@ make_target() {
     -DYUZU_ROOM_STANDALONE=OFF
     -DYUZU_CMD=OFF
     -DVulkanHeaders_FORCE_BUNDLED=ON
-    -DENABLE_LTO=ON
+    -DENABLE_LTO=OFf
     -DUSE_FAST_MATH=ON
   )
 
