@@ -50,18 +50,19 @@ make_target() {
     PGO_FLAGS="-fprofile-use=${PGO_FILE} -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
   fi
 
-  local CPU_FIX="-mcpu=cortex-a78 -mtune=cortex-a78"
+  local CPU_FIX="-march=armv8.2-a+crc+crypto -mtune=cortex-a78"
   local LTO_FLAGS="-flto=thin -fuse-ld=lld -Wl,--lto-O3"
-  local OPT_FLAGS="-O3 -march=armv8.2-a -ffast-math -fslp-vectorize-aggressive"
+  local OPT_FLAGS="-O3"
+  local COMMON_FLAGS="${CPU_FIX} ${OPT_FLAGS} ${PGO_FLAGS} ${LTO_FLAGS}"
 
   # 3. sed 명령 최적화 (단일 sed로 통합)
   local FLAGS_CLEAN="s/-mabi=lp64//g; s/-mcpu=cortex-x[34]/-mcpu=cortex-a78/g; s/-march=armv9(\.[2-9])?-a/-march=armv8.2-a/g"
   
   for _v in CFLAGS CXXFLAGS; do
-    export ${_v}="$(echo ${!_v} | sed -e "$FLAGS_CLEAN") ${OPT_FLAGS} ${PGO_FLAGS} ${CPU_FIX} ${LTO_FLAGS}"
+    export ${_v}="$(echo ${!_v} | sed -e "$FLAGS_CLEAN") ${COMMON_FLAGS}"
   done
 
-  export LDFLAGS="$(echo ${LDFLAGS} | sed -e "$FLAGS_CLEAN" -e 's/-fuse-ld=bfd/-fuse-ld=lld/g') ${PGO_FLAGS} ${CPU_FIX} ${LTO_FLAGS}"
+  export LDFLAGS="$(echo ${LDFLAGS} | sed -e "$FLAGS_CLEAN" -e 's/-fuse-ld=bfd/-fuse-ld=lld/g') ${PGO_FLAGS} ${LTO_FLAGS}"
 
   # 4. 도구 경로 지정
   export AR="${EDEN_LLVM_BIN}/llvm-ar"
@@ -100,8 +101,8 @@ make_target() {
     -DCMAKE_CXX_COMPILER_TARGET=aarch64-rocknix-linux-gnu
     -DCMAKE_ASM_COMPILER="${EDEN_LLVM_BIN}/clang"
     -DCMAKE_ASM_COMPILER_TARGET=aarch64-rocknix-linux-gnu
-    -DCMAKE_C_FLAGS="${CPU_FIX} ${OPT_FLAGS}"
-    -DCMAKE_CXX_FLAGS="${CPU_FIX} ${OPT_FLAGS}"
+    -DCMAKE_C_FLAGS="${COMMON_FLAGS}"
+    -DCMAKE_CXX_FLAGS="${COMMON_FLAGS}"
 
     # 링커 및 도구 설정
     -DCMAKE_LINKER="${EDEN_LLVM_BIN}/ld.lld"
