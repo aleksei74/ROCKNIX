@@ -25,7 +25,6 @@ fi
 EDEN_LLVM_BIN="${TOOLCHAIN}/bin"
 
 PGO_URL="https://github.com/Eden-CI/PGO/releases/download/v020525/eden.profdata"
-PGO_FILE="${PKG_BUILD}/eden.profdata"
 
 post_unpack_target() {
   find "${PKG_BUILD}" \( -name "CMakeLists.txt" -o -name "*.cmake" \) \
@@ -33,6 +32,8 @@ post_unpack_target() {
 }
 
 make_target() {
+  local PGO_FILE="${PKG_BUILD}/eden.profdata"
+
   if [ ! -f "$PGO_FILE" ]; then
     echo "Downloading PGO profile data..."
     curl -L --max-time 300 --retry 3 "$PGO_URL" -o "$PGO_FILE" || {
@@ -47,16 +48,27 @@ make_target() {
   fi
 
   local CPU_FLAGS=""
-  if [ -n "${TARGET_CPU}" ]; then
-    CPU_FLAGS="-mcpu=${TARGET_CPU}${TARGET_CPU_FLAGS}"
-  else
-    CPU_FLAGS="-march=armv8-a"
-  fi
-
-  # Keep the known-good SM8550 tuning. Other devices use their ROCKNIX target CPU.
-  if [ "${DEVICE}" = "SM8550" ]; then
-    CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
-  fi
+  case "${DEVICE}" in
+    SM6115)
+      CPU_FLAGS="-mcpu=cortex-a73+crypto+crc -mtune=cortex-a73"
+      ;;
+    SM8250)
+      CPU_FLAGS="-mcpu=cortex-a76+crypto+crc -mtune=cortex-a76"
+      ;;
+    SM8550)
+      CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
+      ;;
+    SM8650|SM8750)
+      CPU_FLAGS="-mcpu=cortex-x4${TARGET_CPU_FLAGS} -mtune=cortex-x4"
+      ;;
+    *)
+      if [ -n "${TARGET_CPU}" ] && [[ "${TARGET_CPU}" != *.* ]]; then
+        CPU_FLAGS="-mcpu=${TARGET_CPU}${TARGET_CPU_FLAGS}"
+      else
+        CPU_FLAGS="-march=armv8-a -mtune=generic"
+      fi
+      ;;
+  esac
 
   local OPT_FLAGS="-O3"
   local LTO_FLAGS="-flto=thin -fuse-ld=lld -Wl,--lto-O3"
