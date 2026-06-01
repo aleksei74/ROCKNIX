@@ -33,40 +33,13 @@ post_unpack_target() {
 }
 
 make_target() {
-  local CPU_FIX=""
-  local OPT_FLAGS="-O3"
-  local LTO_FLAGS="-flto=thin -fuse-ld=lld -Wl,--lto-O3"
-  local USE_PGO="yes"
-  local USE_FAST_MATH="ON"
-
-  case "${DEVICE}" in
-    SM6115)
-      # Snapdragon 662 class: keep ARMv8-A compatible instructions.
-      CPU_FIX="-march=armv8-a -mtune=cortex-a73"
-      USE_FAST_MATH="OFF"
-      ;;
-    SM8250)
-      # Snapdragon 865 class: Cortex-A77/A55, ARMv8.2-A is safe.
-      CPU_FIX="-march=armv8.2-a+crc+crypto -mtune=cortex-a77"
-      ;;
-    SM8550)
-      # Known-good path for Snapdragon 8 Gen 2. Preserve the working tuning.
-      CPU_FIX="-mcpu=cortex-a78 -mtune=cortex-a78"
-      ;;
-    SM8650)
-      # Snapdragon 8 Gen 3 class. Avoid newer ARMv9 tuning names for older clang.
-      CPU_FIX="-march=armv8.2-a+crc+crypto -mtune=cortex-a78"
-      ;;
-    SM8750)
-      # Snapdragon 8 Elite / custom Oryon class. Keep instructions conservative.
-      CPU_FIX="-march=armv8.2-a+crc+crypto -mtune=generic"
-      ;;
-    *)
-      CPU_FIX="-march=armv8-a -mtune=generic"
-      USE_PGO="no"
-      USE_FAST_MATH="OFF"
-      ;;
-  esac
+  if [ ! -f "$PGO_FILE" ]; then
+    echo "Downloading PGO profile data..."
+    curl -L --max-time 300 --retry 3 "$PGO_URL" -o "$PGO_FILE" || {
+      echo "Warning: PGO download failed, building without PGO"
+      PGO_FILE=""
+    }
+  fi
 
   local PGO_FLAGS=""
   if [ "${USE_PGO}" = "yes" ]; then
@@ -83,10 +56,24 @@ make_target() {
     fi
   fi
 
-  local FLAGS_CLEAN="s/-mabi=lp64//g; s/-mcpu=cortex-x[34]//g; s/-march=armv9[^ ]*//g"
+  local CPU_FLAGS=""
+  if [ -n "${TARGET_CPU}" ]; then
+    CPU_FLAGS="-mcpu=${TARGET_CPU}${TARGET_CPU_FLAGS}"
+  else
+    CPU_FLAGS="-march=armv8-a"
+  fi
+
+  # Keep the known-good SM8550 tuning. Other devices use their ROCKNIX target CPU.
+  if [ "${DEVICE}" = "SM8550" ]; then
+    CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
+  fi
+
+  local OPT_FLAGS="-O3"
+  local LTO_FLAGS="-flto=thin -fuse-ld=lld -Wl,--lto-O3"
+  local FLAGS_CLEAN="s/-mabi=lp64//g; s/-mcpu=[^ ]*//g; s/-march=[^ ]*//g; s/-mtune=[^ ]*//g"
 
   for _v in CFLAGS CXXFLAGS; do
-    export ${_v}="$(echo ${!_v} | sed -e "$FLAGS_CLEAN") ${OPT_FLAGS} ${PGO_FLAGS} ${CPU_FIX} ${LTO_FLAGS}"
+    export ${_v}="$(echo ${!_v} | sed -e "$FLAGS_CLEAN") ${OPT_FLAGS} ${PGO_FLAGS} ${CPU_FLAGS} ${LTO_FLAGS}"
   done
 
   export LDFLAGS="$(echo ${LDFLAGS} | sed -e "$FLAGS_CLEAN" -e 's/-fuse-ld=bfd/-fuse-ld=lld/g') ${PGO_FLAGS} ${LTO_FLAGS}"
@@ -123,8 +110,8 @@ make_target() {
     -DCMAKE_CXX_COMPILER_TARGET=aarch64-rocknix-linux-gnu
     -DCMAKE_ASM_COMPILER="${EDEN_LLVM_BIN}/clang"
     -DCMAKE_ASM_COMPILER_TARGET=aarch64-rocknix-linux-gnu
-    -DCMAKE_C_FLAGS="${CPU_FIX} ${OPT_FLAGS}"
-    -DCMAKE_CXX_FLAGS="${CPU_FIX} ${OPT_FLAGS}"
+    -DCMAKE_C_FLAGS="${CPU_FLAGS} ${OPT_FLAGS}"
+    -DCMAKE_CXX_FLAGS="${CPU_FLAGS} ${OPT_FLAGS}"
 
     -DCMAKE_LINKER="${EDEN_LLVM_BIN}/ld.lld"
     -DCMAKE_AR="${EDEN_LLVM_BIN}/llvm-ar"
@@ -145,10 +132,12 @@ make_target() {
     -DYUZU_CMD=OFF
     -DVulkanHeaders_FORCE_BUNDLED=ON
     -DENABLE_LTO=OFF
-    -DUSE_FAST_MATH="${USE_FAST_MATH}"
   )
 
   cmake "${tgt_opts[@]}" || return 1
+  find . \( -name "*.ninja" -o -name "flags.make" \) \
+    -exec sed -i 's/-Werror/-Wno-error/g' {} + 2>/dev/null
+
   find . \( -name "*.ninja" -o -name "flags.make" \) \
     -exec sed -i 's/-Werror/-Wno-error/g' {} + 2>/dev/null
 
