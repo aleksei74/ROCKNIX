@@ -49,9 +49,6 @@ make_target() {
 
   local CPU_FLAGS=""
   case "${DEVICE}" in
-    SM6115)
-      CPU_FLAGS="-mcpu=cortex-a73+crypto+crc -mtune=cortex-a73"
-      ;;
     SM8250)
       CPU_FLAGS="-mcpu=cortex-a76+crypto+crc -mtune=cortex-a76"
       ;;
