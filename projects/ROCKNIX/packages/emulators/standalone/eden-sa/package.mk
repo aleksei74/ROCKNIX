@@ -42,18 +42,8 @@ make_target() {
   fi
 
   local PGO_FLAGS=""
-  if [ "${USE_PGO}" = "yes" ]; then
-    if [ ! -f "$PGO_FILE" ]; then
-      echo "Downloading PGO profile data..."
-      curl -L --max-time 300 --retry 3 "$PGO_URL" -o "$PGO_FILE" || {
-        echo "Warning: PGO download failed, building without PGO"
-        PGO_FILE=""
-      }
-    fi
-
-    if [ -f "$PGO_FILE" ]; then
-      PGO_FLAGS="-fprofile-use=${PGO_FILE} -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
-    fi
+  if [ -f "$PGO_FILE" ]; then
+    PGO_FLAGS="-fprofile-use=${PGO_FILE} -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
   fi
 
   local CPU_FLAGS=""
@@ -135,8 +125,6 @@ make_target() {
   )
 
   cmake "${tgt_opts[@]}" || return 1
-  find . \( -name "*.ninja" -o -name "flags.make" \) \
-    -exec sed -i 's/-Werror/-Wno-error/g' {} + 2>/dev/null
 
   find . \( -name "*.ninja" -o -name "flags.make" \) \
     -exec sed -i 's/-Werror/-Wno-error/g' {} + 2>/dev/null
