@@ -1,0 +1,39 @@
+diff --git a/apps/ymir-sdl3/src/app/app.cpp b/apps/ymir-sdl3/src/app/app.cpp
+--- a/apps/ymir-sdl3/src/app/app.cpp
++++ b/apps/ymir-sdl3/src/app/app.cpp
+@@ -2030,6 +2030,7 @@ void App::Run() {
+     // We'll manage player indices manually instead.
+     std::unordered_map<SDL_JoystickID, SDL_Gamepad *> gamepads{};
+     PlayerIndexMap gamepadPlayerIndices;
++    std::unordered_map<int, bool> guidePressed{};
+ 
+     std::array<GUIEvent, 64> evts{};
+ 
+@@ -2304,6 +2305,7 @@ void App::Run() {
+                     const int playerIndex = gamepadPlayerIndices.ReleasePlayerIndex(evt.gdevice.which);
+                     SDL_CloseGamepad(gamepads.at(evt.gdevice.which));
+                     inputContext.DisconnectGamepad(playerIndex);
++                    guidePressed.erase(playerIndex);
+                     gamepads.erase(evt.gdevice.which);
+                     devlog::debug<grp::base>("Gamepad {} removed -> player index {}", evt.gdevice.which, playerIndex);
+                 } else {
+@@ -2331,8 +2333,17 @@ void App::Run() {
+             case SDL_EVENT_GAMEPAD_BUTTON_UP: //
+             {
+                 const int playerIndex = gamepadPlayerIndices.GetPlayerIndex(evt.gbutton.which);
+-                inputContext.ProcessPrimitive(
+-                    playerIndex, input::SDL3ToGamepadButton((SDL_GamepadButton)evt.gbutton.button), evt.gbutton.down);
++                const auto button = input::SDL3ToGamepadButton((SDL_GamepadButton)evt.gbutton.button);
++
++                if (button == input::GamepadButton::Guide) {
++                    guidePressed[playerIndex] = evt.gbutton.down;
++                } else if (evt.gbutton.down && button == input::GamepadButton::Start && guidePressed[playerIndex]) {
++                    SDL_Event quitEvent{.type = SDL_EVENT_QUIT};
++                    SDL_PushEvent(&quitEvent);
++                    break;
++                }
++
++                inputContext.ProcessPrimitive(playerIndex, button, evt.gbutton.down);
+                 break;
+             }
+
