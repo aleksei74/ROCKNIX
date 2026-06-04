@@ -207,10 +207,6 @@ if [ ! -d "/storage/.config/mednafen/mednafen.cfg" ]; then
   sed -i "s/cd.image_memcache 1/cd.image_memcache 0/" /storage/.config/mednafen/mednafen.cfg
 fi
 
-# Update EmulationStation Resources
-rm -r /storage/.config/emulationstation/resources
-cp -rf /usr/config/emulationstation/resources /storage/.config/emulationstation/
-
 # Make sure we are using the latest gamecontrollerdb file
 cp -r "/usr/config/SDL-GameControllerDB/gamecontrollerdb.txt" "/storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt"
 
