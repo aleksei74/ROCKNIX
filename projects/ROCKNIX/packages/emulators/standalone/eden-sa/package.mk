@@ -52,11 +52,8 @@ make_target() {
     SM8250)
       CPU_FLAGS="-mcpu=cortex-a76+crypto+crc -mtune=cortex-a76"
       ;;
-    SM8550)
+    SM8550|SM8650|SM8750)
       CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
-      ;;
-    SM8650|SM8750)
-      CPU_FLAGS="-mcpu=cortex-x4${TARGET_CPU_FLAGS} -mtune=cortex-x4"
       ;;
     *)
       if [ -n "${TARGET_CPU}" ] && [[ "${TARGET_CPU}" != *.* ]]; then
