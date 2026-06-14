@@ -61,18 +61,18 @@ case "${DEVICE}" in
   SM8250)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_EMUS+=" aethersx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa ymir-sa"
+                xemu-sa skyemu-sa steam vita3k-sa eden-sa ymir-sa 86box-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   SM8550)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_EMUS+=" aethersx2-sa ares-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa drastic-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa ymir-sa"
+                xemu-sa skyemu-sa steam vita3k-sa eden-sa ymir-sa 86box-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   SM8650|SM8750)
     PKG_EMUS+=" aethersx2-sa ares-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa ymir-sa"
+                xemu-sa skyemu-sa steam vita3k-sa eden-sa ymir-sa 86box-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   S922X)
@@ -790,6 +790,15 @@ makeinstall_target() {
   add_emu_core pc retroarch dosbox_pure true
   add_emu_core pc retroarch dosbox_core false
   add_es_system pc
+
+  ### 86Box
+  case ${DEVICE} in
+    SM8250|SM8550|SM8650|SM8750)
+      add_emu_core 86box 86box 86box-sa false
+      add_es_system 86box
+      install_script "Start 86Box.sh"
+      ;;
+  esac
 
   ### Nintendo MSU-1
   add_emu_core snesmsu1 retroarch snes9x true
