@@ -2,7 +2,7 @@
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="box64"
-PKG_VERSION="194d577d5153383e857b9ca85d918c490c484071" # 260530
+PKG_VERSION="8f445d9a0c52767274567f1a9bd76ef28e531ec7" # 260614
 PKG_ARCH="aarch64"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/ptitSeb/box64"
