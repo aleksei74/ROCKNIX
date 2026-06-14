@@ -12,7 +12,7 @@ if command -v set_kill >/dev/null 2>&1; then
 fi
 
 if command -v sway_fullscreen >/dev/null 2>&1; then
-  sway_fullscreen "86box-sa" &
+  sway_fullscreen "86box-sa" "pidof" &
 fi
 
 /usr/bin/86box-sa -R "/storage/roms/bios/86box" >/dev/null 2>&1

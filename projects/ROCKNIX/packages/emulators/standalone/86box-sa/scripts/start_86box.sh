@@ -48,4 +48,8 @@ case ${HW_DEVICE} in
 esac
 
 # Run 86Box emulator
+if command -v sway_fullscreen >/dev/null 2>&1; then
+  sway_fullscreen "86box-sa" "pidof" &
+fi
+
 ${EMUPERF} /usr/bin/86box-sa -R "${BIOS_PATH}" -P "${VMPATH}" -C "${CFGFILE}"
