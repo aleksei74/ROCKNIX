@@ -2,7 +2,7 @@
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="eden-sa"
-PKG_VERSION="62642750ad63a02de7f1c251644f7cc718f9c8ae" # v0.2.1
+PKG_VERSION="53e12bac8a3c7a7e1ba00020daa4e57c12c56b7b" # v0.2.1
 PKG_LICENSE="GPLv2"
 PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 boost libevdev libdrm ffmpeg zlib zstd alsa-lib qt6 libfmt"
 PKG_LONGDESC="Eden is a high-performance and easy-to-use emulator, tailored for enthusiasts and developers alike."
@@ -68,14 +68,15 @@ make_target() {
   esac
 
   local OPT_FLAGS="-O3"
-  local LTO_FLAGS="-flto=thin -fuse-ld=lld -Wl,--lto-O3"
+  local LTO_COMPILER_FLAGS=""
+  local LTO_LINKER_FLAGS="-fuse-ld=lld"
   local FLAGS_CLEAN="s/-mabi=lp64//g; s/-mcpu=[^ ]*//g; s/-march=[^ ]*//g; s/-mtune=[^ ]*//g"
 
   for _v in CFLAGS CXXFLAGS; do
-    export ${_v}="$(echo ${!_v} | sed -e "$FLAGS_CLEAN") ${OPT_FLAGS} ${PGO_FLAGS} ${CPU_FLAGS} ${LTO_FLAGS}"
+    export ${_v}="$(echo ${!_v} | sed -e "$FLAGS_CLEAN") ${OPT_FLAGS} ${PGO_FLAGS} ${CPU_FLAGS} ${LTO_COMPILER_FLAGS}"
   done
 
-  export LDFLAGS="$(echo ${LDFLAGS} | sed -e "$FLAGS_CLEAN" -e 's/-fuse-ld=bfd/-fuse-ld=lld/g') ${PGO_FLAGS} ${LTO_FLAGS}"
+  export LDFLAGS="$(echo ${LDFLAGS} | sed -e "$FLAGS_CLEAN" -e 's/-fuse-ld=bfd/-fuse-ld=lld/g') ${PGO_FLAGS} ${LTO_LINKER_FLAGS}"
 
   export AR="${EDEN_LLVM_BIN}/llvm-ar"
   export RANLIB="${EDEN_LLVM_BIN}/llvm-ranlib"
@@ -109,8 +110,8 @@ make_target() {
     -DCMAKE_CXX_COMPILER_TARGET=aarch64-rocknix-linux-gnu
     -DCMAKE_ASM_COMPILER="${EDEN_LLVM_BIN}/clang"
     -DCMAKE_ASM_COMPILER_TARGET=aarch64-rocknix-linux-gnu
-    -DCMAKE_C_FLAGS="${CPU_FLAGS} ${OPT_FLAGS}"
-    -DCMAKE_CXX_FLAGS="${CPU_FLAGS} ${OPT_FLAGS}"
+    -DCMAKE_C_FLAGS="${CFLAGS}"
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS}"
 
     -DCMAKE_LINKER="${EDEN_LLVM_BIN}/ld.lld"
     -DCMAKE_AR="${EDEN_LLVM_BIN}/llvm-ar"
