@@ -50,7 +50,7 @@ make_target() {
   local CPU_FLAGS=""
   case "${DEVICE}" in
     SM8250)
-      CPU_FLAGS="-march=armv8.2-a+crc+crypto -mtune=cortex-a77"
+      CPU_FLAGS="-mcpu=cortex-a76+crypto+crc -mtune=cortex-a76"
       ;;
     SM8550)
       CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
