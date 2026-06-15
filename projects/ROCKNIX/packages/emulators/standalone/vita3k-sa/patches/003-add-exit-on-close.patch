@@ -45,7 +45,7 @@ index 929c45ab..be82df1b 100644
      void pump_sdl_events();
      void open_trophy_collection();
 diff --git a/vita3k/gui-qt/src/main_window.cpp b/vita3k/gui-qt/src/main_window.cpp
-index beb788a3..5db55063 100644
+index beb788a3..515d6318 100644
 --- a/vita3k/gui-qt/src/main_window.cpp
 +++ b/vita3k/gui-qt/src/main_window.cpp
 @@ -833,7 +833,7 @@ bool MainWindow::handle_pending_app_launch_request() {
@@ -66,6 +66,15 @@ index beb788a3..5db55063 100644
      }
  
      if (launch_request.reason != AppLaunchReason::LoadExec && !confirm_missing_firmware_warning())
+@@ -962,7 +962,7 @@ std::optional<AppLaunchRequest> MainWindow::boot_game_once(const AppLaunchReques
+     m_ui->toolbar_fullscreen->setText(m_fullscreen ? tr("Exit Fullscreen") : tr("Fullscreen"));
+ 
+     connect(m_game_window, &GameWindow::closed,
+-        this, &MainWindow::on_game_closed);
++        this, [this]() { on_game_closed(); });
+ 
+     const auto abort_boot = [&](const QString &msg) {
+         QMessageBox::critical(this, tr("Error"), msg);
 @@ -1031,7 +1031,7 @@ std::optional<AppLaunchRequest> MainWindow::boot_game_once(const AppLaunchReques
          this, [this]() { take_screenshot(emuenv); });
  
