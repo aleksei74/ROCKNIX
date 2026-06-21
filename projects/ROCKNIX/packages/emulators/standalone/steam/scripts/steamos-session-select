@@ -3,5 +3,32 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
 
-killall gamescope steam FEX
-killall -9 gamescope steam FEX
+. /etc/profile
+
+if [[ "$1" == *plasma* || "$1" == *desktop* ]]; then
+  # 1. Prepare desktop configuration
+  mkdir -p /storage/.config/sway
+  cp /usr/share/sway/config.desktop /storage/.config/sway/config
+  
+  # Modify the exit binding in the copied config to run return-to-gaming-mode.sh
+  sed -i "s|'swaymsg exit'|'/usr/bin/return-to-gaming-mode.sh'|g" /storage/.config/sway/config
+
+  # Append Steam autostart to Sway config
+  echo "exec /usr/bin/start-steam-desktop.sh" >> /storage/.config/sway/config
+
+  # 2. Mask essway.service to prevent it from starting when gamescope exits
+  systemctl mask essway.service
+  systemctl daemon-reload
+
+  # 3. Kill steam/gamescope/FEX to release the DRM master
+  killall gamescope steam FEX 2>/dev/null
+  killall -9 gamescope steam FEX 2>/dev/null
+
+  # 4. Wait a bit for DRM master release and then start sway.service in desktop mode
+  # Run outside the steam-bigpicture scope using systemd-run so it survives scope destruction.
+  systemd-run --unit=start-sway-desktop sh -c "sleep 2 && systemctl start sway.service"
+else
+  # Default action (returning to gaming mode or normal exit)
+  killall gamescope steam FEX 2>/dev/null
+  killall -9 gamescope steam FEX 2>/dev/null
+fi
