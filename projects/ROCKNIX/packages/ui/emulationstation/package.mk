@@ -35,6 +35,10 @@ PKG_CMAKE_OPTS_TARGET+=" -DROCKNIX=1 \
                          -DENABLE_PULSE=1 \
                          -DUSE_SYSTEM_PUGIXML=1"
 
+export SCREENSCRAPER_DEV_LOGIN="devid=jelos&devpassword=6SL1d8O8cSp"
+export GAMESDB_APIKEY="eafc38eb965ee34f54d056f14df30e5a8c2d8102e2225ecf2e038e2afc97b584"
+export CHEEVOS_DEV_LOGIN="z=jelos&y=50Q3nAvnnn1P3JsdCrohr2K5TJTV1ckv"
+
 pre_configure_target() {
   for key in SCREENSCRAPER_DEV_LOGIN \
         GAMESDB_APIKEY \

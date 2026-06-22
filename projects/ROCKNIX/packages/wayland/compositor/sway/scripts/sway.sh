@@ -17,5 +17,9 @@ fi
 # start sway, even if no input devices are connected
 export WLR_LIBINPUT_NO_DEVICES=1
 
+# Force legacy DRM KMS to avoid page-flip/atomic EBUSY errors on Snapdragon panels
+export WLR_DRM_NO_ATOMIC=1
+
 logger -t Sway "### Starting Sway with -V ${SWAY_GPU_ARGS} ${SWAY_DAEMON_ARGS}"
 /usr/bin/sway -V ${SWAY_GPU_ARGS} ${SWAY_DAEMON_ARGS} > ${SWAY_LOG_FILE} 2>&1
+

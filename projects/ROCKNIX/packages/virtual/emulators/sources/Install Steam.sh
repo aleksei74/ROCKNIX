@@ -116,8 +116,7 @@ install_steam_client_arm64() {
 
 install_bundled_proton_files() {
   log_info "Installing bundled Proton files..."
-  mkdir -p "${STEAM_DOT}" "${PROTON_DIR}/"
-  cp -f "/usr/share/steam/toolmanifest.vdf" "${PROTON_DIR}/" || die "Failed to copy toolmanifest.vdf."
+  mkdir -p "${STEAM_DOT}"
   cp -f "/usr/share/steam/registry.vdf" "${STEAM_DOT}" || die "Failed to copy registry.vdf."
 }
 
@@ -138,20 +137,24 @@ install_proton_cachyos() {
     done
   fi
 
-  if [ -d "${extracted_dir}" ]; then
-    log_info "Proton-CachyOS already installed. Skipping download."
-    return 0
+  if [ ! -d "${extracted_dir}" ]; then
+    log_info "Downloading and installing Proton-CachyOS..."
+    mkdir -p "${dest_dir}"
+    wget -c -t 5 -O "${tar_path}" "$url" || die "Failed to download Proton-CachyOS."
+    tar -xvf "${tar_path}" -C "${dest_dir}" || die "Failed to extract Proton-CachyOS."
+    rm -f "${tar_path}"
   fi
-
-  log_info "Downloading and installing Proton-CachyOS..."
-  mkdir -p "${dest_dir}"
-  wget -c -t 5 -O "${tar_path}" "$url" || die "Failed to download Proton-CachyOS."
-  tar -xvf "${tar_path}" -C "${dest_dir}" || die "Failed to extract Proton-CachyOS."
-  rm -f "${tar_path}"
 
   if [ -f "${manifest_file}" ]; then
     sed -i '/require_tool_appid/d' "${manifest_file}" || die "Failed to patch toolmanifest.vdf."
   fi
+
+  # Symlink Proton 11.0 (ARM64) to the extracted Proton-CachyOS directory
+  if [ -d "${PROTON_DIR}" ] && [ ! -L "${PROTON_DIR}" ]; then
+    rm -rf "${PROTON_DIR}"
+  fi
+  ln -sfn "${extracted_dir}" "${PROTON_DIR}" || die "Failed to symlink Proton common directory."
+  cp -f "/usr/share/steam/toolmanifest.vdf" "${PROTON_DIR}/" || die "Failed to copy toolmanifest.vdf."
 }
 
 run_steam_first_launch() {
