@@ -241,3 +241,6 @@ client.background       $base07
 
 # Load etc config
 include /etc/sway/config.d/*
+
+# Force Steam Big Picture to be fullscreen
+for_window [class="steam" title="(?i)big picture"] fullscreen enable
