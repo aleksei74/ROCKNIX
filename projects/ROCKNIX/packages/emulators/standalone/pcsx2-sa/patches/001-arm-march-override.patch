@@ -1,0 +1,16 @@
+--- a/cmake/BuildParameters.cmake
++++ b/cmake/BuildParameters.cmake
+@@ -130,7 +130,12 @@
+ 		# default and targets the broad arm64 ecosystem. In-order ARMv8.0 cores
+ 		# without LSE (e.g. Cortex-A53 handhelds) must override -march to armv8-a
+ 		# in their own toolchain/preset — LSE atomics fault on them.
+-		add_compile_options("-march=armv8.1-a")
++		# ROCKNIX: allow per-target override (e.g. ARMv8.0 Cortex-A72 on
++		# RK3576 has no LSE atomics and faults on armv8.1-a).
++		if(NOT DEFINED PCSX2_ARM_MARCH)
++			set(PCSX2_ARM_MARCH "armv8.1-a")
++		endif()
++		add_compile_options("-march=${PCSX2_ARM_MARCH}")
+ 	endif()
+ 
+ 	# If we're running on Linux, we need to detect the page/cache line size.
