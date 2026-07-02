@@ -2,7 +2,7 @@
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="armsx2-sa"
-PKG_VERSION="bf72d5654ef09d422d0378b83e47a6bb6db9fecf"  # tag 2.4.6
+PKG_VERSION="ff87a5f478829c5788a1e3b73da863a6571dd161"  # tag 2.4.9
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL-3.0-or-later"
 PKG_SITE="https://github.com/ARMSX2/ARMSX2"
@@ -40,6 +40,15 @@ ARMSX2_CMAKE_OPTS=(
   -DHOST_PAGE_SIZE=0x1000
   -DHOST_CACHE_LINE_SIZE=64
 )
+
+# RK3576's Cortex-A72 is ARMv8.0-A and lacks LSE atomics; ARMSX2's default
+# -march=armv8.1-a emits LSE instructions that SIGILL on it. Drop to armv8-a
+# (keeping crc+crypto, which the A72 has) via the patched ARMSX2_ARM_MARCH hook.
+case ${DEVICE} in
+  RK3576)
+    ARMSX2_CMAKE_OPTS+=( -DARMSX2_ARM_MARCH=armv8-a+crc+crypto )
+  ;;
+esac
 
 make_target() {
   for _v in CFLAGS CXXFLAGS LDFLAGS; do
