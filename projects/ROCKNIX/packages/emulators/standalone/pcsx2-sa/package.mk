@@ -22,7 +22,12 @@ PCSX2_CMAKE_BASE=(
   -DX11_API=ON
 )
 
-PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/archive/refs/tags/latest.zip"
+# Use the release asset, not the "latest" source archive. The source archive
+# nests every pnach under "pcsx2_patches-latest/patches/", but PCSX2 looks
+# patches up at the zip root as "<serial>_<crc>.pnach" (Patch.cpp:
+# GetPnachTemplate has no directory prefix), so those never match. The release
+# asset ships the pnach files flat at the root, as PCSX2 expects.
+PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
 
 # RK3576's Cortex-A72 is ARMv8.0-A and lacks LSE atomics; PCSX2's default
 # -march=armv8.1-a emits LSE instructions that SIGILL on it. Drop to armv8-a
