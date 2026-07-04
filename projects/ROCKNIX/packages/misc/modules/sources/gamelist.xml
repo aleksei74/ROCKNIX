@@ -312,9 +312,9 @@
         <image>./images/moonlight.svg</image>
     </game>
     <game>
-        <path>./Start PCSX2.sh</path>
-        <name>PCSX2 실행</name>
-        <desc>PCSX2 GUI(PS2)를 열어 전역 구성 변경 사항을 에뮬레이터에 직접 적용할 수 있습니다. 설정을 수정하려면 마우스와 키보드를 준비하는 것이 좋습니다. PCSX2는 무료 오픈 소스 PlayStation 2(PS2) 에뮬레이터입니다. 그 목적은 MIPS CPU 인터프리터, 리컴파일러 및 하드웨어 상태와 PS2 시스템 메모리를 관리하는 가상 머신의 조합을 사용하여 PS2의 하드웨어를 에뮬레이트하는 것입니다.</desc>
+        <path>./Start YAPS2.sh</path>
+        <name>YAPS2 실행</name>
+        <desc>YAPS2 GUI(PS2)를 열어 전역 구성 변경 사항을 에뮬레이터에 직접 적용할 수 있습니다. 설정을 수정하려면 마우스와 키보드를 준비하는 것이 좋습니다. YAPS2는 무료 오픈 소스 PlayStation 2(PS2) 에뮬레이터입니다. 그 목적은 MIPS CPU 인터프리터, 리컴파일러 및 하드웨어 상태와 PS2 시스템 메모리를 관리하는 가상 머신의 조합을 사용하여 PS2의 하드웨어를 에뮬레이트하는 것입니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
