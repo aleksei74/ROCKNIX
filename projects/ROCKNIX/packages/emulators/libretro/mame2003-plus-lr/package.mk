@@ -21,7 +21,7 @@
 ################################################################################
 
 PKG_NAME="mame2003-plus-lr"
-PKG_VERSION="b74ba551ae75b3d5d2ab91eb43bcd0e5d3624249" # DsNo (260627)
+PKG_VERSION="632bdfd494ed567d639c58cbeedecf9f08808470" # DsNo (260705)
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/aleksei74/mame2003-plus-dsno-libretro"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
