@@ -88,7 +88,7 @@ case "${DEVICE}" in
     ;;
   AMD64)
     PKG_EMUS+=" ares-sa azahar-sa cemu-sa dolphin-sa gopher64-sa mednafen melonds-sa nanoboyadvance-sa \
-                xemu-sa skyemu-sa vita3k-sa"
+                xemu-sa skyemu-sa vita3k-sa yaps2-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
 esac
 
@@ -684,7 +684,7 @@ makeinstall_target() {
 
   ### Nintendo Wii U
   case ${DEVICE} in
-    SM8250|SM8550|SM8650|SM8750)
+    SM8250|SM8550|SM8650|SM8750|AMD64)
       add_emu_core wiiu cemu cemu-sa true
       add_es_system wiiu
       install_script "Start CEMU.sh"
@@ -1188,22 +1188,24 @@ makeinstall_target() {
 
   ### Sony Playstation 2
   case ${DEVICE} in
+  AMD64)
+    add_emu_core ps2 yaps2 yaps2-sa true
+    install_script "Start YAPS2.sh"
+    add_es_system ps2
+    ;;
     RK3399|RK3576|RK3566|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
       add_emu_core ps2 aethersx2 aethersx2-sa true
-
       case ${DEVICE} in
         RK3576|SM8250|SM8550|SM8650|SM8750)
           add_emu_core ps2 yaps2 yaps2-sa false
           install_script "Start YAPS2.sh"
         ;;
       esac
-
       case ${DEVICE} in
         SM8250|SM8550|SM8650|SM8750)
           add_emu_core ps2 armsx2 armsx2-sa false
         ;;
       esac
-
       add_es_system ps2
       install_script "Start AetherSX2.sh"
       ;;
