@@ -35,11 +35,14 @@ PCSX2_CMAKE_BASE=(
 PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
 
 # RK3576's Cortex-A72 is ARMv8.0-A and lacks LSE atomics; PCSX2's default
-# -march=armv8.1-a emits LSE instructions that SIGILL on it. Drop to armv8-a
-# (keeping crc+crypto, which the A72 has) via the patched PCSX2_ARM_MARCH hook.
+# -march=armv8.1-a emits LSE instructions that SIGILL on it. Current upstream
+# honors an explicit -march in CMAKE_CXX_FLAGS and skips its ARMv8.1 default.
 case ${DEVICE} in
   RK3576)
-    PCSX2_CMAKE_BASE+=( -DPCSX2_ARM_MARCH=armv8-a+crc+crypto )
+    PCSX2_CMAKE_BASE+=(
+      -DCMAKE_C_FLAGS=-march=armv8-a+crc+crypto
+      -DCMAKE_CXX_FLAGS=-march=armv8-a+crc+crypto
+    )
   ;;
 esac
 
@@ -56,6 +59,10 @@ make_target() {
       done
     ;;
   esac
+
+  # LTO archives contain LLVM bitcode and must be linked with lld. ROCKNIX's
+  # global LDFLAGS may select bfd, which CMake appends after our *_FLAGS_INIT.
+  export LDFLAGS="$(echo ${LDFLAGS} | sed 's/-fuse-ld=[^ ]*//g')"
 
   mkdir -p "${PKG_BUILD}/.${TARGET_NAME}"
   cd "${PKG_BUILD}/.${TARGET_NAME}"
