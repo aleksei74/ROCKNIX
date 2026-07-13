@@ -1204,6 +1204,7 @@ makeinstall_target() {
       case ${DEVICE} in
         SM8250|SM8550|SM8650|SM8750)
           add_emu_core ps2 armsx2 armsx2-sa false
+          install_script "Start ARMSX2.sh"
         ;;
       esac
       add_es_system ps2

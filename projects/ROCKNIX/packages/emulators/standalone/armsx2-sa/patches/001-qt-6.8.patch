@@ -1,0 +1,20 @@
+--- a/cmake/SearchForStuff.cmake
++++ b/cmake/SearchForStuff.cmake
+@@ -114,14 +114,15 @@ endif()
+ 
+ # Find the Qt components that we need.
+ if(ENABLE_QT_UI)
+-	find_package(Qt6 6.10.1 COMPONENTS CoreTools Core GuiTools Gui WidgetsTools Widgets LinguistTools REQUIRED)
++	find_package(Qt6 6.8.3 COMPONENTS CoreTools Core GuiTools Gui WidgetsTools Widgets LinguistTools REQUIRED)
+ 
+ 	if(NOT WIN32 AND NOT APPLE)
++		find_package(Qt6 COMPONENTS GuiPrivate REQUIRED)
+ 		if (Qt6_VERSION VERSION_GREATER_EQUAL 6.10.0)
+-			find_package(Qt6 COMPONENTS CorePrivate GuiPrivate WidgetsPrivate REQUIRED)
++			find_package(Qt6 COMPONENTS CorePrivate WidgetsPrivate REQUIRED)
+ 		endif()
+ 	endif()
+ 
+ 	# The docking system for the debugger.
+ 	find_package(KDDockWidgets-qt6 2.3.0 REQUIRED)
+ endif()

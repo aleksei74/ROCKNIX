@@ -12,8 +12,8 @@ if [ ! -d "/storage/.config/YAPS2" ]; then
 fi
 
 #Make YAPS2 bios folder
-if [ ! -d "/storage/roms/bios/pcsx2" ]; then
-    mkdir -p "/storage/roms/bios/pcsx2"
+if [ ! -d "/storage/roms/bios/ps2" ]; then
+    mkdir -p "/storage/roms/bios/ps2"
 fi
 
 set_kill set "yaps2-qt"
