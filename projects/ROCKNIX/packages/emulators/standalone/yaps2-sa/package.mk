@@ -25,6 +25,7 @@ PCSX2_CMAKE_BASE=(
   -DENABLE_QT_DEBUGGER=OFF
   -DWAYLAND_API=ON
   -DX11_API=ON
+  -DCMAKE_LINKER_TYPE=LLD
 )
 
 # Use the release asset, not the "latest" source archive. The source archive
