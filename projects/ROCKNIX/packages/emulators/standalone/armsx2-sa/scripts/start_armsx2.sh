@@ -6,16 +6,12 @@
 . /etc/profile
 
 DATA_ROOT="/storage/.config/ARMSX2"
-LEGACY_CONFIG="/storage/.config/armsx2/ARMSX2.ini"
 mkdir -p "${DATA_ROOT}/inis"
-if [ ! -f "${DATA_ROOT}/inis/PCSX2.ini" ]; then
-  if [ -f "${LEGACY_CONFIG}" ]; then
-    cp -f "${LEGACY_CONFIG}" "${DATA_ROOT}/inis/PCSX2.ini"
-  else
-    cp -f /usr/config/ARMSX2/inis/PCSX2.ini "${DATA_ROOT}/inis/PCSX2.ini"
-  fi
+if [ ! -f "${DATA_ROOT}/inis/PCSX2.ini" ] || \
+   ! grep -q '^SettingsVersion = 1$' "${DATA_ROOT}/inis/PCSX2.ini"; then
+  cp -f /usr/config/ARMSX2/inis/PCSX2.ini "${DATA_ROOT}/inis/PCSX2.ini"
 fi
-mkdir -p /storage/roms/bios/armsx2
+mkdir -p /storage/roms/bios/ps2
 mkdir -p /storage/roms/savestates/ps2
 
 # Use Rocknix's curated SDL controller DB so device-specific mappings (e.g.
@@ -55,7 +51,7 @@ fi
 
 set_kill set "-9 armsx2-qt"
 ${EMUPERF} /usr/share/armsx2-sa/armsx2-qt \
-  -batch \
+  -bigpicture \
   -fullscreen \
   -datapath /storage/.config \
   -- "${1}"

@@ -116,9 +116,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  local config_device="${DEVICE}"
-  [ "${DEVICE}" = "RK3576" ] && config_device="SM8550"
-
   mkdir -p ${INSTALL}/usr/bin
   cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
   chmod 755 ${INSTALL}/usr/bin/*
@@ -126,9 +123,8 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/share/armsx2-sa
   cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/* ${INSTALL}/usr/share/armsx2-sa
 
-  mkdir -p ${INSTALL}/usr/config/ARMSX2/inis
-  cp -f ${PKG_DIR}/config/${config_device}/armsx2/ARMSX2.ini \
-        ${INSTALL}/usr/config/ARMSX2/inis/PCSX2.ini
+  mkdir -p ${INSTALL}/usr/config
+  cp -rf ${PKG_DIR}/config/ARMSX2 ${INSTALL}/usr/config
 }
 
 post_install() {
