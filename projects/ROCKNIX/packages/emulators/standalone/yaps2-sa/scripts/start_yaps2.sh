@@ -22,8 +22,8 @@ if [ ! -f "/storage/.config/YAPS2/inis/PCSX2.ini" ]; then
 fi
 
 #Make YAPS2 bios folder
-if [ ! -d "/storage/roms/bios/pcsx2" ]; then
-    mkdir -p "/storage/roms/bios/pcsx2"
+if [ ! -d "/storage/roms/bios/ps2" ]; then
+    mkdir -p "/storage/roms/bios/ps2"
 fi
 
 #Create PS2 savestates folder
