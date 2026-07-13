@@ -56,7 +56,7 @@ case "${DEVICE}" in
   RK3576)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_DEPENDS_TARGET+=" common-shaders glsl-shaders"
-    PKG_EMUS+=" aethersx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa yaps2-sa"
+    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa yaps2-sa"
     LIBRETRO_CORES+=" dolphin-lr"
     ;;
   RK3588|SM6115)
@@ -1202,7 +1202,7 @@ makeinstall_target() {
         ;;
       esac
       case ${DEVICE} in
-        SM8250|SM8550|SM8650|SM8750)
+        RK3576|SM8250|SM8550|SM8650|SM8750)
           add_emu_core ps2 armsx2 armsx2-sa false
         ;;
       esac
