@@ -14,6 +14,8 @@ fi
 
 mkdir -p /storage/roms/bios/ps2
 mkdir -p /storage/roms/savestates/ps2
+mkdir -p /storage/roms/ps2/textures
+sed -i '/^Textures =/c\Textures = /storage/roms/ps2/textures' "${DATA_ROOT}/inis/PCSX2.ini"
 ln -sf /usr/config/SDL-GameControllerDB/gamecontrollerdb.txt "${DATA_ROOT}/game_controller_db.txt"
 
 set_kill set "armsx2-qt"
