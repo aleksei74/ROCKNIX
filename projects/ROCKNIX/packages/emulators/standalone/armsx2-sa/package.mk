@@ -45,17 +45,6 @@ ARMSX2_CMAKE_OPTS=(
   -DOVERRIDE_HOST_CACHE_LINE_SIZE=64
 )
 
-# RK3576 contains Cortex-A72/A53 cores. Keep generated code at ARMv8.0 so the
-# binary does not acquire ARMv8.1 LSE instructions from the upstream default.
-case ${DEVICE} in
-  RK3576)
-    ARMSX2_CMAKE_OPTS+=(
-      -DCMAKE_C_FLAGS=-march=armv8-a+crc+crypto
-      -DCMAKE_CXX_FLAGS=-march=armv8-a+crc+crypto
-    )
-  ;;
-esac
-
 PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
 
 make_target() {
