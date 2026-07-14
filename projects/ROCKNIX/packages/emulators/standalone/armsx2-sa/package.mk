@@ -2,7 +2,7 @@
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="armsx2-sa"
-PKG_VERSION="917bc678654480f351279eaa2dfee2d8008a2b76"
+PKG_VERSION="9e0dc436f7bdd5aae08a94e5b69cb640302ab50f" # tag: 2.6.0
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL-3.0-or-later"
 PKG_SITE="https://github.com/ARMSX2/ARMSX2"
