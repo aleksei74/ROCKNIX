@@ -1,0 +1,12 @@
+--- a/pcsx2/CMakeLists.txt
++++ b/pcsx2/CMakeLists.txt
+@@ -1138,6 +1138,9 @@ if(LTO_PCSX2_CORE)
+ 		target_compile_definitions(PCSX2_LTO PRIVATE MULTI_ISA_SHARED_COMPILATION)
+ 	endif()
+ 	target_link_libraries(PCSX2_LTO PRIVATE PCSX2_FLAGS)
++	if(USE_VULKAN)
++		target_link_libraries(PCSX2_LTO PRIVATE libretro-headers)
++	endif()
+ 	target_link_libraries(PCSX2 PRIVATE PCSX2_LTO)
+ 	set_target_properties(PCSX2_LTO PROPERTIES INTERPROCEDURAL_OPTIMIZATION true)
+ 	fixup_file_properties(PCSX2_LTO)
