@@ -35,4 +35,4 @@
 +		endif()
  	endif()
  	
- 	# Windows page/cache line size seems to match x68-64 
+	# Windows page size matches x86-64 (4K).
