@@ -1,0 +1,77 @@
+--- a/pcsx2/GS/Renderers/HW/GSTextureReplacements.h
++++ b/pcsx2/GS/Renderers/HW/GSTextureReplacements.h
+@@ -39,6 +39,7 @@ namespace GSTextureReplacements
+ 	u32 CalcMipmapLevelsForReplacement(u32 width, u32 height);
+ 
+ 	bool HasAnyReplacementTextures();
++	bool HasLegacyTextureReplacements();
+ 	bool HasReplacementTextureWithOtherPalette(const GSTextureCache::HashCacheKey& hash);
+ 	GSTexture* LookupReplacementTexture(const GSTextureCache::HashCacheKey& hash, bool mipmap, bool* pending, std::pair<u8, u8>* alpha_minmax);
+ 	GSTexture* CreateReplacementTexture(const ReplacementTexture& rtex, bool mipmap);
+--- a/pcsx2/GS/Renderers/HW/GSTextureReplacements.cpp
++++ b/pcsx2/GS/Renderers/HW/GSTextureReplacements.cpp
+@@ -127,6 +127,7 @@ namespace GSTextureReplacements
+ 	static std::mutex s_dumped_textures_mutex;
+ 
+ 	/// Lookup map of texture names to replacements, if they exist.
++	static bool s_has_legacy_replacements;
+ 	static std::unordered_map<TextureName, std::string> s_replacement_texture_filenames;
+ 
+ 	/// Lookup map of texture names without CLUT hash, to know when we need to disable paltex.
+@@ -381,6 +382,7 @@ void GSTextureReplacements::ReloadReplacementMap()
+ 	// clear out the caches
+ 	{
+ 		s_replacement_texture_filenames.clear();
++		s_has_legacy_replacements = false;
+ 		s_replacement_textures_without_clut_hash.clear();
+ 
+ 		std::unique_lock<std::mutex> lock(s_replacement_texture_cache_mutex);
+@@ -429,6 +431,21 @@ void GSTextureReplacements::ReloadReplacementMap()
+ 		if (!name.has_value())
+ 			continue;
+ 
++		// Old PCSX2 filenames retain TEX0.TCC in bit 14. Detect that bit
++		// instead of treating every non-region filename as legacy, since
++		// current packs can legitimately contain both full and region names.
++		const std::string_view title = Path::GetFileTitle(filename);
++		const size_t mip_pos = title.find("-mip");
++		const size_t bits_end = (mip_pos == std::string_view::npos) ? title.size() : mip_pos;
++		const size_t bits_start = bits_end ? title.rfind('-', bits_end - 1) : std::string_view::npos;
++		if (bits_start != std::string_view::npos)
++		{
++			u32 raw_bits = 0;
++			const std::string bits_string(title.substr(bits_start + 1, bits_end - bits_start - 1));
++			if (std::sscanf(bits_string.c_str(), "%x", &raw_bits) == 1)
++				s_has_legacy_replacements |= ((raw_bits & (1u << 14)) != 0);
++		}
++
+ 		DbgCon.WriteLn("Found %ux%u replacement '%.*s'", name->Width(), name->Height(), static_cast<int>(filename.size()), filename.data());
+ 		s_replacement_texture_filenames.emplace(name.value(), std::move(fd.FileName));
+ 
+@@ -496,6 +513,11 @@ bool GSTextureReplacements::HasAnyReplacementTextures()
+ 	return !s_replacement_texture_filenames.empty();
+ }
+ 
++bool GSTextureReplacements::HasLegacyTextureReplacements()
++{
++	return s_has_legacy_replacements;
++}
++
+ bool GSTextureReplacements::HasReplacementTextureWithOtherPalette(const GSTextureCache::HashCacheKey& hash)
+ {
+ 	const TextureName name(CreateTextureName(hash.WithRemovedCLUTHash(), 0));
+--- a/pcsx2/GS/Renderers/HW/GSTextureCache.cpp
++++ b/pcsx2/GS/Renderers/HW/GSTextureCache.cpp
+@@ -8925,6 +8925,12 @@ void GSTextureCache::SourceRegion::AdjustTEX0(GIFRegTEX0* TEX0) const
+ 
+ GSTextureCache::SourceRegion GSTextureCache::SourceRegion::Create(GIFRegTEX0 TEX0, GIFRegCLAMP CLAMP)
+ {
++	// PCSX2 1.7 texture packs were hashed as complete textures. If the pack
++	// contains legacy filenames, retain that layout instead of generating
++	// region hashes which cannot match the old replacements.
++	if (GSTextureReplacements::HasLegacyTextureReplacements())
++		return {};
++
+ 	SourceRegion region = {};
+ 
+ 	if (CLAMP.WMS == CLAMP_REGION_CLAMP && CLAMP.MAXU >= CLAMP.MINU)

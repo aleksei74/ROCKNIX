@@ -11,10 +11,18 @@ if [ ! -d "/storage/.config/YAPS2" ]; then
         cp -r "/usr/config/YAPS2" "/storage/.config/"
 fi
 
+if [ ! -f "/storage/.config/YAPS2/inis/PCSX2.ini" ]; then
+    mkdir -p "/storage/.config/YAPS2/inis"
+    cp -f "/usr/config/YAPS2/inis/PCSX2.ini" "/storage/.config/YAPS2/inis/"
+fi
+
 #Make YAPS2 bios folder
 if [ ! -d "/storage/roms/bios/ps2" ]; then
     mkdir -p "/storage/roms/bios/ps2"
 fi
+
+mkdir -p "/storage/roms/ps2/textures"
+sed -i '/^Textures =/c\Textures = /storage/roms/ps2/textures' /storage/.config/YAPS2/inis/PCSX2.ini
 
 set_kill set "yaps2-qt"
 

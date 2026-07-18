@@ -31,6 +31,10 @@ if [ ! -d "/storage/roms/savestates/ps2" ]; then
     mkdir -p "/storage/roms/savestates/ps2"
 fi
 
+#Use a shared PS2 texture directory
+mkdir -p "/storage/roms/ps2/textures"
+sed -i '/^Textures =/c\Textures = /storage/roms/ps2/textures' /storage/.config/YAPS2/inis/PCSX2.ini
+
 #Emulation Station Features
 GAME=$(echo "${1}"| sed "s#^/.*/##")
 PLATFORM=$(echo "${2}"| sed "s#^/.*/##")
