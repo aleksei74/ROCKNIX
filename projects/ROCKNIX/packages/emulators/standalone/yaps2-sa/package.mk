@@ -2,7 +2,7 @@
 # Copyright (C) 2025-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="yaps2-sa"
-PKG_VERSION="3aa1db19ba705cebd86b0f01023bcf917c815b24"
+PKG_VERSION="76bba7ffd3c278221de8ad19a6fcddddb3692432"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/yaps2/yaps2"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
