@@ -11,23 +11,6 @@ PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 libpng zlib libjpeg-turbo zstd lz4 
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="speed"
 
-PCSX2_CMAKE_BASE=(
-  -DCMAKE_BUILD_TYPE=Release
-  # Full-tree IPO stays off for Qt (not worth it)...
-  -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
-  # ...but stays on for just the recompiler/VU/EE/IOP core:
-  -DLTO_PCSX2_CORE=ON
-  -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
-  -DUSE_VULKAN=ON
-  -DUSE_OPENGL=ON
-  -DUSE_BACKTRACE=OFF
-  -DENABLE_QT_UI=ON
-  -DENABLE_QT_DEBUGGER=OFF
-  -DWAYLAND_API=ON
-  -DX11_API=ON
-  -DCMAKE_LINKER_TYPE=LLD
-)
-
 # Use the release asset, not the "latest" source archive. The source archive
 # nests every pnach under "pcsx2_patches-latest/patches/", but PCSX2 looks
 # patches up at the zip root as "<serial>_<crc>.pnach" (Patch.cpp:
@@ -35,19 +18,44 @@ PCSX2_CMAKE_BASE=(
 # asset ships the pnach files flat at the root, as PCSX2 expects.
 PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
 
-# RK3576's Cortex-A72 is ARMv8.0-A and lacks LSE atomics; PCSX2's default
-# -march=armv8.1-a emits LSE instructions that SIGILL on it. Current upstream
-# honors an explicit -march in CMAKE_CXX_FLAGS and skips its ARMv8.1 default.
-case ${DEVICE} in
-  RK3576)
-    PCSX2_CMAKE_BASE+=(
-      -DCMAKE_C_FLAGS=-march=armv8-a+crc+crypto
-      -DCMAKE_CXX_FLAGS=-march=armv8-a+crc+crypto
-    )
-  ;;
-esac
+get_graphicdrivers() {
+  if listcontains "${GRAPHIC_DRIVERS}" "(panfrost)"; then
+    GRAPHICS_DRIVER="panfrost"
+  elif listcontains "${GRAPHIC_DRIVERS}" "(freedreno)"; then
+    GRAPHICS_DRIVER="freedreno"
+  fi
+}
 
-make_target() {
+pre_configure_target() {
+  PCSX2_CMAKE_BASE=(
+    -DCMAKE_BUILD_TYPE=Release
+    # Full-tree IPO stays off for Qt (not worth it)...
+    -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+    # ...but stays on for just the recompiler/VU/EE/IOP core:
+    -DLTO_PCSX2_CORE=ON
+    -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
+    -DUSE_VULKAN=ON
+    -DUSE_OPENGL=ON
+    -DUSE_BACKTRACE=OFF
+    -DENABLE_QT_UI=ON
+    -DENABLE_QT_DEBUGGER=OFF
+    -DWAYLAND_API=ON
+    -DX11_API=ON
+    -DCMAKE_LINKER_TYPE=LLD
+  )
+
+  # RK3576's Cortex-A72 is ARMv8.0-A and lacks LSE atomics; PCSX2's default
+  # -march=armv8.1-a emits LSE instructions that SIGILL on it. Current upstream
+  # honors an explicit -march in CMAKE_CXX_FLAGS and skips its ARMv8.1 default.
+  case ${DEVICE} in
+    RK3576)
+      PCSX2_CMAKE_BASE+=(
+        -DCMAKE_C_FLAGS=-march=armv8-a+crc+crypto
+        -DCMAKE_CXX_FLAGS=-march=armv8-a+crc+crypto
+      )
+    ;;
+  esac
+
   case ${TARGET_ARCH} in
     aarch64)
       for _v in CFLAGS CXXFLAGS LDFLAGS; do
@@ -64,7 +72,9 @@ make_target() {
   # LTO archives contain LLVM bitcode and must be linked with lld. ROCKNIX's
   # global LDFLAGS may select bfd, which CMake appends after our *_FLAGS_INIT.
   export LDFLAGS="$(echo ${LDFLAGS} | sed 's/-fuse-ld=[^ ]*//g')"
+}
 
+make_target() {
   mkdir -p "${PKG_BUILD}/.${TARGET_NAME}"
   cd "${PKG_BUILD}/.${TARGET_NAME}"
 
