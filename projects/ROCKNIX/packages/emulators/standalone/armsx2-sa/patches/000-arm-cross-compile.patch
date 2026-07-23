@@ -1,16 +1,6 @@
 --- a/cmake/BuildParameters.cmake
 +++ b/cmake/BuildParameters.cmake
-@@ -125,16 +125,30 @@ elseif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64" OR "${CMAKE_SYSTEM_PROCESSOR
- 	elseif(NOT MSVC)
- 		# Require atomic rmw instructions. MSVC (and clang-cl) reject -march;
- 		# their arm64 baseline already includes what we need.
--		add_compile_options("-march=armv8.1-a")
-+		# Keep a platform/toolchain-selected -march when cross-compiling.
-+		if(NOT CMAKE_CXX_FLAGS MATCHES "-march=")
-+			add_compile_options("-march=armv8.1-a")
-+		endif()
- 	endif()
- 
+@@ -148,10 +148,21 @@ elseif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm64" OR "${CMAKE_SYSTEM_PROCESS
  	# If we're running on Linux, we need to detect the page/cache line size.
  	# It could be a virtual machine with 4K pages, or 16K with Asahi.
  	if(LINUX)
@@ -35,4 +25,4 @@
 +		endif()
  	endif()
  	
-	# Windows page size matches x86-64 (4K).
+ 	# Windows page size matches x86-64 (4K).

@@ -38,6 +38,7 @@ pre_configure_target() {
 
   DISABLED_FEATURES="--disable-dependency-tracking \
             --without-contrib \
+            --disable-gst-decode \
             --disable-alsa \
             --disable-nls \
             --disable-dbus \
