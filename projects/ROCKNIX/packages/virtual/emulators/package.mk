@@ -1210,7 +1210,6 @@ makeinstall_target() {
       add_es_system ps2
       install_script "Start AetherSX2.sh"
       ;;
-      ;;
   esac
 
   ### Sony Playstation 3
