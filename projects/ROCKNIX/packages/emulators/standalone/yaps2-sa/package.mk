@@ -18,13 +18,12 @@ PKG_BUILD_FLAGS="speed"
 # asset ships the pnach files flat at the root, as PCSX2 expects.
 PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
 
-get_graphicdrivers() {
+get_graphicdrivers
   if listcontains "${GRAPHIC_DRIVERS}" "(panfrost)"; then
     GRAPHICS_DRIVER="panfrost"
   elif listcontains "${GRAPHIC_DRIVERS}" "(freedreno)"; then
     GRAPHICS_DRIVER="freedreno"
   fi
-}
 
 pre_configure_target() {
   PCSX2_CMAKE_BASE=(
