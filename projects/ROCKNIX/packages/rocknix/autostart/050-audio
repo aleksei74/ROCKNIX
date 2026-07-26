@@ -14,11 +14,7 @@ then
 fi
 
 (
-  ### Auto switch between internal and bluetooth devices
-  pactl load-module module-switch-on-connect blocklist="Dirtywave_M8|DirtyWave_M8|hdmi" 2>/dev/null
-
-  ### Set up audio routing (Internal or HDMI)
-  /usr/bin/hdmi_sense 2>/dev/null
+  sleep 1
 
   ### Set the default audio path, needed for some devices
   if [ ! -z "${DEVICE_PLAYBACK_PATH_SPK}" ]
@@ -39,12 +35,13 @@ fi
     VOLUME="${DEVICE_VOLUME}"
   fi
 
-  ### Set the primary card volume to 100%
-  ### to eliminate low audio on some devices.
+  ### Set primary card volume and PipeWire volume
   amixer -c ${ALSA_PRIMARY_CARD:-0} -q sset "Master" 100% 2>/dev/null
-
-  ### Now set the pipewire mixer volume
   /usr/bin/volume ${VOLUME} 2>/dev/null
+
+  ### Auto switch between internal and bluetooth devices
+  pactl load-module module-switch-on-connect blocklist="Dirtywave_M8|DirtyWave_M8|hdmi" 2>/dev/null
+  /usr/bin/hdmi_sense 2>/dev/null
 
   ### Run quantum audio hack if exists
   if [ -n "/usr/sbin/quantum" ]; then
@@ -52,13 +49,7 @@ fi
   fi
 ) &
 
-# Ensure DRM panel driver finishes initialization before UI (Sway) starts
-for i in $(seq 1 12); do
-  if [ "$(cat /sys/class/drm/card*-DSI-*/status 2>/dev/null)" = "connected" ]; then
-    sleep 1.5
-    break
-  fi
-  sleep 0.25
-done
+
+
 
 
