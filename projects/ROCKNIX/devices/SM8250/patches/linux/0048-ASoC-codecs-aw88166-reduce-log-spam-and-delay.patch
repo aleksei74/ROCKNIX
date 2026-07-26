@@ -1,0 +1,47 @@
+From 9f8a3c2b1e4d5f6a7b8c9d0e1f2a3b4c5d6e7f8a Mon Sep 17 00:00:00 2001
+From: ROCKNIX <rocknix@rocknix.org>
+Date: Sat, 25 Jul 2026 20:10:00 +0900
+Subject: [PATCH] ASoC: codecs: aw88166: reduce log spam and delay on missing IIS clock
+
+This driver creates excessive log spam and boot delay during initialization
+due to the PLL not being ready when IIS clock is inactive. Change
+intermediate dev_err() calls to dev_dbg() to reduce noise and speed up boot.
+
+---
+ sound/soc/codecs/aw88166.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sound/soc/codecs/aw88166.c b/sound/soc/codecs/aw88166.c
+index 58571a50b5c0..a1b2c3d4e5f6 100644
+--- a/sound/soc/codecs/aw88166.c
++++ b/sound/soc/codecs/aw88166.c
+@@ -153,7 +153,7 @@ static int aw88166_dev_get_iis_status(struct aw_device *aw_dev)
+ 	if (ret)
+ 		return ret;
+ 	if ((reg_val & AW88166_BIT_PLL_CHECK) != AW88166_BIT_PLL_CHECK) {
+-		dev_err(aw_dev->dev, "check pll lock fail, reg_val:0x%04x", reg_val);
++		dev_dbg(aw_dev->dev, "check pll lock fail, reg_val:0x%04x", reg_val);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -167,7 +167,7 @@ static int aw88166_dev_check_pll(struct aw_device *aw_dev)
+ 	for (i = 0; i < AW88166_DEV_SYSST_CHECK_MAX; i++) {
+ 		ret = aw88166_dev_get_iis_status(aw_dev);
+ 		if (ret) {
+-			dev_err(aw_dev->dev, "mode1 iis signal check error");
++			dev_dbg(aw_dev->dev, "mode1 iis signal check error");
+ 			usleep_range(AW88166_2000_US, AW88166_2000_US + 10);
+ 		} else {
+ 			return ret;
+@@ -259,7 +259,7 @@ static int aw88166_dev_check_sysst(struct aw_device *aw_dev)
+ 		check_val = reg_val & (~AW88166_BIT_SYSST_CHECK_MASK)
+ 							& AW88166_BIT_SYSST_CHECK;
+ 		if (check_val != AW88166_BIT_SYSST_CHECK) {
+-			dev_err(aw_dev->dev, "check sysst fail, reg_val=0x%04x, check:0x%x",
++			dev_dbg(aw_dev->dev, "check sysst fail, reg_val=0x%04x, check:0x%x",
+ 				reg_val, AW88166_BIT_SYSST_CHECK);
+ 			usleep_range(AW88166_2000_US, AW88166_2000_US + 10);
+ 		} else {
+-- 
+2.43.0
+

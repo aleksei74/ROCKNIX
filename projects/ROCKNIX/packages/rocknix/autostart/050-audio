@@ -13,39 +13,52 @@ then
   systemctl start pipewire-pulse
 fi
 
-### Auto switch between internal and bluetooth devices
-pactl load-module module-switch-on-connect blocklist="Dirtywave_M8|DirtyWave_M8|hdmi" 2>/dev/null
+(
+  ### Auto switch between internal and bluetooth devices
+  pactl load-module module-switch-on-connect blocklist="Dirtywave_M8|DirtyWave_M8|hdmi" 2>/dev/null
 
-### Set up audio routing (Internal or HDMI)
-/usr/bin/hdmi_sense 2>/dev/null
+  ### Set up audio routing (Internal or HDMI)
+  /usr/bin/hdmi_sense 2>/dev/null
 
-### Set the default audio path, needed for some devices
-if [ ! -z "${DEVICE_PLAYBACK_PATH_SPK}" ]
-then
-  if [ -z "${DEVICE_PLAYBACK_PATH}" ]
+  ### Set the default audio path, needed for some devices
+  if [ ! -z "${DEVICE_PLAYBACK_PATH_SPK}" ]
   then
-    export DEVICE_PLAYBACK_PATH="Playback Path"
+    if [ -z "${DEVICE_PLAYBACK_PATH}" ]
+    then
+      export DEVICE_PLAYBACK_PATH="Playback Path"
+    fi
+    amixer -c ${ALSA_PRIMARY_CARD:-0} cset name="${DEVICE_PLAYBACK_PATH}" ${DEVICE_PLAYBACK_PATH_SPK} 2>/dev/null
   fi
-  amixer -c ${ALSA_PRIMARY_CARD:-0} cset name="${DEVICE_PLAYBACK_PATH}" ${DEVICE_PLAYBACK_PATH_SPK} 2>/dev/null
-fi
 
-VOLUME=$(get_setting audio.volume)
-if [ -z ${VOLUME} ]
-then
-  VOLUME="60"
-elif [ -n "${DEVICE_VOLUME}" ]
-then
-  VOLUME="${DEVICE_VOLUME}"
-fi
+  VOLUME=$(get_setting audio.volume)
+  if [ -z ${VOLUME} ]
+  then
+    VOLUME="60"
+  elif [ -n "${DEVICE_VOLUME}" ]
+  then
+    VOLUME="${DEVICE_VOLUME}"
+  fi
 
-### Set the primary card volume to 100%
-### to eliminate low audio on some devices.
- amixer -c ${ALSA_PRIMARY_CARD:-0} -q sset "Master" 100%
+  ### Set the primary card volume to 100%
+  ### to eliminate low audio on some devices.
+  amixer -c ${ALSA_PRIMARY_CARD:-0} -q sset "Master" 100% 2>/dev/null
 
-### Now set the pipewire mixer volume
-/usr/bin/volume ${VOLUME}
+  ### Now set the pipewire mixer volume
+  /usr/bin/volume ${VOLUME} 2>/dev/null
 
-### Run quantum audio hack if exists
-if [ -n "/usr/sbin/quantum" ]; then
-  /usr/sbin/quantum
-fi
+  ### Run quantum audio hack if exists
+  if [ -n "/usr/sbin/quantum" ]; then
+    /usr/sbin/quantum 2>/dev/null
+  fi
+) &
+
+# Ensure DRM panel driver finishes initialization before UI (Sway) starts
+for i in $(seq 1 12); do
+  if [ "$(cat /sys/class/drm/card*-DSI-*/status 2>/dev/null)" = "connected" ]; then
+    sleep 1.5
+    break
+  fi
+  sleep 0.25
+done
+
+
