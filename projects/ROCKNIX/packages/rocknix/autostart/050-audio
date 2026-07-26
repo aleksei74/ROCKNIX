@@ -55,10 +55,11 @@ fi
 # Ensure DRM panel driver finishes initialization before UI (Sway) starts
 for i in $(seq 1 12); do
   if [ "$(cat /sys/class/drm/card*-DSI-*/status 2>/dev/null)" = "connected" ]; then
-    sleep 1.5
+    sleep 0.2
     break
   fi
   sleep 0.25
 done
+
 
 
