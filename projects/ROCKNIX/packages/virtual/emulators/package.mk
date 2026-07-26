@@ -1186,26 +1186,32 @@ makeinstall_target() {
       add_emu_core psx retroarch pcsx_rearmed true
       add_emu_core psx retroarch beetle_psx false
       add_emu_core psx mednafen psx false
+      ;;
   esac
+
   add_emu_core psx duckstation duckstation-sa false
   add_emu_core psx retroarch swanstation false
   add_es_system psx
 
   ### Sony Playstation 2
   case ${DEVICE} in
-  AMD64)
-    add_emu_core ps2 yaps2 yaps2-sa true
-    install_script "Start YAPS2.sh"
-    add_es_system ps2
-    ;;
-  RK3399|RK3576|RK3566|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
-    add_emu_core ps2 aethersx2 aethersx2-sa true
-    case ${DEVICE} in
-      S922X|SM6115|SM8250|SM8550|SM8650|SM8750)
-        add_emu_core ps2 yaps2 yaps2-sa false
-        install_script "Start YAPS2.sh"
+    AMD64)
+      add_emu_core ps2 yaps2 yaps2-sa true
+      install_script "Start YAPS2.sh"
+      add_es_system ps2
+      ;;
+    RK3399|RK3576|RK3566|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
+      add_emu_core ps2 aethersx2 aethersx2-sa true
+      case ${DEVICE} in
+        S922X|SM6115|SM8250|SM8550|SM8650|SM8750)
+          add_emu_core ps2 yaps2 yaps2-sa false
+          install_script "Start YAPS2.sh"
+          ;;
+      esac
+      add_es_system ps2
       ;;
   esac
+
 
   ### Sony Playstation 3
   case ${DEVICE} in
