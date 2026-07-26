@@ -59,9 +59,14 @@ case "${DEVICE}" in
     PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa yaps2-sa"
     LIBRETRO_CORES+=" dolphin-lr"
     ;;
-  RK3588|SM6115)
+  RK3588)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_EMUS+=" aethersx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa supermodel-sa vita3k-sa"
+    LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
+    ;;
+  SM6115)
+    [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
+    PKG_EMUS+=" aethersx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa supermodel-sa vita3k-sa yaps2-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
     ;;
   SM8250)
@@ -1193,22 +1198,12 @@ makeinstall_target() {
     install_script "Start YAPS2.sh"
     add_es_system ps2
     ;;
-    RK3399|RK3576|RK3566|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
-      add_emu_core ps2 aethersx2 aethersx2-sa true
-      case ${DEVICE} in
-        S922X|RK3576|SM8250|SM8550|SM8650|SM8750)
-          add_emu_core ps2 yaps2 yaps2-sa false
-          install_script "Start YAPS2.sh"
-        ;;
-      esac
-      case ${DEVICE} in
-        RK3576|SM8250|SM8550|SM8650|SM8750)
-          add_emu_core ps2 armsx2 armsx2-sa false
-          install_script "Start ARMSX2.sh"
-        ;;
-      esac
-      add_es_system ps2
-      install_script "Start AetherSX2.sh"
+  RK3399|RK3576|RK3566|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
+    add_emu_core ps2 aethersx2 aethersx2-sa true
+    case ${DEVICE} in
+      S922X|SM6115|SM8250|SM8550|SM8650|SM8750)
+        add_emu_core ps2 yaps2 yaps2-sa false
+        install_script "Start YAPS2.sh"
       ;;
   esac
 
