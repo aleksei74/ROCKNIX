@@ -13,38 +13,42 @@ then
   systemctl start pipewire-pulse
 fi
 
-### Set the default audio path, needed for some devices
-if [ ! -z "${DEVICE_PLAYBACK_PATH_SPK}" ]
-then
-  if [ -z "${DEVICE_PLAYBACK_PATH}" ]
-  then
-    export DEVICE_PLAYBACK_PATH="Playback Path"
-  fi
-  amixer -c ${ALSA_PRIMARY_CARD:-0} cset name="${DEVICE_PLAYBACK_PATH}" ${DEVICE_PLAYBACK_PATH_SPK} 2>/dev/null
-fi
-
-VOLUME=$(get_setting audio.volume)
-if [ -z ${VOLUME} ]
-then
-  VOLUME="60"
-elif [ -n "${DEVICE_VOLUME}" ]
-then
-  VOLUME="${DEVICE_VOLUME}"
-fi
-
-### Set primary card volume and PipeWire volume
-amixer -c ${ALSA_PRIMARY_CARD:-0} -q sset "Master" 100% 2>/dev/null
-/usr/bin/volume ${VOLUME} 2>/dev/null
-
-### Defer HDMI sensing & module load so it does not collide with Sway DRM modeset
 (
-  sleep 4
+  sleep 1
+
+  ### Set the default audio path, needed for some devices
+  if [ ! -z "${DEVICE_PLAYBACK_PATH_SPK}" ]
+  then
+    if [ -z "${DEVICE_PLAYBACK_PATH}" ]
+    then
+      export DEVICE_PLAYBACK_PATH="Playback Path"
+    fi
+    amixer -c ${ALSA_PRIMARY_CARD:-0} cset name="${DEVICE_PLAYBACK_PATH}" ${DEVICE_PLAYBACK_PATH_SPK} 2>/dev/null
+  fi
+
+  VOLUME=$(get_setting audio.volume)
+  if [ -z ${VOLUME} ]
+  then
+    VOLUME="60"
+  elif [ -n "${DEVICE_VOLUME}" ]
+  then
+    VOLUME="${DEVICE_VOLUME}"
+  fi
+
+  ### Set primary card volume and PipeWire volume
+  amixer -c ${ALSA_PRIMARY_CARD:-0} -q sset "Master" 100% 2>/dev/null
+  /usr/bin/volume ${VOLUME} 2>/dev/null
+
+  ### Auto switch between internal and bluetooth devices
   pactl load-module module-switch-on-connect blocklist="Dirtywave_M8|DirtyWave_M8|hdmi" 2>/dev/null
   /usr/bin/hdmi_sense 2>/dev/null
+
+  ### Run quantum audio hack if exists
   if [ -n "/usr/sbin/quantum" ]; then
     /usr/sbin/quantum 2>/dev/null
   fi
 ) &
+
 
 
 
