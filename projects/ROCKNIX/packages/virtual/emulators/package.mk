@@ -1202,18 +1202,19 @@ makeinstall_target() {
       ;;
     RK3399|RK3576|RK3566|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
       add_emu_core ps2 aethersx2 aethersx2-sa true
-      add_emu_core ps2 armsx2 armsx2-sa false
-      install_script "Start AetherSX2.sh"
-      install_script "Start ARMSX2.sh"
       case ${DEVICE} in
-        S922X|RK3576|SM8250|SM8550|SM8650|SM8750)
+        S922X|RK3576|SM6115|SM8250|SM8550|SM8650|SM8750)
           add_emu_core ps2 yaps2 yaps2-sa false
+          add_emu_core ps2 armsx2 armsx2-sa false
           install_script "Start YAPS2.sh"
+          install_script "Start ARMSX2.sh"
           ;;
       esac
       add_es_system ps2
+      install_script "Start AetherSX2.sh"
       ;;
   esac
+
 
 
 
