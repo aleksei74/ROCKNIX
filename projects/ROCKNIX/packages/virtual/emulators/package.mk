@@ -56,49 +56,34 @@ case "${DEVICE}" in
   RK3576)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_DEPENDS_TARGET+=" common-shaders glsl-shaders"
-    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa yaps2-sa"
+    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa"
     LIBRETRO_CORES+=" dolphin-lr"
     ;;
   RK3588)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
-    PKG_EMUS+=" aethersx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa supermodel-sa vita3k-sa"
+    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa supermodel-sa vita3k-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
     ;;
   SM6115)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
-    PKG_EMUS+=" aethersx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa supermodel-sa vita3k-sa armsx2-sa"
+    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa supermodel-sa vita3k-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
     ;;
   SM8250)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
-<<<<<<< HEAD
     PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa yaps2-sa"
-=======
-    PKG_EMUS+=" aethersx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa armsx2-sa"
->>>>>>> pr-176
+                xemu-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   SM8550)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
-<<<<<<< HEAD
     PKG_EMUS+=" aethersx2-sa ares-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa drastic-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa yaps2-sa"
+                xemu-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   SM8650|SM8750)
     PKG_EMUS+=" aethersx2-sa ares-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa yaps2-sa"
-=======
-    PKG_EMUS+=" aethersx2-sa ares-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa drastic-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa armsx2-sa"
-    LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
-    ;;
-  SM8650|SM8750)
-    PKG_EMUS+=" aethersx2-sa ares-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa armsx2-sa"
->>>>>>> pr-176
+                xemu-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   S922X)
