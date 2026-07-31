@@ -1,0 +1,34 @@
+Emulation Run Log - Started at 일  7월 26 13:51:55 KST 2026
+
+ARG1: /storage/roms/3ds/Crashmo (Kor).3ds
+ARG2: -P3ds
+ARG3: --core=azahar-sa
+ARG4: --emulator=azahar
+ARGS: /storage/roms/3ds/Crashmo (Kor).3ds -P3ds --core=azahar-sa --emulator=azahar
+EMULATOR: azahar
+PLATFORM: 3ds
+CORE: azahar-sa
+ROM NAME: /storage/roms/3ds/Crashmo (Kor).3ds
+BASE ROM NAME: Crashmo (Kor).3ds
+USING CONFIG: /storage/.config/retroarch/retroarch.cfg
+USING APPENDCONFIG : /tmp/.retroarch.cfg
+GAME GUIDE PATH: No Game Guide Found
+
+runemu.sh: /usr/bin/runemu.sh Clearing screen
+runemu.sh: /usr/bin/runemu.sh Disabling BT
+runemu.sh: /usr/bin/runemu.sh Configuring for azahar
+runemu.sh: /usr/bin/runemu.sh Clearing screen
+runemu.sh: /usr/bin/runemu.sh executing game: /storage/roms/3ds/Crashmo (Kor).3ds
+runemu.sh: /usr/bin/runemu.sh script to execute: ${RUN_SHELL} "/usr/bin/start_${CORE%-*}.sh" "${ROMNAME}" "${PLATFORM}"
+runemu.sh: /usr/bin/runemu.sh Configure big.little ()
+runemu.sh: /usr/bin/runemu.sh Set emulation performance mode to (ondemand)
+runemu.sh: /usr/bin/runemu.sh Executing /usr/bin/bash /usr/bin/start_azahar.sh /storage/roms/3ds/Crashmo (Kor).3ds 3ds
+Could not open module param file '/sys/module/bifrost_kbase/parameters/large_page_conf'
+/usr/bin/start_azahar.sh: line 221:  7388 Killed                     ${EMUPERF} /usr/bin/azahar "${1}"
+runemu.sh: /usr/bin/runemu.sh Clearing screen
+runemu.sh: /usr/bin/runemu.sh Restore system GPU performance mode (auto)
+runemu.sh: /usr/bin/runemu.sh Restore active threads ()
+runemu.sh: /usr/bin/runemu.sh Checking errors: 0 
+runemu.sh: /usr/bin/runemu.sh Cleaning up and exiting
+runemu.sh: /usr/bin/runemu.sh Enabling BT
+runemu.sh: /usr/bin/runemu.sh Clearing screen

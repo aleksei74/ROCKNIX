@@ -7,16 +7,19 @@ source /etc/profile
 
 DATA_ROOT="/storage/.config/ARMSX2"
 mkdir -p "${DATA_ROOT}/inis"
-if [ ! -f "${DATA_ROOT}/inis/PCSX2.ini" ] || \
-   ! grep -q '^SettingsVersion = 1$' "${DATA_ROOT}/inis/PCSX2.ini"; then
-  cp -f /usr/config/ARMSX2/inis/PCSX2.ini "${DATA_ROOT}/inis/PCSX2.ini"
+if [ ! -f "${DATA_ROOT}/inis/PCSX2.ini" ]; then
+    cp -r /usr/config/ARMSX2/inis/PCSX2.ini "${DATA_ROOT}/inis/PCSX2.ini"
+fi
+
+if [ ! -f "${DATA_ROOT}/inis/secrets.ini" ]; then
+    cp -r /usr/config/ARMSX2/inis/secrets.ini "${DATA_ROOT}/inis/secrets.ini"
 fi
 
 mkdir -p /storage/roms/bios/ps2
 mkdir -p /storage/roms/savestates/ps2
 mkdir -p /storage/roms/ps2/textures
 sed -i '/^Textures =/c\Textures = /storage/roms/ps2/textures' "${DATA_ROOT}/inis/PCSX2.ini"
-ln -sf /usr/config/SDL-GameControllerDB/gamecontrollerdb.txt "${DATA_ROOT}/game_controller_db.txt"
+ln -sf /usr/config/SDL-GameControllerDB/gamecontrollerdb.txt "${DATA_ROOT}/game_controller_db.txt" 2>/dev/null
 
 set_kill set "armsx2-qt"
 export QT_QPA_PLATFORM=wayland

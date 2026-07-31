@@ -1,0 +1,151 @@
+[   0.200332] Input <Info> input_common/udp/client.cpp:StartCommunication:206: Starting communication with UDP input server on 127.0.0.1:26760
+[   0.454792] Frontend <Info> citra_qt/citra_qt.cpp:GMainWindow:454: Azahar Version: b42d091 | master-b42d0916b-dirty
+[   0.454917] Frontend <Info> citra_qt/citra_qt.cpp:GMainWindow:472: Host OS: Linux 7.0.2
+[   0.454955] Frontend <Info> citra_qt/citra_qt.cpp:GMainWindow:475: Host RAM: 2.91 GiB
+[   0.454961] Frontend <Info> citra_qt/citra_qt.cpp:GMainWindow:476: Host Swap: 2.00 GiB
+[   0.512816] Frontend <Info> citra_qt/citra_qt.cpp:BootGame:1465: Azahar starting...
+[   0.514205] Frontend <Info> citra_qt/citra_qt.cpp:BootGame:1488: Loading per application config file for title 00040000000C8A00
+[   0.522178] Config <Info> common/settings.cpp:LogSettings:85: Azahar Configuration:
+[   0.522210] Config <Info> common/settings.cpp:operator():82: Core_UseCpuJit: true
+[   0.522214] Config <Info> common/settings.cpp:operator():82: Core_CPUClockPercentage: 100
+[   0.522216] Config <Info> common/settings.cpp:operator():82: Controller_UseArticController: false
+[   0.522218] Config <Info> common/settings.cpp:operator():82: Renderer_UseGLES: true
+[   0.522220] Config <Info> common/settings.cpp:operator():82: Renderer_GraphicsAPI: Vulkan
+[   0.522222] Config <Info> common/settings.cpp:operator():82: Renderer_AsyncShaders: false
+[   0.522223] Config <Info> common/settings.cpp:operator():82: Renderer_AsyncPresentation: true
+[   0.522225] Config <Info> common/settings.cpp:operator():82: Renderer_SpirvShaderGen: true
+[   0.522227] Config <Info> common/settings.cpp:operator():82: Renderer_DisableSpirvOptimizer: true
+[   0.522230] Config <Info> common/settings.cpp:operator():82: Renderer_Debug: false
+[   0.522233] Config <Info> common/settings.cpp:operator():82: Renderer_UseHwShader: true
+[   0.522235] Config <Info> common/settings.cpp:operator():82: Renderer_ShadersAccurateMul: true
+[   0.522242] Config <Info> common/settings.cpp:operator():82: Renderer_UseShaderJit: false
+[   0.522245] Config <Info> common/settings.cpp:operator():82: Renderer_UseResolutionFactor: 1
+[   0.522247] Config <Info> common/settings.cpp:operator():82: Renderer_UseIntegerScaling: false
+[   0.522252] Config <Info> common/settings.cpp:operator():82: Renderer_FrameLimit: 100
+[   0.522254] Config <Info> common/settings.cpp:operator():82: Renderer_VSyncNew: true
+[   0.522256] Config <Info> common/settings.cpp:operator():82: Renderer_PostProcessingShader: None (builtin)
+[   0.522258] Config <Info> common/settings.cpp:operator():82: Renderer_FilterMode: true
+[   0.522261] Config <Info> common/settings.cpp:operator():82: Renderer_TextureFilter: None
+[   0.522263] Config <Info> common/settings.cpp:operator():82: Renderer_TextureSampling: GameControlled
+[   0.522268] Config <Info> common/settings.cpp:operator():82: Renderer_DelayGameRenderThreasUs: 0
+[   0.522270] Config <Info> common/settings.cpp:operator():82: Renderer_DisableRightEyeRender: true
+[   0.522273] Config <Info> common/settings.cpp:operator():82: Stereoscopy_Render3d: 0
+[   0.522281] Config <Info> common/settings.cpp:operator():82: Stereoscopy_Factor3d: 0
+[   0.522284] Config <Info> common/settings.cpp:operator():82: Stereoscopy_Swap_Eyes: false
+[   0.522287] Config <Info> common/settings.cpp:operator():82: Stereoscopy_Render_3d_to_which_display: 0
+[   0.522290] Config <Info> common/settings.cpp:operator():82: Stereoscopy_MonoRenderOption: 0
+[   0.522293] Config <Info> common/settings.cpp:operator():82: Layout_LayoutOption: 4
+[   0.522295] Config <Info> common/settings.cpp:operator():82: Layout_PortraitLayoutOption: 0
+[   0.522298] Config <Info> common/settings.cpp:operator():82: Layout_SecondaryDisplayLayout: 0
+[   0.522303] Config <Info> common/settings.cpp:operator():82: Layout_SwapScreen: false
+[   0.522305] Config <Info> common/settings.cpp:operator():82: Layout_UprightScreen: false
+[   0.522307] Config <Info> common/settings.cpp:operator():82: Layout_ScreenGap: 0
+[   0.522312] Config <Info> common/settings.cpp:operator():82: Layout_LargeScreenProportion: 2
+[   0.522315] Config <Info> common/settings.cpp:operator():82: Layout_SmallScreenPosition: 2
+[   0.522317] Config <Info> common/settings.cpp:operator():82: Utility_DumpTextures: false
+[   0.522319] Config <Info> common/settings.cpp:operator():82: Utility_CustomTextures: false
+[   0.522321] Config <Info> common/settings.cpp:operator():82: Utility_PreloadTextures: false
+[   0.522324] Config <Info> common/settings.cpp:operator():82: Utility_AsyncCustomLoading: true
+[   0.522325] Config <Info> common/settings.cpp:operator():82: Utility_UseDiskShaderCache: true
+[   0.522340] Config <Info> common/settings.cpp:operator():82: Audio_Emulation: HLE
+[   0.522343] Config <Info> common/settings.cpp:operator():82: Audio_OutputType: 0
+[   0.522345] Config <Info> common/settings.cpp:operator():82: Audio_OutputDevice: Auto
+[   0.522355] Config <Info> common/settings.cpp:operator():82: Audio_InputType: 0
+[   0.522357] Config <Info> common/settings.cpp:operator():82: Audio_InputDevice: Auto
+[   0.522364] Config <Info> common/settings.cpp:operator():82: Audio_EnableAudioStretching: true
+[   0.522367] Config <Info> common/settings.cpp:operator():82: Audio_EnableRealtime: false
+[   0.522369] Config <Info> common/settings.cpp:operator():82: Camera_OuterRightName: blank
+[   0.522371] Config <Info> common/settings.cpp:operator():82: Camera_OuterRightConfig: 
+[   0.522374] Config <Info> common/settings.cpp:operator():82: Camera_OuterRightFlip: 0
+[   0.522376] Config <Info> common/settings.cpp:operator():82: Camera_InnerName: blank
+[   0.522379] Config <Info> common/settings.cpp:operator():82: Camera_InnerConfig: 
+[   0.522382] Config <Info> common/settings.cpp:operator():82: Camera_InnerFlip: 0
+[   0.522385] Config <Info> common/settings.cpp:operator():82: Camera_OuterLeftName: blank
+[   0.522387] Config <Info> common/settings.cpp:operator():82: Camera_OuterLeftConfig: 
+[   0.522388] Config <Info> common/settings.cpp:operator():82: Camera_OuterLeftFlip: 0
+[   0.522389] Config <Info> common/settings.cpp:operator():82: DataStorage_UseVirtualSd: true
+[   0.522391] Config <Info> common/settings.cpp:operator():82: DataStorage_UseCustomStorage: false
+[   0.522392] Config <Info> common/settings.cpp:operator():82: System_IsNew3ds: false
+[   0.522394] Config <Info> common/settings.cpp:operator():82: System_LLEApplets: true
+[   0.522396] Config <Info> common/settings.cpp:operator():82: System_RegionValue: -1
+[   0.522400] Config <Info> common/settings.cpp:operator():82: System_PluginLoader: false
+[   0.522403] Config <Info> common/settings.cpp:operator():82: System_PluginLoaderAllowed: true
+[   0.522411] Config <Info> common/settings.cpp:operator():82: System_ApplyRegionFreePatch: true
+[   0.522413] Config <Info> common/settings.cpp:operator():82: Debugging_DelayStartForLLEModules: true
+[   0.522415] Config <Info> common/settings.cpp:operator():82: Debugging_UseGdbstub: false
+[   0.522416] Config <Info> common/settings.cpp:operator():82: Debugging_GdbstubPort: 24689
+[   0.522417] Config <Info> common/settings.cpp:operator():82: Debugging_InstantDebugLog: false
+[   0.522418] Config <Info> common/settings.cpp:operator():82: Debugging_ToggleUniqueDataConsoleType: false
+[   0.958303] Audio.Sink <Info> audio_core/cubeb_sink.cpp:StateCallback:135: Cubeb Audio Stream Started
+[   0.960004] Service.FS <Warning> core/file_sys/ncch_container.cpp:LoadOverrides:412: Loaded NCCH /storage/.local/share/azahar/nand/00000000000000000000000000000000/title/0004009b/00014202/content/00000000.app is tainted, application behavior may not be as expected!
+[   0.962245] Service.HTTP <Error> core/hle/service/http/http_c.cpp:DecryptClCertA:2106: ClCertA file missing, using default
+[   0.979577] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_KHR_swapchain
+[   0.979611] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_KHR_image_format_list
+[   0.979615] Render.Vulkan <Warning> video_core/renderer_vulkan/vk_instance.cpp:operator():440: Extension VK_EXT_shader_stencil_export unavailable.
+[   0.979618] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_EXT_external_memory_host
+[   0.979621] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_EXT_tooling_info
+[   0.979623] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_KHR_timeline_semaphore
+[   0.979626] Render.Vulkan <Warning> video_core/renderer_vulkan/vk_instance.cpp:operator():440: Extension VK_KHR_portability_subset unavailable.
+[   0.979628] Render.Vulkan <Warning> video_core/renderer_vulkan/vk_instance.cpp:operator():435: Extension VK_EXT_extended_dynamic_state has been blacklisted because it is broken on Qualcomm and ARM drivers
+[   0.979631] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_EXT_custom_border_color
+[   0.979633] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_EXT_index_type_uint8
+[   0.979634] Render.Vulkan <Warning> video_core/renderer_vulkan/vk_instance.cpp:operator():440: Extension VK_EXT_fragment_shader_interlock unavailable.
+[   0.979638] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:operator():431: Enabling extension: VK_EXT_pipeline_creation_cache_control
+[   0.979639] Render.Vulkan <Warning> video_core/renderer_vulkan/vk_instance.cpp:operator():440: Extension VK_KHR_fragment_shader_barycentric unavailable.
+[   0.989636] Render.Vulkan <Warning> video_core/renderer_vulkan/vk_instance.cpp:CreateFormatTable:302: Format B8G8R8Unorm unsupported, falling back unconditionally to R8G8B8A8Unorm
+[   0.989757] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:CollectToolingInfo:691: VK_DRIVER: Mali-G52 29.1.0
+[   0.989766] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:CollectToolingInfo:692: VK_DEVICE: Mali-G52
+[   0.989769] Render.Vulkan <Info> video_core/renderer_vulkan/vk_instance.cpp:CollectToolingInfo:693: VK_VERSION: 1.3.303
+[   0.990245] Render.Vulkan <Info> video_core/renderer_vulkan/renderer_vulkan.cpp:IsLowRefreshRate:101: Refresh rate is above emulated 3DS screen: 60hz. Good.
+[   1.016860] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Stream buffer with size 128 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   1.879745] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Upload buffer with size 524288 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   1.883560] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Download buffer with size 16384 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   1.897685] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Stream buffer with size 65536 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   1.899827] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Stream buffer with size 8192 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   1.900880] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Stream buffer with size 2048 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   1.901481] Render.Vulkan <Info> video_core/renderer_vulkan/vk_stream_buffer.cpp:CreateBuffers:238: Created Stream buffer with size 2048 KiB (flags { DeviceLocal | HostVisible | HostCoherent })
+[   2.023687] Render.Vulkan <Info> video_core/renderer_vulkan/renderer_vulkan.cpp:IsLowRefreshRate:101: Refresh rate is above emulated 3DS screen: 60hz. Good.
+[   2.031061] Loader <Info> core/loader/ncch.cpp:Load:324: Program ID: 00040000000C8A00
+[   2.031259] Service.FS <Warning> core/file_sys/ncch_container.cpp:OpenFile:128: Failed to open /storage/.local/share/azahar/sdmc/Nintendo 3DS/00000000000000000000000000000000/00000000000000000000000000000000/title/0004000e/000c8a00/content/00000000.app
+[   2.188997] Loader <Info> core/hle/kernel/process.cpp:ParseKernelCaps:198: ExHeader kernel version: 2.33
+[   2.193877] Service.FS <Info> core/file_sys/ncch_container.cpp:LoadSectionExeFS:468: Attempting to load logo from the ExeFS
+[   2.243753] Core.Cheats <Info> core/cheats/cheats.cpp:LoadCheatFile:92: Attempting to load cheats file: /storage/.local/share/azahar/cheats/00040000000C8A00.txt
+[   2.244407] Core.Cheats <Info> core/cheats/gateway_cheat.cpp:LoadFile:491: GatewayCheat::LoadFile failed, file doesn't exist: /storage/.local/share/azahar/cheats/00040000000C8A00.txt
+[   2.248687] Render.Vulkan <Info> video_core/renderer_vulkan/vk_pipeline_cache.cpp:LoadDriverPipelineDiskCache:239: No pipeline cache found for title_id=00040000000C8A00
+[   2.249486] Render.Vulkan <Info> video_core/renderer_vulkan/vk_shader_disk_cache.cpp:InitVSCache:585: Loading VS disk shader cache for title 00040000000C8A00
+[   2.259187] Render.Vulkan <Info> video_core/renderer_vulkan/vk_shader_disk_cache.cpp:InitFSCache:896: Loading FS disk shader cache for title 00040000000C8A00
+[   2.268726] Render.Vulkan <Info> video_core/renderer_vulkan/vk_shader_disk_cache.cpp:InitGSCache:1113: Loading GS disk shader cache for title 00040000000C8A00
+[   2.269966] Render.Vulkan <Info> video_core/renderer_vulkan/vk_shader_disk_cache.cpp:InitPLCache:1332: Loading PL disk shader cache for title 00040000000C8A00
+[   2.273862] Service.CAM <Info> citra_qt/camera/qt_multimedia_camera.cpp:ResumeCameras:50: Resuming all cameras
+[   2.277343] Frontend <Warning> citra_qt/citra_qt.cpp:HoldWakeLockLinux:1269: Couldn't connect to XDP D-Bus endpoint
+[   2.282483] Frontend <Warning> common/linux/gamemode.cpp:StartGamemode:15: Failed to start gamemode: dlopen failed - libgamemode.so: cannot open shared object file: No such file or directory
+[   2.719834] Service.SRV <Warning> core/hle/service/sm/srv.cpp:RegisterClient:64: (STUBBED) called. Caller PID=11
+[   2.787014] Service.SRV <Warning> core/hle/service/sm/srv.cpp:EnableNotification:86: (STUBBED) called
+[   2.822774] Service.NDM <Warning> core/hle/service/ndm/ndm_u.cpp:OverrideDefaultDaemons:195: (STUBBED) bit_mask=0x0000000F
+[   2.828692] Service.NDM <Warning> core/hle/service/ndm/ndm_u.cpp:SuspendDaemons:74: (STUBBED) bit_mask=0x00000006
+[   2.831739] Service.FS <Warning> core/hle/service/fs/fs_user.cpp:InitializeWithSdkVersion:1079: (STUBBED) called, version: 0x040203C8
+[   2.875444] Service.FS <Error> ./core/file_sys/archive_backend.h:GetOpenDelayNs:221: Delay generator was not initalized. Using default
+[   2.994602] Service.FS <Error> ./core/file_sys/archive_backend.h:GetOpenDelayNs:221: Delay generator was not initalized. Using default
+[   3.241630] Service.FS <Error> core/file_sys/savedata_archive.cpp:OpenFile:75: Non-existing file /storage/.local/share/azahar/nand/data/00000000000000000000000000000000/sysdata/00010034/00000000/BOSS_SV.db can't be open without mode create.
+[   3.241854] Service.FS <Error> core/file_sys/savedata_archive.cpp:OpenFile:75: Non-existing file /storage/.local/share/azahar/nand/data/00000000000000000000000000000000/sysdata/00010034/00000000/BOSS_SS.db can't be open without mode create.
+[   3.241929] Service.BOSS <Error> core/hle/service/boss/online_service.cpp:InitializeSession:104: Could not open BOSS database.
+[   3.249933] Service.APT <Warning> core/hle/service/apt/apt.cpp:NotifyToWait:362: (STUBBED) app_id=768
+[   3.264366] Service.APT <Warning> core/hle/service/apt/apt.cpp:AppletUtility:711: (STUBBED) called command=0X00000007, input_size=0X00000004, output_size=0X00000001
+[   3.267567] Service.APT <Warning> core/hle/service/apt/apt.cpp:AppletUtility:711: (STUBBED) called command=0X00000004, input_size=0X00000001, output_size=0X00000001
+[   3.922269] Service.DSP <Info> audio_core/hle/hle.cpp:LoadComponent:512: Firmware hash: 0xe031661c89e654ee
+[   3.922335] Service.DSP <Info> audio_core/hle/hle.cpp:LoadComponent:517: Structures hash: 0x228655de1258d999
+[   3.922343] Service.DSP <Info> core/hle/service/dsp/dsp_dsp.cpp:LoadComponent:191: called size=0xC234, prog_mask=0x00FF, data_mask=0x00FF
+[   3.926251] Service.DSP <Info> core/hle/service/dsp/dsp_dsp.cpp:RegisterInterruptEvents:258: Registered interrupt=2, channel=2, event=event-00116300
+[   3.927453] Service.DSP <Warning> core/hle/service/dsp/dsp_dsp.cpp:GetSemaphoreEventHandle:275: (STUBBED) called
+[   3.928649] Service.DSP <Warning> core/hle/service/dsp/dsp_dsp.cpp:SetSemaphoreMask:285: (STUBBED) called mask=0x2000
+[   3.930693] Audio.DSP <Info> audio_core/hle/hle.cpp:PipeWrite:235: Application has requested initialization of DSP hardware
+[   3.931752] Service.DSP <Info> core/hle/service/dsp/dsp_dsp.cpp:SetSemaphore:57: called, semaphore_value=4000
+[   3.939104] Service.DSP <Info> core/hle/service/dsp/dsp_dsp.cpp:SetSemaphore:57: called, semaphore_value=4000
+[   4.010127] Service.CFG <Info> core/hle/service/cfg/cfg.cpp:UpdatePreferredRegionCode:1081: Preferred region code set to 5
+[   4.010191] Service.CFG <Warning> core/hle/service/cfg/cfg.cpp:UpdatePreferredRegionCode:1084: System language 1 does not fit the region. Adjusted to 7
+[   4.010567] Service.FS <Warning> core/file_sys/ncch_container.cpp:LoadOverrides:412: Loaded NCCH /storage/.local/share/azahar/nand/00000000000000000000000000000000/title/0004009b/00014202/content/00000000.app is tainted, application behavior may not be as expected!
+[   4.010639] Service.FS <Warning> core/file_sys/ncch_container.cpp:ReadOverrideRomFS:689: File /storage/.local/share/azahar/nand/00000000000000000000000000000000/title/0004009b/00014202/content/00000000.app.romfs overriding built-in RomFS; LayeredFS not enabled
+[   5.152767] Service.APT <Warning> core/hle/service/apt/apt.cpp:AppletUtility:711: (STUBBED) called command=0X00000004, input_size=0X00000001, output_size=0X00000001
+[   5.198969] Service.FS <Error> ./core/file_sys/archive_backend.h:GetOpenDelayNs:221: Delay generator was not initalized. Using default
+[   5.598539] Service.FS <Error> ./core/file_sys/archive_backend.h:GetOpenDelayNs:221: Delay generator was not initalized. Using default
+[   5.601950] Service.FS <Error> ./core/file_sys/file_backend.h:GetReadDelayNs:51: Delay generator was not initalized. Using default

@@ -1,0 +1,25 @@
+diff --git a/projects/ROCKNIX/packages/graphics/mesa/package.mk b/projects/ROCKNIX/packages/graphics/mesa/package.mk
+index cdee18e603..8fa73cb931 100644
+--- a/projects/ROCKNIX/packages/graphics/mesa/package.mk
++++ b/projects/ROCKNIX/packages/graphics/mesa/package.mk
+@@ -12,7 +12,7 @@ PKG_DEPENDS_TARGET="toolchain expat libdrm Mako:host pyyaml:host"
+ PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
+ PKG_TOOLCHAIN="meson"
+ PKG_PATCH_DIRS+=" ${DEVICE}"
+-PKG_VERSION="26.1.2"
++PKG_VERSION="26.2.0-rc1"
+ PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
+ 
+ if listcontains "${GRAPHIC_DRIVERS}" "panfrost" || \
+diff --git a/projects/ROCKNIX/packages/multimedia/vlc/package.mk b/projects/ROCKNIX/packages/multimedia/vlc/package.mk
+index 5e9aa7751c..b77486d085 100644
+--- a/projects/ROCKNIX/packages/multimedia/vlc/package.mk
++++ b/projects/ROCKNIX/packages/multimedia/vlc/package.mk
+@@ -38,6 +38,7 @@ pre_configure_target() {
+ 
+   DISABLED_FEATURES="--disable-dependency-tracking \
+             --without-contrib \
++            --disable-gst-decode \
+             --disable-alsa \
+             --disable-nls \
+             --disable-dbus \
