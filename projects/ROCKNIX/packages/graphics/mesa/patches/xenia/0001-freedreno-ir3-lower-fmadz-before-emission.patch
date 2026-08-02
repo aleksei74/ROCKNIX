@@ -1,0 +1,25 @@
+diff --git a/src/freedreno/ir3/ir3_context.c b/src/freedreno/ir3/ir3_context.c
+index 507386b..ed7eb69 100644
+--- a/src/freedreno/ir3/ir3_context.c
++++ b/src/freedreno/ir3/ir3_context.c
+@@ -91,9 +91,18 @@ ir3_context_init(struct ir3_compiler *compiler, struct ir3_shader *shader,
+       needs_late_alg = true;
+    }
+
+-   /* nir_opt_algebraic() above would have unfused our ffmas, re-fuse them. */
+-   if (needs_late_alg) {
+-      NIR_PASS(progress, ctx->s, nir_opt_algebraic_late);
++   /* nir_opt_algebraic() above would have unfused our ffmas, re-fuse them.
++    * Also run this when zero-preserving multiplies need lowering. Variant
++    * lowering can leave fmulz/fadd pairs which the first late pass fuses to
++    * fmadz; run to a fixed point so a following pass lowers the new fmadz via
++    * the abs-min pattern before it reaches the IR3 emitter. */
++   if (needs_late_alg || ctx->s->options->lower_fmulz_with_abs_min) {
++      bool more_late_algebraic;
++      do {
++         more_late_algebraic = false;
++         NIR_PASS(more_late_algebraic, ctx->s, nir_opt_algebraic_late);
++      } while (more_late_algebraic);
++
+       NIR_PASS(progress, ctx->s, nir_opt_dce);
+    }

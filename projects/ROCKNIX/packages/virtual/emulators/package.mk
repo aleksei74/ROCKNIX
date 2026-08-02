@@ -72,7 +72,7 @@ case "${DEVICE}" in
   SM8250)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
     PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
-                xemu-sa skyemu-sa steam vita3k-sa eden-sa"
+                xemu-sa xenia-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr"
     ;;
   SM8550)
@@ -1420,7 +1420,7 @@ makeinstall_target() {
 
   ### Microsoft Xbox 360
   case ${DEVICE} in
-    SM8550|SM8650|SM8750)
+    SM8250|SM8550|SM8650|SM8750)
       add_emu_core xbox360 xenia xenia-sa true
       add_es_system xbox360
       install_script "Start Xenia.sh"

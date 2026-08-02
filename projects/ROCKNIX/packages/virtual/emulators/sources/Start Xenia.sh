@@ -7,6 +7,4 @@ source /etc/profile
 
 set_kill set "-9 xenia_canary"
 
-sway_fullscreen "xenia" &
-
 /usr/bin/start_xenia.sh >/dev/null 2>&1

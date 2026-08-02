@@ -27,10 +27,22 @@ PKG_TOOLCHAIN="manual"
 make_target() {
   local LLVM_BIN="${TOOLCHAIN}/bin"
   local BUILD_DIR="${PKG_BUILD}/.${TARGET_NAME}"
-  local CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
+  local CPU_FLAGS=""
   local OPT_FLAGS="-O3 -fPIC"
   local TARGET_FLAGS="--target=aarch64-rocknix-linux-gnu --sysroot=${SYSROOT_PREFIX}"
   local FLAGS_CLEAN="s/-mabi=lp64//g; s/-mcpu=[^ ]*//g; s/-march=[^ ]*//g; s/-mtune=[^ ]*//g"
+
+  case "${DEVICE}" in
+    SM8250)
+      CPU_FLAGS="-march=armv8.2-a+crc+crypto -mtune=cortex-a77"
+      ;;
+    SM8550|SM8650|SM8750)
+      CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
+      ;;
+    *)
+      CPU_FLAGS="-march=armv8-a -mtune=generic"
+      ;;
+  esac
 
   for _v in CFLAGS CXXFLAGS ASMFLAGS; do
     export ${_v}="$(echo ${!_v} | sed -e "${FLAGS_CLEAN}") ${TARGET_FLAGS} ${OPT_FLAGS} ${CPU_FLAGS}"
@@ -94,5 +106,7 @@ makeinstall_target() {
   mkdir -p "${INSTALL}/usr/bin"
   cp -v "${XENIA_BIN}" "${INSTALL}/usr/bin/xenia_canary"
   cp -v "${PKG_DIR}/scripts/start_xenia.sh" "${INSTALL}/usr/bin/"
+  mkdir -p "${INSTALL}/usr/config/xenia"
+  cp -v "${PKG_DIR}/config/xenia-canary.config.toml" "${INSTALL}/usr/config/xenia/"
   chmod 0755 "${INSTALL}/usr/bin/xenia_canary" "${INSTALL}/usr/bin/start_xenia.sh"
 }
