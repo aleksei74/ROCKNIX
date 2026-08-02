@@ -11,6 +11,7 @@
 # PKG_GIT_CLONE_SINGLE (optional) clone single branch only (set to yes)
 # PKG_GIT_CLONE_DEPTH (optional) history to clone, must be a number
 # PKG_GIT_SUBMODULE_DEPTH (optional) history of submodules to clone, must be a number
+# PKG_GIT_SUBMODULES (optional) space-separated submodule paths to clone
 
 set -e
 set -o pipefail
@@ -55,17 +56,22 @@ _repo_exists_and_valid() {
 }
 
 _update_submodules() {
-  if [[ -n "${GIT_SUBMODULE_PARAMS}" ]]; then
+  local submodule_params=("--init")
+  if [[ -n "${PKG_GIT_SUBMODULES}" ]]; then
+    submodules="${PKG_GIT_SUBMODULES}"
+  elif [[ -n "${GIT_SUBMODULE_PARAMS}" ]]; then
     submodules=$(git config --file .gitmodules --get-regexp path | awk '{ print $2 }')
+    submodule_params+=("--recursive")
   else
     submodules=$(git submodule | awk '{ print $2 }')
+    submodule_params+=("--recursive")
   fi
 
   for submodule in $submodules; do
     echo "Updating submodule: $submodule"
     
     # Try to update the submodule
-    git submodule update --init --recursive ${GIT_SUBMODULE_PARAMS} -- "${submodule}" 
+    git submodule update "${submodule_params[@]}" ${GIT_SUBMODULE_PARAMS} -- "${submodule}"
     _rv=$?
 
     if [[ $_rv != 0 ]] ; then
@@ -82,7 +88,7 @@ _update_submodules() {
       rm -rf ".git/modules/${submodule}" "${submodule}"
 
       echo "Reinitializing submodule: $submodule"
-      git submodule update --init --recursive ${GIT_SUBMODULE_PARAMS} -- "${submodule}"
+      git submodule update "${submodule_params[@]}" ${GIT_SUBMODULE_PARAMS} -- "${submodule}"
       _rv=$?
       if [[ $_rv != 0 ]] ; then
         echo "Failed to reinitialize submodule: $submodule"
@@ -98,7 +104,11 @@ _update_submodules() {
 
 
 _get_repo() {
-  local git_params=("--recursive" "--shallow-submodules" "--filter=blob:none" "--no-tags")
+  local git_params=("--filter=blob:none" "--no-tags")
+
+  if [[ -z "${PKG_GIT_SUBMODULES}" ]]; then
+    git_params+=("--recursive" "--shallow-submodules")
+  fi
 
   [[ -n "${PKG_GIT_CLONE_BRANCH}" ]] && git_params+=("--branch" "${PKG_GIT_CLONE_BRANCH}")
   [[ "${PKG_GIT_CLONE_SINGLE}" == "yes" ]] && git_params+=("--single-branch")

@@ -1,0 +1,114 @@
+diff --git a/src/xenia/gpu/CMakeLists.txt b/src/xenia/gpu/CMakeLists.txt
+index 8c85102..fbce033 100644
+--- a/src/xenia/gpu/CMakeLists.txt
++++ b/src/xenia/gpu/CMakeLists.txt
+@@ -8,7 +8,6 @@ if(APPLE)
+   target_link_libraries(xenia-gpu PUBLIC dxbc fmt snappy xxhash xenia-base xenia-ui)
+ else()
+   target_include_directories(xenia-gpu PRIVATE
+-    ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+     ${PROJECT_SOURCE_DIR}/third_party/glslang
+   )
+   target_link_libraries(xenia-gpu PUBLIC dxbc fmt glslang-spirv snappy xxhash xenia-base xenia-ui)
+@@ -28,7 +27,6 @@ if(XENIA_BUILD_MISC)
+       ${PROJECT_SOURCE_DIR}/src/xenia/base/console_app_main_posix.cc)
+   endif()
+   target_include_directories(xenia-gpu-shader-compiler PRIVATE
+-    ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+     ${PROJECT_SOURCE_DIR}/third_party/glslang
+   )
+   target_link_libraries(xenia-gpu-shader-compiler PRIVATE
+diff --git a/src/xenia/gpu/null/CMakeLists.txt b/src/xenia/gpu/null/CMakeLists.txt
+index 0cd9672..c02f9ba 100644
+--- a/src/xenia/gpu/null/CMakeLists.txt
++++ b/src/xenia/gpu/null/CMakeLists.txt
+@@ -3,9 +3,6 @@ xe_platform_sources(xenia-gpu-null ${CMAKE_CURRENT_SOURCE_DIR})
+ if(APPLE)
+   target_link_libraries(xenia-gpu-null PUBLIC xenia-base xenia-gpu xenia-ui xxhash)
+ else()
+-  target_include_directories(xenia-gpu-null PRIVATE
+-    ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+-  )
+   target_link_libraries(xenia-gpu-null PUBLIC xenia-base xenia-gpu xenia-ui xenia-ui-vulkan xxhash)
+ endif()
+ xe_target_defaults(xenia-gpu-null)
+diff --git a/src/xenia/gpu/vulkan/CMakeLists.txt b/src/xenia/gpu/vulkan/CMakeLists.txt
+index 8deb34b..32017f4 100644
+--- a/src/xenia/gpu/vulkan/CMakeLists.txt
++++ b/src/xenia/gpu/vulkan/CMakeLists.txt
+@@ -2,7 +2,6 @@ add_library(xenia-gpu-vulkan STATIC)
+ xe_platform_sources(xenia-gpu-vulkan ${CMAKE_CURRENT_SOURCE_DIR})
+ xe_shader_rules_spirv(xenia-gpu-vulkan ${CMAKE_CURRENT_SOURCE_DIR}/../shaders)
+ target_include_directories(xenia-gpu-vulkan PRIVATE
+-  ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+   ${PROJECT_SOURCE_DIR}/third_party/glslang
+ )
+ target_link_libraries(xenia-gpu-vulkan PUBLIC
+@@ -23,7 +22,6 @@ if(XENIA_BUILD_MISC)
+       ${PROJECT_SOURCE_DIR}/src/xenia/ui/windowed_app_main_posix.cc)
+   endif()
+   target_include_directories(xenia-gpu-vulkan-trace-viewer PRIVATE
+-    ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+     ${PROJECT_SOURCE_DIR}/third_party/glslang
+   )
+   target_link_libraries(xenia-gpu-vulkan-trace-viewer PRIVATE
+@@ -52,7 +50,6 @@ if(XENIA_BUILD_MISC)
+       ${PROJECT_SOURCE_DIR}/src/xenia/base/console_app_main_posix.cc)
+   endif()
+   target_include_directories(xenia-gpu-vulkan-trace-dump PRIVATE
+-    ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+     ${PROJECT_SOURCE_DIR}/third_party/glslang
+   )
+   target_link_libraries(xenia-gpu-vulkan-trace-dump PRIVATE
+diff --git a/src/xenia/ui/vulkan/CMakeLists.txt b/src/xenia/ui/vulkan/CMakeLists.txt
+index 8836d4d..3a38799 100644
+--- a/src/xenia/ui/vulkan/CMakeLists.txt
++++ b/src/xenia/ui/vulkan/CMakeLists.txt
+@@ -3,7 +3,6 @@ xe_platform_sources(xenia-ui-vulkan ${CMAKE_CURRENT_SOURCE_DIR})
+ xe_platform_sources(xenia-ui-vulkan ${CMAKE_CURRENT_SOURCE_DIR}/functions)
+ xe_shader_rules_spirv(xenia-ui-vulkan ${CMAKE_CURRENT_SOURCE_DIR}/../shaders)
+ target_include_directories(xenia-ui-vulkan PRIVATE
+-  ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+   ${PROJECT_SOURCE_DIR}/third_party/glslang
+ )
+ target_link_libraries(xenia-ui-vulkan PUBLIC xenia-base xenia-ui)
+@@ -24,9 +23,6 @@ if(XENIA_BUILD_MISC)
+     ${CMAKE_CURRENT_SOURCE_DIR}/../window_demo.cc
+     ${CMAKE_CURRENT_SOURCE_DIR}/vulkan_window_demo.cc
+   )
+-  target_include_directories(xenia-ui-window-vulkan-demo PRIVATE
+-    ${PROJECT_SOURCE_DIR}/third_party/Vulkan-Headers/include
+-  )
+   target_link_libraries(xenia-ui-window-vulkan-demo PRIVATE
+     fmt imgui xenia-base xenia-ui xenia-ui-vulkan
+   )
+diff --git a/src/xenia/ui/vulkan/spirv_tools_context.h b/src/xenia/ui/vulkan/spirv_tools_context.h
+index 2ffea1e..62aac6f 100644
+--- a/src/xenia/ui/vulkan/spirv_tools_context.h
++++ b/src/xenia/ui/vulkan/spirv_tools_context.h
+@@ -13,7 +13,7 @@
+ #include <cstdint>
+ #include <string>
+
+-#include "third_party/SPIRV-Tools/include/spirv-tools/libspirv.h"
++#include <spirv-tools/libspirv.h>
+ #include "xenia/base/platform.h"
+
+ #if XE_PLATFORM_LINUX
+diff --git a/src/xenia/ui/vulkan/vulkan_api.h b/src/xenia/ui/vulkan/vulkan_api.h
+index 27f99fd..a342554 100644
+--- a/src/xenia/ui/vulkan/vulkan_api.h
++++ b/src/xenia/ui/vulkan/vulkan_api.h
+@@ -42,9 +42,9 @@
+ #endif
+ #endif
+
+-#include "third_party/Vulkan-Headers/include/vulkan/vulkan.h"
++#include <vulkan/vulkan.h>
+
+-#include "third_party/Vulkan-Headers/include/vulkan/vulkan_hpp_macros.hpp"
+-#include "third_party/Vulkan-Headers/include/vulkan/vulkan_to_string.hpp"
++#include <vulkan/vulkan_hpp_macros.hpp>
++#include <vulkan/vulkan_to_string.hpp>
+
+ #endif  // XENIA_UI_VULKAN_VULKAN_API_H_
