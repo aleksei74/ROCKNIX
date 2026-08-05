@@ -34,6 +34,7 @@ fi
 export DISPLAY="${DISPLAY:-:0}"
 export GDK_BACKEND="x11"
 export SDL_VIDEODRIVER="x11"
+export GDK_PIXBUF_MODULE_FILE="/dev/null"
 
 # GTK creates an XWayland window, so match the process PID rather than a
 # Wayland app_id that isn't present.

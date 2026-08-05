@@ -36,6 +36,8 @@ pre_configure_target() {
 }
 
 post_makeinstall_target() {
-  mkdir -p ${INSTALL}/usr/lib/gdk-pixbuf-2.0/2.10.0/
+  if [ "${DISPLAYSERVER}" = "x11" ]; then
+    mkdir -p ${INSTALL}/usr/lib/gdk-pixbuf-2.0/2.10.0/
     cp ${PKG_DIR}/config/* ${INSTALL}/usr/lib/gdk-pixbuf-2.0/2.10.0/
+  fi
 }
