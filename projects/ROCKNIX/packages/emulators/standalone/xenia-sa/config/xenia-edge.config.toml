@@ -21,7 +21,7 @@ break_condition_gpr = -1                           # GPR compared to
 break_condition_op = "eq"                          # comparison operator
 break_condition_truncate = true                    # truncate value to 32-bits
 break_condition_value = 0                          # value compared against
-break_on_debugbreak = true                         # int3 on JITed __debugbreak requests.
+break_on_debugbreak = false                        # Continue past guest debugbreak requests.
 break_on_instruction = 0                           # int3 before the given guest address is executed.
 break_on_start = false                             # Break into the debugger on startup.
 break_on_unimplemented_instructions = true         # Break to the host debugger (or crash if no debugger attached) if an unimplemented PowerPC instruction is encountered.
@@ -369,6 +369,10 @@ logged_profile_slot_0_xuid = ""                    # XUID of the profile to load
 logged_profile_slot_1_xuid = ""                    # XUID of the profile to load on boot in slot 1
 logged_profile_slot_2_xuid = ""                    # XUID of the profile to load on boot in slot 2
 logged_profile_slot_3_xuid = ""                    # XUID of the profile to load on boot in slot 3
+
+
+[XConfig]
+audio_flag = 1                                      # Digital Stereo + Dolby Pro Logic
 
 
 [SDL]
