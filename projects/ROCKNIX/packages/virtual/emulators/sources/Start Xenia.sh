@@ -5,6 +5,6 @@
 
 source /etc/profile
 
-set_kill set "-9 xenia_canary"
+set_kill set "-9 xenia_edge"
 
 /usr/bin/start_xenia.sh >/dev/null 2>&1

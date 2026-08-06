@@ -34,7 +34,9 @@ fi
 export DISPLAY="${DISPLAY:-:0}"
 export GDK_BACKEND="x11"
 export SDL_VIDEODRIVER="x11"
-export GDK_PIXBUF_MODULE_FILE="/dev/null"
+# Use the installed gdk-pixbuf loader cache. An inherited /dev/null module
+# file prevents GTK from loading PNG icons.
+unset GDK_PIXBUF_MODULE_FILE
 
 # GTK creates an XWayland window, so match the process PID rather than a
 # Wayland app_id that isn't present.
@@ -57,4 +59,3 @@ if [ -n "${ROM}" ]; then
 fi
 
 /usr/bin/xenia_edge "${ARGS[@]}"
-
