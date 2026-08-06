@@ -17,7 +17,7 @@ case "${DEVICE}" in
     PKG_PATCH_DIRS+=" xenia"
     ;;
 esac
-PKG_VERSION="26.2.0-rc3"
+PKG_VERSION="26.2.0"
 PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
 
 if listcontains "${GRAPHIC_DRIVERS}" "panfrost" || \
