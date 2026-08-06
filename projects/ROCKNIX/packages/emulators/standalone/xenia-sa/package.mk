@@ -115,5 +115,8 @@ makeinstall_target() {
   cp -v "${PKG_DIR}/scripts/start_xenia.sh" "${INSTALL}/usr/bin/"
   mkdir -p "${INSTALL}/usr/config/xenia"
   cp -v "${PKG_DIR}/config/xenia-edge.config.toml" "${INSTALL}/usr/config/xenia/"
+  if [ -d "${PKG_DIR}/config/content" ]; then
+    cp -a "${PKG_DIR}/config/content" "${INSTALL}/usr/config/xenia/"
+  fi
   chmod 0755 "${INSTALL}/usr/bin/xenia_edge" "${INSTALL}/usr/bin/start_xenia.sh"
 }

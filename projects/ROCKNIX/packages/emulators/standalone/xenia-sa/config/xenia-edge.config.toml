@@ -365,7 +365,7 @@ writable_executable_memory = true                  # Allow mapping memory with b
 
 
 [Profiles]
-logged_profile_slot_0_xuid = ""                    # XUID of the profile to load on boot in slot 0
+logged_profile_slot_0_xuid = "E03000000B90AE81"    # XUID of the profile to load on boot in slot 0
 logged_profile_slot_1_xuid = ""                    # XUID of the profile to load on boot in slot 1
 logged_profile_slot_2_xuid = ""                    # XUID of the profile to load on boot in slot 2
 logged_profile_slot_3_xuid = ""                    # XUID of the profile to load on boot in slot 3

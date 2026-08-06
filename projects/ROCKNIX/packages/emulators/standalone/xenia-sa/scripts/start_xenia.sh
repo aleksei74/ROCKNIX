@@ -28,6 +28,9 @@ if [ ! -f "${CONF_FILE}" ]; then
   elif [ -f "${DEFAULT_CONF_FILE}" ]; then
     cp "${DEFAULT_CONF_FILE}" "${CONF_FILE}"
   fi
+  if [ -d "/usr/config/xenia/content" ]; then
+    cp -rn /usr/config/xenia/content/* "${CONTENT_DIR}/" 2>/dev/null || true
+  fi
 fi
 
 # Xenia's Linux frontend currently uses GTK/X11 and an XCB Vulkan surface.
