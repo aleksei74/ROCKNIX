@@ -51,7 +51,6 @@ ARGS=(
   "--storage_root=${CONF_DIR}"
   "--content_root=${CONTENT_DIR}"
   "--cache_root=${CACHE_DIR}"
-  "--vsync=${VSYNC}"
 )
 
 if [ -n "${ROM}" ]; then
