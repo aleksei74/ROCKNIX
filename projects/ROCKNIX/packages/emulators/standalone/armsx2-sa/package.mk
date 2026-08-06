@@ -6,9 +6,7 @@ PKG_VERSION="dd5b6616eb315260b235fee36083e1ba45fc36a0" # tag: 2.6.6.4 (260805)
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL-3.0-or-later"
 PKG_SITE="https://github.com/ARMSX2/ARMSX2"
-PKG_URL="${PKG_SITE}.git"
-PKG_GIT_CLONE_BRANCH="master"
-GET_HANDLER_SUPPORT="git"
+PKG_URL="${PKG_SITE}/archive/refs/tags/${PKG_VERSION}.tar.gz"
 PKG_LONGDESC="ARMSX2 is a native ARM64 PlayStation 2 (PS2) emulator, a fork of PCSX2 that ports the EE/IOP/VU JIT recompilers to ARM64."
 PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 libpng zlib libjpeg-turbo zstd lz4 libwebp freetype \
                     plutosvg curl libpcap ffmpeg libX11 libXext qt6 ecm shaderc rapidyaml \
@@ -37,6 +35,8 @@ fi
 
 pre_configure_target() {
   PCSX2_CMAKE_BASE=(
+    # Reported version
+    -DARMSX2_VERSION=${PKG_VERSION}
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
     -DLTO_PCSX2_CORE=ON
