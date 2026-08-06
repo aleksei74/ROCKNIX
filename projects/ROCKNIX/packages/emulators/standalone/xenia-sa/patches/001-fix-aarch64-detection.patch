@@ -1,0 +1,30 @@
+diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
+index d2d4fe8..6557e0d 100644
+--- a/third_party/CMakeLists.txt
++++ b/third_party/CMakeLists.txt
+@@ -133,7 +133,7 @@ add_library(discord-rpc STATIC
+ )
+ if(XE_TARGET_X86_64)
+   target_compile_definitions(discord-rpc PRIVATE RAPIDJSON_SSE42)
+-elseif(XE_TARGET_ARM64)
++elseif(XE_TARGET_AARCH64)
+   target_compile_definitions(discord-rpc PRIVATE RAPIDJSON_NEON)
+ endif()
+ target_include_directories(discord-rpc PUBLIC discord-rpc/include PRIVATE rapidjson/include)
+diff --git a/xenia-build.py b/xenia-build.py
+index 14751f3..e9fbe0b 100755
+--- a/xenia-build.py
++++ b/xenia-build.py
+@@ -596,10 +596,10 @@ def normalize_target_arch(value):
+         f"unknown architecture '{value}' (expected: arm64, aarch64, a64, x64, amd64, x86_64, x86)")
+ 
+ def is_amd64():
+-    return normalize_target_arch(platform.machine()) in ("x64", "x86_64", "amd64", "x86")
++    return normalize_target_arch(platform.machine()) == "x64"
+ 
+ def is_arm():
+-    return normalize_target_arch(platform.machine()) in ("x64", "x86_64", "amd64", "x86")
++    return normalize_target_arch(platform.machine()) == "arm64"
+ 
+ def get_build_dir(target_arch=None):
+     """Returns the Ninja build directory for the given target architecture.

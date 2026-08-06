@@ -25,8 +25,6 @@ post_makeinstall_target() {
   mkdir -p ${SYSROOT_PREFIX}/usr/lib/pkgconfig
     cp shared-mime-info.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig
 
-  # Create /usr/share/mime/mime.cache
-  if [ "${WINDOWMANAGER}" = "sway" ]; then
-    ${TOOLCHAIN}/bin/update-mime-database ${INSTALL}/usr/share/mime
-  fi
+  # Create /usr/share/mime/mime.cache (required by gdk-pixbuf GIO MIME sniffing)
+  ${TOOLCHAIN}/bin/update-mime-database ${INSTALL}/usr/share/mime
 }

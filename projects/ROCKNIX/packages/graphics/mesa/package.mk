@@ -12,7 +12,12 @@ PKG_DEPENDS_TARGET="toolchain expat libdrm Mako:host pyyaml:host"
 PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
 PKG_TOOLCHAIN="meson"
 PKG_PATCH_DIRS+=" ${DEVICE}"
-PKG_VERSION="26.1.6"
+case "${DEVICE}" in
+  SM8250|SM8550|SM8650|SM8750)
+    PKG_PATCH_DIRS+=" xenia"
+    ;;
+esac
+PKG_VERSION="26.2.0-rc3"
 PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
 
 if listcontains "${GRAPHIC_DRIVERS}" "panfrost" || \
