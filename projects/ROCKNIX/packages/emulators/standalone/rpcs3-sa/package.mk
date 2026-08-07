@@ -29,6 +29,8 @@ pre_configure_target() {
                            -DBUILD_LLVM=OFF \
                            -DSTATIC_LINK_LLVM=OFF \
                            -DLLVM_DIR=${SYSROOT_PREFIX}/usr/lib/cmake/llvm \
+                           -DCMAKE_SYSTEM_PROCESSOR=${TARGET_ARCH} \
+                           -DBUILD_RPCS3_TESTS=OFF \
                            -DUSE_NATIVE_INSTRUCTIONS=OFF \
                            -DUSE_PRECOMPILED_HEADERS=OFF \
                            -DUSE_LTO=ON \
@@ -50,6 +52,7 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/bin
   DESTDIR=${INSTALL} cmake --install ${PKG_BUILD}/.${TARGET_NAME}
   mv ${INSTALL}/usr/bin/rpcs3 ${INSTALL}/usr/bin/${PKG_NAME}
+  safe_remove ${INSTALL}/usr/share/rpcs3/test
   cp -rf ${PKG_DIR}/scripts/start_rpcs3.sh ${INSTALL}/usr/bin
   chmod 755 ${INSTALL}/usr/bin/*
   mkdir -p ${INSTALL}/usr/config/rpcs3
