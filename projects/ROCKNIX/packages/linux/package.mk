@@ -17,7 +17,6 @@ PKG_PATCH_DIRS="${LINUX} mainline ${DEVICE} default"
 
 [[ "${DEVICE}" == RK* ]] && PKG_PATCH_DIRS+=" mainline-rockchip"
 [[ "${DEVICE}" == SM* ]] && PKG_DEPENDS_TARGET+=" mkbootimg:host"
-[[ "${ROCKNIX_JOYPAD}" == "yes" ]] && PKG_PATCH_DIRS+=" rocknix-joypad"
 
 case ${DEVICE} in
   RK3588)
@@ -47,7 +46,7 @@ case ${DEVICE} in
     PKG_PATCH_DIRS+=" 7.0"
     ;;
   S922X)
-    PKG_VERSION="6.18.38"
+    PKG_VERSION="6.18.43"
     PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     ;;
   *)
