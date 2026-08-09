@@ -7,19 +7,8 @@ PKG_SITE="https://download.qt.io"
 PKG_DEPENDS_TARGET="toolchain qt6:host openssl libjpeg-turbo libpng pcre2 sqlite zlib freetype SDL2 gstreamer gst-plugins-base gst-plugins-good gst-libav"
 PKG_DEPENDS_HOST="gcc:host llvm:host mesa:host"
 PKG_LONGDESC="A cross-platform application and UI framework"
-
-# RK3566 requires Qt v6.8.3 or azahar-sa will segfault in dual-window mode
-case ${DEVICE} in
-  RK3566)
-    PKG_VERSION_MAJOR="6.8"
-    PKG_VERSION="${PKG_VERSION_MAJOR}.3"
-  ;;
-  *)
-    PKG_VERSION_MAJOR="6.10"
-    PKG_VERSION="${PKG_VERSION_MAJOR}.3"
-  ;;
-esac
-
+PKG_VERSION_MAJOR="6.10"
+PKG_VERSION="${PKG_VERSION_MAJOR}.3"
 PKG_URL="${PKG_SITE}/archive/qt/${PKG_VERSION_MAJOR}/${PKG_VERSION}/single/qt-everywhere-src-${PKG_VERSION}.tar.xz"
 
 # Apply project-specific patches
