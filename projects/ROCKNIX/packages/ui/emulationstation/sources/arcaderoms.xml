@@ -4270,6 +4270,7 @@
   <rom id="fatfursp" name="Fatal Fury Special / Garou Densetsu Special (NGM-058 ~ NGH-058, set 1)" />
   <rom id="fatfurspa" name="Fatal Fury Special / Garou Densetsu Special (NGM-058 ~ NGH-058, set 2)" />
   <rom id="fatfurspb" name="Fatal Fury Special (SNES bootleg with timer)" />
+  <rom id="fatfurspk" name="Fatal Fury Special / Garou Densetsu Special (Korean Translation)" />
   <rom id="fatfurwa" name="Fatal Fury: Wild Ambition / Garou Densetsu: Wild Ambition (rev.A)" />
   <rom id="fatfury1" name="Fatal Fury - King of Fighters / Garou Densetsu - Shukumei no Tatakai (NGM-033 ~ NGH-033)" />
   <rom id="fatfury1k" name="Fatal Fury - King of Fighters / Garou Densetsu - Shukumei no Tatakai (Korean Translation)" />
@@ -4278,6 +4279,7 @@
   <rom id="fatfury2k" name="Fatal Fury 2 / Garou Densetsu 2 - Arata-naru Tatakai (Korean Translation)" />
   <rom id="fatfury3" name="Fatal Fury 3 - Road to the Final Victory / Garou Densetsu 3 - Haruka-naru Tatakai (NGM-069 ~ NGH-069)" />
   <rom id="fatfury3a" name="Fatal Fury 3 - Road to the Final Victory / Garou Densetsu 3 - haruka-naru tatakai (NGM-069 ~ NGH-069) (alternate set)" />
+  <rom id="fatfury3k" name="Fatal Fury 3 - Road to the Final Victory / Garou Densetsu 3 - Haruka-naru Tatakai (Korean Translation)" />
   <rom id="fax" name="FAX" />
   <rom id="fax2" name="FAX 2" />
   <rom id="fb2010" name="Fruit Bonus 2010 (v. 2.0.1.3)" />
@@ -7636,6 +7638,7 @@
   <rom id="legendb" name="Legion (bootleg of Legend)" />
   <rom id="legendoh" name="Legend of Heroes" />
   <rom id="legendos" name="Legend of Success Joe / Ashita no Joe Densetsu" />
+  <rom id="legendosk" name="Legend of Success Joe / Ashita no Joe Densetsu (Korean Translation)" />
   <rom id="legendsb" name="Legend (SNES bootleg)" />
   <rom id="legion" vert="true" name="Legion - Spinner-87 (World ver 2.03)" />
   <rom id="legionj" vert="true" name="Chouji Meikyuu Legion (Japan ver 1.05, set 1)" />
@@ -16267,6 +16270,7 @@
   <rom id="wbmlbg" name="Wonder Boy: Monster Land (English bootleg set 2)" />
   <rom id="wbmlbge" name="Wonder Boy: Monster Land (English bootleg set 3)" />
   <rom id="wbmld" name="Wonder Boy: Monster Land (decrypted bootleg of Japan New Ver., MC-8123, 317-0043)" />
+  <rom id="wbmldk" name="Wonder Boy: Monster Land (Korean Translation decrypted bootleg of Japan New Ver., MC-8123, 317-0043)" />
   <rom id="wbmlh" name="Wonder Boy: Monster Land (English, difficulty hack)" />
   <rom id="wbmljb" name="Wonder Boy: Monster Land (Japan bootleg)" />
   <rom id="wbmljo" name="Wonder Boy: Monster Land (Japan Old Ver., MC-8123, 317-0043)" />
