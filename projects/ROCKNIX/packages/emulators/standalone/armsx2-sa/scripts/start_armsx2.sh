@@ -1,32 +1,39 @@
 #!/bin/bash
 
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
+# Copyright (C) 2022-present JELOS (https://github.com/JustEnoughLinuxOS)
 
 . /etc/profile
 
-DATA_ROOT="/storage/.config/ARMSX2"
-mkdir -p "${DATA_ROOT}/inis"
-
-if [ ! -f "${DATA_ROOT}/inis/PCSX2.ini" ]; then
-    cp -r /usr/config/ARMSX2/inis/PCSX2.ini "${DATA_ROOT}/inis/PCSX2.ini"
+#Check if ARMSX2 exists in .config
+if [ ! -d "/storage/.config/ARMSX2" ]; then
+    mkdir -p "/storage/.config/ARMSX2"
+        cp -r "/usr/config/ARMSX2" "/storage/.config/"
 fi
 
-if [ ! -f "${DATA_ROOT}/inis/secrets.ini" ]; then
-    cp -r /usr/config/ARMSX2/inis/secrets.ini "${DATA_ROOT}/inis/secrets.ini"
+#Check if ARMSX2 ini exists in .config
+if [ ! -f "/storage/.config/ARMSX2/inis/PCSX2.ini" ]; then
+        cp -r "/usr/config/ARMSX2/inis/PCSX2.ini" "/storage/.config/ARMSX2/inis/"
 fi
 
-mkdir -p /storage/roms/bios/ps2
-mkdir -p /storage/roms/savestates/ps2
-mkdir -p /storage/roms/ps2/textures
-sed -i '/^Textures =/c\Textures = /storage/roms/ps2/textures' "${DATA_ROOT}/inis/PCSX2.ini"
+#Check if secrets ini exists in .config
+if [ ! -f "/storage/.config/ARMSX2/inis/secrets.ini" ]; then
+        cp -r "/usr/config/ARMSX2/inis/secrets.ini" "/storage/.config/ARMSX2/inis/"
+fi
 
-# Use Rocknix's curated SDL controller DB
-ln -sf /usr/config/SDL-GameControllerDB/gamecontrollerdb.txt "${DATA_ROOT}/game_controller_db.txt" 2>/dev/null
+#Make ARMSX2 bios folder
+if [ ! -d "/storage/roms/bios/armsx2" ]; then
+    mkdir -p "/storage/roms/bios/armsx2"
+fi
 
-# EmulationStation Features
-GAME=$(echo "${1}" | sed "s#^/.*/##")
-PLATFORM=$(echo "${2}" | sed "s#^/.*/##")
+#Create PS2 savestates folder
+if [ ! -d "/storage/roms/savestates/ps2" ]; then
+    mkdir -p "/storage/roms/savestates/ps2"
+fi
+
+#Emulation Station Features
+GAME=$(echo "${1}"| sed "s#^/.*/##")
+PLATFORM=$(echo "${2}"| sed "s#^/.*/##")
 ASPECT=$(get_setting aspect_ratio "${PLATFORM}" "${GAME}")
 FILTER=$(get_setting bilinear_filtering "${PLATFORM}" "${GAME}")
 FPS=$(get_setting show_fps "${PLATFORM}" "${GAME}")
@@ -38,73 +45,174 @@ IRES=$(get_setting internal_resolution "${PLATFORM}" "${GAME}")
 VSYNC=$(get_setting vsync "${PLATFORM}" "${GAME}")
 ENABLE_WIDESCREEN_PATCHES=$(get_setting enable_widescreen_patches "${PLATFORM}" "${GAME}")
 
+#Set the cores to use
 CORES=$(get_setting "cores" "${PLATFORM}" "${GAME}")
-if [ "${CORES}" = "little" ]; then
+if [ "${CORES}" = "little" ]
+then
   EMUPERF="${SLOW_CORES}"
-elif [ "${CORES}" = "big" ]; then
+elif [ "${CORES}" = "big" ]
+then
   EMUPERF="${FAST_CORES}"
 else
+  #All..
   unset EMUPERF
 fi
 
-if [ "$ASPECT" = "0" ]; then
-  sed -i '/^AspectRatio =/c\AspectRatio = 4:3' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$ASPECT" = "1" ]; then
-  sed -i '/^AspectRatio =/c\AspectRatio = 16:9' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$ASPECT" = "2" ]; then
-  sed -i '/^AspectRatio =/c\AspectRatio = Stretch' "${DATA_ROOT}/inis/PCSX2.ini"
-fi
+  #Aspect Ratio
+	if [ "$ASPECT" = "0" ]
+	then
+  		sed -i '/^AspectRatio =/c\AspectRatio = 4:3' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
+	if [ "$ASPECT" = "1" ]
+	then
+  		sed -i '/^AspectRatio =/c\AspectRatio = 16:9' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
+	if [ "$ASPECT" = "2" ]
+	then
+  		sed -i '/^AspectRatio =/c\AspectRatio = Stretch' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
 
-if [ "$FILTER" = "0" ]; then
-  sed -i '/^filter =/c\filter = 0' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$FILTER" = "1" ]; then
-  sed -i '/^filter =/c\filter = 1' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$FILTER" = "2" ]; then
-  sed -i '/^filter =/c\filter = 2' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$FILTER" = "3" ]; then
-  sed -i '/^filter =/c\filter = 3' "${DATA_ROOT}/inis/PCSX2.ini"
-fi
+  #Bilinear Filtering
+        if [ "$FILTER" = "0" ]
+        then
+                sed -i '/^filter =/c\filter = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$FILTER" = "1" ]
+        then
+                sed -i '/^filter =/c\filter = 1' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$FILTER" = "2" ]
+        then
+                sed -i '/^filter =/c\filter = 2' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$FILTER" = "3" ]
+        then
+                sed -i '/^filter =/c\filter = 3' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
 
-if [ "$GRENDERER" = "0" ]; then
-  sed -i '/^Renderer =/c\Renderer = -1' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$GRENDERER" = "1" ]; then
-  sed -i '/^Renderer =/c\Renderer = 12' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$GRENDERER" = "2" ]; then
-  sed -i '/^Renderer =/c\Renderer = 14' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$GRENDERER" = "3" ]; then
-  sed -i '/^Renderer =/c\Renderer = 13' "${DATA_ROOT}/inis/PCSX2.ini"
-fi
+  #Graphics Backend
+	if [ "$GRENDERER" = "0" ]
+	then
+  		sed -i '/^Renderer =/c\Renderer = -1' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
+	if [ "$GRENDERER" = "1" ]
+	then
+  		sed -i '/^Renderer =/c\Renderer = 12' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
+	if [ "$GRENDERER" = "2" ]
+	then
+  		sed -i '/^Renderer =/c\Renderer = 14' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
+        if [ "$GRENDERER" = "3" ]
+        then
+                sed -i '/^Renderer =/c\Renderer = 13' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
 
-if [ "$IRES" > "0" ]; then
-  sed -i "/^upscale_multiplier =/c\upscale_multiplier = $IRES" "${DATA_ROOT}/inis/PCSX2.ini"
-else
-  sed -i '/^upscale_multiplier =/c\upscale_multiplier = 1' "${DATA_ROOT}/inis/PCSX2.ini"
-fi
+  #Internal Resolution
+        if [ "$IRES" > "0" ]
+        then
+                sed -i "/^upscale_multiplier =/c\upscale_multiplier = $IRES" /storage/.config/ARMSX2/inis/PCSX2.ini
+        else
+                sed -i '/^upscale_multiplier =/c\upscale_multiplier = 1' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
 
-if [ "$FPS" = "false" ]; then
-  sed -i '/^OsdShowFPS =/c\OsdShowFPS = false' "${DATA_ROOT}/inis/PCSX2.ini"
-elif [ "$FPS" = "true" ]; then
-  sed -i '/^OsdShowFPS =/c\OsdShowFPS = true' "${DATA_ROOT}/inis/PCSX2.ini"
-fi
+  #Show FPS
+	if [ "$FPS" = "false" ]
+	then
+  		sed -i '/^OsdShowFPS =/c\OsdShowFPS = false' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
+	if [ "$FPS" = "true" ]
+	then
+  		sed -i '/^OsdShowFPS =/c\OsdShowFPS = true' /storage/.config/ARMSX2/inis/PCSX2.ini
+	fi
 
-if [ "$ENABLE_WIDESCREEN_PATCHES" = "true" ]; then
-  sed -i '/^EnableWideScreenPatches =/c\EnableWideScreenPatches = true' "${DATA_ROOT}/inis/PCSX2.ini"
-else
-  sed -i '/^EnableWideScreenPatches =/c\EnableWideScreenPatches = false' "${DATA_ROOT}/inis/PCSX2.ini"
-fi
+  #EE Cycle Rate
+        sed -i '/^EECycleRate =/c\EECycleRate = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        if [ "$RATE" = "0" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = -3' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$RATE" = "1" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = -2' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$RATE" = "2" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = -1' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$RATE" = "3" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$RATE" = "4" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = 1' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$RATE" = "5" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = 2' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$RATE" = "6" ]
+        then
+                sed -i '/^EECycleRate =/c\EECycleRate = 3' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
 
-if [ -f /usr/bin/cheevos_armsx2.sh ]; then
+  #EE Cycle Skip
+        sed -i '/^EECycleSkip =/c\EECycleSkip = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        if [ "$SKIP" = "0" ]
+        then
+                sed -i '/^EECycleSkip =/c\EECycleSkip = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$SKIP" = "1" ]
+        then
+                sed -i '/^EECycleSkip =/c\EECycleSkip = 1' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$SKIP" = "2" ]
+        then
+                sed -i '/^EECycleSkip =/c\EECycleSkip = 2' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$SKIP" = "3" ]
+        then
+                sed -i '/^EECycleSkip =/c\EECycleSkip = 3' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+
+#HW download mode
+        sed -i '/^HWDownloadMode =/c\HWDownloadMode = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        if [ "$HWDOWNLOAD" = "0" ]
+        then
+                sed -i '/^HWDownloadMode =/c\HWDownloadMode = 0' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$HWDOWNLOAD" = "1" ]
+        then
+                sed -i '/^HWDownloadMode =/c\HWDownloadMode = 1' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$HWDOWNLOAD" = "2" ]
+        then
+                sed -i '/^HWDownloadMode =/c\HWDownloadMode = 2' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+        if [ "$HWDOWNLOAD" = "3" ]
+        then
+                sed -i '/^HWDownloadMode =/c\HWDownloadMode = 3' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+
+#Widescreen patches
+	if [ "$ENABLE_WIDESCREEN_PATCHES" = "true" ]
+	then
+  		sed -i '/^EnableWideScreenPatches =/c\EnableWideScreenPatches = true' /storage/.config/ARMSX2/inis/PCSX2.ini
+        else
+                sed -i '/^EnableWideScreenPatches =/c\EnableWideScreenPatches = false' /storage/.config/ARMSX2/inis/PCSX2.ini
+        fi
+
+#Retroachievements
   /usr/bin/cheevos_armsx2.sh
-fi
 
+#Graphic driver fixes
 @GRAPHICS@
 
-export QT_QPA_PLATFORM=wayland
-export SDL_AUDIODRIVER=pulseaudio
+#Set QT enviornment to wayland
+  export QT_QPA_PLATFORM=wayland
 
-set_kill set "-9 armsx2-qt"
-${EMUPERF} /usr/share/armsx2-sa/armsx2-qt \
-  -bigpicture \
-  -fullscreen \
-  -datapath /storage/.config \
-  -- "${1}"
+#Run ARMSX2 emulator
+  export SDL_AUDIODRIVER=pulseaudio
+  set_kill set "-9 armsx2-qt"
+  ${EMUPERF} /usr/share/armsx2-sa/armsx2-qt -bigpicture -fullscreen "${1}"
