@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
+# Copyright (C) 2025-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="armsx2-sa"
 PKG_VERSION="2.6.6.5"
@@ -11,31 +11,23 @@ PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 libpng zlib libjpeg-turbo zstd lz4 
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="speed"
 
-if [ "${DISPLAYSERVER}" = "wl" ]; then
-  PKG_DEPENDS_TARGET+=" wayland ${WINDOWMANAGER} xwayland xrandr libXi"
-fi
-
-if [ "${OPENGL_SUPPORT}" = "yes" ]; then
-  PKG_DEPENDS_TARGET+=" ${OPENGL} libglvnd"
-elif [ "${OPENGLES_SUPPORT}" = "yes" ]; then
-  PKG_DEPENDS_TARGET+=" ${OPENGLES}"
-fi
-
-PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
+PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/archive/refs/tags/latest.zip"
 
 get_graphicdrivers
-if listcontains "${GRAPHIC_DRIVERS}" "(panfrost)"; then
-  GRAPHICS_DRIVER="panfrost"
-elif listcontains "${GRAPHIC_DRIVERS}" "(freedreno)"; then
-  GRAPHICS_DRIVER="freedreno"
-fi
+  if listcontains "${GRAPHIC_DRIVERS}" "(panfrost)"; then
+    GRAPHICS_DRIVER="panfrost"
+  elif listcontains "${GRAPHIC_DRIVERS}" "(freedreno)"; then
+    GRAPHICS_DRIVER="freedreno"
+  fi
 
 pre_configure_target() {
   PCSX2_CMAKE_BASE=(
     # Reported version
     -DARMSX2_VERSION=${PKG_VERSION}
     -DCMAKE_BUILD_TYPE=Release
+    # Full-tree IPO stays off for Qt (not worth it)...
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+    # ...but stays on for just the recompiler/VU/EE/IOP core:
     -DLTO_PCSX2_CORE=ON
     -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
     -DUSE_VULKAN=ON
@@ -46,33 +38,11 @@ pre_configure_target() {
     -DWAYLAND_API=ON
     -DX11_API=ON
     -DCMAKE_LINKER_TYPE=LLD
-    -DOVERRIDE_HOST_PAGE_SIZE=0x1000
-    -DOVERRIDE_HOST_CACHE_LINE_SIZE=64
   )
 
-  case ${DEVICE} in
-    RK3576)
-      PCSX2_CMAKE_BASE+=(
-        -DCMAKE_C_FLAGS=-march=armv8-a+crc+crypto
-        -DCMAKE_CXX_FLAGS=-march=armv8-a+crc+crypto
-      )
-    ;;
-  esac
-
-  case ${TARGET_ARCH} in
-    aarch64)
-      for _v in CFLAGS CXXFLAGS LDFLAGS; do
-        export ${_v}="$(echo ${!_v} | sed 's/-march=[^ ]*//g; s/-mabi=lp64//g; s/-mtune=[^ ]*//g')"
-      done
-    ;;
-    x86_64)
-      for _v in CFLAGS CXXFLAGS LDFLAGS; do
-        export ${_v}="$(echo ${!_v} | sed 's/-mabi=lp64//g; s/-mtune=[^ ]*//g')"
-      done
-    ;;
-  esac
-
-  export LDFLAGS="$(echo ${LDFLAGS} | sed 's/-fuse-ld=[^ ]*//g')"
+  for _v in CFLAGS CXXFLAGS LDFLAGS; do
+    export ${_v}="$(echo ${!_v} | sed 's/-mabi=lp64//g; s/-mtune=[^ ]*//g')"
+  done
 }
 
 make_target() {
@@ -87,12 +57,6 @@ make_target() {
     -DCMAKE_MAKE_PROGRAM=ninja
     -DCMAKE_C_COMPILER="${TOOLCHAIN}/bin/clang"
     -DCMAKE_CXX_COMPILER="${TOOLCHAIN}/bin/clang++"
-    -DCMAKE_AR="${TOOLCHAIN}/bin/llvm-ar"
-    -DCMAKE_RANLIB="${TOOLCHAIN}/bin/llvm-ranlib"
-    -DCMAKE_NM="${TOOLCHAIN}/bin/llvm-nm"
-    -DCMAKE_OBJCOPY="${TOOLCHAIN}/bin/llvm-objcopy"
-    -DCMAKE_OBJDUMP="${TOOLCHAIN}/bin/llvm-objdump"
-    -DCMAKE_STRIP="${TOOLCHAIN}/bin/llvm-strip"
     -DCMAKE_C_COMPILER_AR="${TOOLCHAIN}/bin/llvm-ar"
     -DCMAKE_CXX_COMPILER_AR="${TOOLCHAIN}/bin/llvm-ar"
     -DCMAKE_C_COMPILER_RANLIB="${TOOLCHAIN}/bin/llvm-ranlib"
@@ -109,14 +73,16 @@ make_target() {
     -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
     -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
     -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
-    -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
     -DLLVM_DIR="${TOOLCHAIN}/lib/cmake/llvm"
+    -DCMAKE_AR="${TOOLCHAIN}/bin/llvm-ar"
+    -DCMAKE_RANLIB="${TOOLCHAIN}/bin/llvm-ranlib"
+    -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
     "${PCSX2_CMAKE_BASE[@]}"
   )
-
   cmake "${tgt_opts[@]}"
   cmake --build "${PKG_BUILD}/.${TARGET_NAME}"
-  wget -c -t 5 -O "${PKG_BUILD}/.${TARGET_NAME}/bin/resources/patches.zip" "${PATCHES_URL}"
+  ninja install
+  wget -c -t 5 -O "bin/resources/patches.zip" ${PATCHES_URL}
 }
 
 makeinstall_target() {
@@ -128,6 +94,8 @@ makeinstall_target() {
   cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/* ${INSTALL}/usr/share/armsx2-sa
 
   mkdir -p ${INSTALL}/usr/config
+  cp -rf ${PKG_DIR}/config/common/ARMSX2 ${INSTALL}/usr/config
+
   case ${DEVICE} in
     S922X)
       cp -rf ${PKG_DIR}/config/S922X/ARMSX2 ${INSTALL}/usr/config
@@ -149,5 +117,5 @@ post_install() {
   esac
 
   sed -e "s/@GRAPHICS@/${GRAPHICS}/g" \
-      -i ${INSTALL}/usr/bin/start_armsx2.sh
+        -i ${INSTALL}/usr/bin/start_armsx2.sh
 }
