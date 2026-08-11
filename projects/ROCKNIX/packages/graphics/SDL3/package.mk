@@ -99,7 +99,8 @@ pre_configure_target() {
 
   export LDFLAGS="${LDFLAGS} -ludev"
 
-  PKG_CMAKE_OPTS_TARGET+=" -DBUILD_SHARED_LIBS=ON \
+  PKG_CMAKE_OPTS_TARGET+=" -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON \
+                           -DBUILD_SHARED_LIBS=ON \
                            -DSDL_SHARED=ON \
                            -DSDL_STATIC=OFF \
                            -DSDL_TEST_LIBRARY=OFF \
