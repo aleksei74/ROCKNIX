@@ -14,11 +14,6 @@ case ${DEVICE} in
     PKG_VERSION="1.9"
     PKG_URL="https://github.com/swaywm/sway/archive/${PKG_VERSION}.zip"
     ;;
-  RK3326|RK3566|RK3576|S922X)
-    PKG_VERSION="1.11"
-    PKG_SHA256="0e37a55b7c3379230e97e1ad982542b75016a0c7d6676198604e557f9b373dae"
-    PKG_URL="https://github.com/swaywm/sway/releases/download/${PKG_VERSION}/sway-${PKG_VERSION}.tar.gz"
-    ;;
   *)
     PKG_VERSION="1.11"
     PKG_SHA256="0e37a55b7c3379230e97e1ad982542b75016a0c7d6676198604e557f9b373dae"
