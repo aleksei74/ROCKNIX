@@ -13,16 +13,9 @@ if [ ! -d "/storage/.config/Vita3K" ]; then
     mkdir -p "/storage/.config/Vita3K"
 fi
 
-# Copy prerequisite files if they aren't there yet.
-if [ ! -d "/storage/.config/Vita3K/data" -o ! -d "/storage/.config/Vita3K/lang" -o ! -d "/storage/.config/Vita3K/shaders-builtin" ]; then
-    cp -r "/usr/config/vita3k/data" "/storage/.config/Vita3K/"
-    cp -r "/usr/config/vita3k/lang" "/storage/.config/Vita3K/"
-    cp -r "/usr/config/vita3k/shaders-builtin" "/storage/.config/Vita3K/"
-fi
-
 # Apply default config if it isn't there yet.
 if [ ! -f "${CONFIG_FILE}" ]; then
-    cp -r /usr/config/vita3k/config.yml "${CONFIG_FILE}"
+    cp -r /usr/config/Vita3K/config.yml "${CONFIG_FILE}"
 fi
 
 # Check if system vita3k folder exists

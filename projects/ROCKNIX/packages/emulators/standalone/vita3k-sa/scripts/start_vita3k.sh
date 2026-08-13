@@ -20,12 +20,12 @@ fi
 
 # Apply default config if it isn't there yet.
 if [ ! -f "${CONFIG_FILE}" ]; then
-    cp "/usr/config/vita3k/config.yml" "${CONFIG_FILE}"
+    cp "/usr/config/Vita3K/config.yml" "${CONFIG_FILE}"
 fi
 
 # Copy vita-gamelist for game scanning if not already there.
 if [ ! -f "/storage/.config/Vita3K/vita-gamelist.txt" ]; then
-    cp "/usr/config/vita3k/vita-gamelist.txt" "/storage/.config/Vita3K/"
+    cp "/usr/config/Vita3K/vita-gamelist.txt" "/storage/.config/Vita3K/"
 fi
 
 # EmulationStation options
@@ -209,6 +209,8 @@ fi
 # Snapshot the installed games, so we can see if one was just installed for later.
 APPS_BEFORE=$(ls /storage/roms/psvita/vita3k/ux0/app/ 2>/dev/null)
 NEW_ID=""
+
+export QT_QPA_PLATFORM=xcb
 
 case "$GAME" in
     *.pkg)

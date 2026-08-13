@@ -52,16 +52,16 @@ pre_make_target() {
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/bin
-  mkdir -p ${INSTALL}/usr/config/vita3k
+  mkdir -p ${INSTALL}/usr/config/Vita3K
   mkdir -p ${INSTALL}/storage/bios/vita3k
 
   cp -f ${PKG_BUILD}/.${TARGET_NAME}/bin/Vita3K ${INSTALL}/usr/bin/vita3k-sa
   cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin/
   chmod 755 ${INSTALL}/usr/bin/*
-  cp -f ${PKG_DIR}/config/config.yml ${INSTALL}/usr/config/vita3k/
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/shaders-builtin ${INSTALL}/usr/config/vita3k/
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/data ${INSTALL}/usr/config/vita3k/
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/translations ${INSTALL}/usr/config/vita3k/
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/icons ${INSTALL}/usr/config/vita3k/
-  cp -f ${PKG_DIR}/sources/vita-gamelist.txt ${INSTALL}/usr/config/vita3k/vita-gamelist.txt
+  cp -f ${PKG_DIR}/config/config.yml ${INSTALL}/usr/config/Vita3K/
+  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/shaders-builtin ${INSTALL}/usr/config/Vita3K/
+  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/data ${INSTALL}/usr/config/Vita3K/
+  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/translations ${INSTALL}/usr/config/Vita3K/
+  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/bin/icons ${INSTALL}/usr/config/Vita3K/
+  cp -f ${PKG_DIR}/sources/vita-gamelist.txt ${INSTALL}/usr/config/Vita3K/vita-gamelist.txt
 }
