@@ -10,26 +10,9 @@ PKG_DEPENDS_TARGET="toolchain gstreamer"
 PKG_LONGDESC="Base GStreamer plugins and helper libraries"
 PKG_BUILD_FLAGS="-gold"
 
-pre_configure_target() {
-  PKG_MESON_OPTS_TARGET="-Dgl=enabled \
-                         -Dexamples=disabled \
-                         -Dgl-graphene=disabled \
-                         -Dtests=disabled \
-                         -Dpackage-name=gst-plugins-base \
-                         -Dpackage-origin=rocknix.org \
-                         -Ddoc=disabled \
-                         -Dnls=disabled"
-}
+PKG_MESON_OPTS_TARGET="${PKG_MESON_OPTS_TARGET//-Dgl=disabled/-Dgl=enabled}"
 
 post_configure_target() {
   find "${PKG_BUILD}" -path '*subprojects/graphene/include/graphene-config.h' -exec \
     sed -i 's/^#\(\s*\)#define GRAPHENE_USE_AVX/#\1define GRAPHENE_USE_AVX/' {} +
-}
-
-post_makeinstall_target() {
-  # clean up
-  safe_remove ${SYSROOT_PREFIX}/usr/include/GL
-  safe_remove ${INSTALL}/usr/include
-  safe_remove ${INSTALL}/usr/lib/pkgconfig
-  safe_remove ${INSTALL}/usr/share
 }
