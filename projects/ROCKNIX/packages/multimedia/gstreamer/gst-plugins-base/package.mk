@@ -16,3 +16,10 @@ post_configure_target() {
   find "${PKG_BUILD}" -path '*subprojects/graphene/include/graphene-config.h' -exec \
     sed -i 's/^#\(\s*\)#define GRAPHENE_USE_AVX/#\1define GRAPHENE_USE_AVX/' {} +
 }
+
+post_makeinstall_target() {
+  safe_remove ${SYSROOT_PREFIX}/usr/include/GL
+  safe_remove ${INSTALL}/usr/include
+  safe_remove ${INSTALL}/usr/lib/pkgconfig
+  safe_remove ${INSTALL}/usr/share
+}
