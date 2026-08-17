@@ -13,7 +13,7 @@ RATMPCONF="/storage/.config/retroarch/retroarch.cfg"
 
 shopt -s extglob
 case "$1" in
-  add|create|libretro|grim)
+  add|create|libretro)
     GAME="$2"
   ;;
   *)
@@ -50,16 +50,6 @@ if [ ! -f "${CONFIG_DIR}/scummvm.ini" ]; then
     cp -rf /usr/config/scummvm/scummvm.ini ${CONFIG_DIR}/scummvm.ini
 fi
 
-if [ ! -d "/storage/.config/scummvm-grim/" ]; then
-    mkdir -p /storage/.config/scummvm-grim
-    cp -rf /usr/config/scummvm-grim/* /storage/.config/scummvm-grim/
-fi
-
-if [ ! -f "/storage/.config/scummvm-grim/scummvm.ini" ]; then
-    mkdir -p /storage/.config/scummvm-grim
-    cp -rf /usr/config/scummvm-grim/scummvm.ini /storage/.config/scummvm-grim/scummvm.ini
-fi
-
 case $1 in
   "libretro")
     GAME=$(cat "${GAME}" | awk 'BEGIN {FS="\""}; {print $2}')
@@ -78,23 +68,6 @@ case $1 in
 
   "create")
     create_svm
-  ;;
-
-  "grim")
-    set_kill set "-9 scummvm-grim"
-    GAME=$(cat "${GAME}")
-    GAME=$(echo "${GAME}" | tr -s ' \n' ' ')
-    GAMEID=$(echo "${GAME}" | awk '{print $NF}')
-    GAMEPATH=$(echo "${GAME}" | sed 's/--path="\(.*\)" .*/\1/')
-    if ! grep -q "^\[${GAMEID}\]" /storage/.config/scummvm-grim/scummvm.ini; then
-      /usr/bin/scummvm-grim --config=/storage/.config/scummvm-grim/scummvm.ini --add --path="${GAMEPATH}"
-    fi
-
-    systemctl start fluidsynth
-    eval /usr/bin/scummvm-grim --config=/storage/.config/scummvm-grim/scummvm.ini \
-        --fullscreen --joystick=0 \
-        --themepath=/usr/config/scummvm-grim/themes --extrapath=/usr/local/share/scummvm-grim "${GAME}"
-    systemctl stop fluidsynth
   ;;
 
   *)

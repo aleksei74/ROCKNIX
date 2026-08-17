@@ -1252,7 +1252,6 @@ makeinstall_target() {
 
   ### ScummVM
   add_emu_core scummvm scummvmsa scummvm true
-  add_emu_core scummvm scummvm-grim scummvm false
   add_emu_core scummvm retroarch scummvm false
   add_es_system scummvm
   add_system_dir /storage/roms/scummvm
