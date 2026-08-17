@@ -11,7 +11,7 @@ PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 libpng zlib libjpeg-turbo zstd lz4 
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="speed"
 
-PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/archive/refs/tags/latest.zip"
+PATCHES_URL="https://github.com/PCSX2/pcsx2_patches/releases/download/latest/patches.zip"
 
 get_graphicdrivers
   if listcontains "${GRAPHIC_DRIVERS}" "(panfrost)"; then
