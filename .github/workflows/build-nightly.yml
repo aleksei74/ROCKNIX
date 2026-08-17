@@ -234,9 +234,9 @@ jobs:
          PREV_TAG=$(git tag --sort=-creatordate | grep -vx "${CURRENT_TAG}" | head -n 1 || true)
 
          if [ -z "$PREV_TAG" ]; then
-           COMMITS=$(git log --pretty=format:"%h %s (%an)" | grep -v "Merge branch" || true)
+           COMMITS=$(git log --first-parent --pretty=format:"%h %s (%an)" | grep -v "Merge branch" || true)
          else
-           COMMITS=$(git log "${PREV_TAG}..HEAD" --pretty=format:"%h %s (%an)" | grep -v "Merge branch" || true)
+           COMMITS=$(git log "${PREV_TAG}..HEAD" --first-parent --pretty=format:"%h %s (%an)" | grep -v "Merge branch" || true)
          fi
 
          {
