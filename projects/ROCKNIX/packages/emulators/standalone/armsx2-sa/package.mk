@@ -2,12 +2,12 @@
 # Copyright (C) 2025-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="armsx2-sa"
-PKG_VERSION="2.6.6.7"
+PKG_VERSION="2.6.6.8"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/ARMSX2/ARMSX2"
 PKG_URL="${PKG_SITE}/archive/refs/tags/${PKG_VERSION}.tar.gz"
 PKG_LONGDESC="ARMSX2 is a native ARM64 PlayStation 2 (PS2) emulator, a fork of PCSX2 that ports the EE/IOP/VU JIT recompilers to ARM64."
-PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 libpng zlib libjpeg-turbo zstd lz4 libwebp freetype plutosvg curl libpcap ffmpeg libX11 libXext qt6 ecm shaderc lsfg-vk"
+PKG_DEPENDS_TARGET="toolchain llvm:host SDL3 libpng zlib libjpeg-turbo zstd lz4 libwebp freetype plutosvg curl libpcap ffmpeg libX11 libXext qt6 ecm shaderc vulkan-loader vulkan-headers wlr-randr"
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="speed"
 
@@ -31,6 +31,9 @@ pre_configure_target() {
     -DLTO_PCSX2_CORE=ON
     -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
     -DUSE_VULKAN=ON
+    # ARMSX2 2.6.6.8's Eden-derived frame-generation sources are optional on
+    # desktop builds. Enable them for the native Linux Vulkan path.
+    -DARMSX2_ENABLE_LSFG=ON
     -DUSE_OPENGL=ON
     -DUSE_BACKTRACE=OFF
     -DENABLE_QT_UI=ON
@@ -43,6 +46,10 @@ pre_configure_target() {
   for _v in CFLAGS CXXFLAGS LDFLAGS; do
     export ${_v}="$(echo ${!_v} | sed 's/-mabi=lp64//g; s/-mtune=[^ ]*//g')"
   done
+
+  # GSLsfg.cpp and the Vulkan present hooks are guarded by this definition.
+  # Apply it globally so it reaches the core, GS libraries, and LTO target.
+  export CXXFLAGS="${CXXFLAGS} -DARMSX2_HAS_LSFG=1"
 }
 
   for _f in "${SYSROOT_PREFIX}"/usr/lib/*.o "${SYSROOT_PREFIX}"/usr/lib/*.a; do
