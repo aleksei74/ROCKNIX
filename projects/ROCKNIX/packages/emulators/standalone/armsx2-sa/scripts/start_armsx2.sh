@@ -51,8 +51,31 @@ LSFG_MULTIPLIER=$(get_setting lsfg_multiplier "${PLATFORM}" "${GAME}")
 LSFG_MULTIPLIER=${LSFG_MULTIPLIER:-2}
 LSFG_FLOW_SCALE=$(get_setting lsfg_flow_scale "${PLATFORM}" "${GAME}")
 LSFG_FLOW_SCALE=${LSFG_FLOW_SCALE:-0.30}
+# The old external lsfg-vk layer used a 0.00..1.00 fraction. Native ARMSX2
+# 2.6.6.8 stores the same choice as a 25..100 percentage. Accept both forms
+# so existing EmulationStation settings continue to work after the migration.
+case "${LSFG_FLOW_SCALE}" in
+  auto)
+    LSFG_FLOW_SCALE=100
+    ;;
+  *.*)
+    LSFG_FLOW_SCALE=$(awk -v scale="${LSFG_FLOW_SCALE}" 'BEGIN { printf "%d", (scale * 100) + 0.5 }')
+    ;;
+esac
+case "${LSFG_FLOW_SCALE}" in
+  ''|*[!0-9]*)
+    LSFG_FLOW_SCALE=100
+    ;;
+esac
+if [ "${LSFG_FLOW_SCALE}" -lt 25 ]; then
+  LSFG_FLOW_SCALE=25
+elif [ "${LSFG_FLOW_SCALE}" -gt 100 ]; then
+  LSFG_FLOW_SCALE=100
+fi
 LSFG_PERFORMANCE_MODE=$(get_setting lsfg_performance_mode "${PLATFORM}" "${GAME}")
 LSFG_PERFORMANCE_MODE=${LSFG_PERFORMANCE_MODE:-1}
+LSFG_TARGET_RATE=$(get_setting lsfg_target_rate "${PLATFORM}" "${GAME}")
+LSFG_TARGET_RATE=${LSFG_TARGET_RATE:-auto}
 
 #Set the cores to use
 CORES=$(get_setting "cores" "${PLATFORM}" "${GAME}")
@@ -218,32 +241,152 @@ fi
 #Graphic driver fixes
 @GRAPHICS@
 
-#Lossless Scaling frame generation
-  LSFG_DLL_PATH="/storage/roms/bios/armsx2/Lossless.dll"
-  if [ ! -f "${LSFG_DLL_PATH}" ] && [ -f "/storage/games-internal/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll" ]; then
-    LSFG_DLL_PATH="/storage/games-internal/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll"
-  elif [ ! -f "${LSFG_DLL_PATH}" ] && [ -f "/storage/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll" ]; then
-    LSFG_DLL_PATH="/storage/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll"
-  elif [ ! -f "${LSFG_DLL_PATH}" ] && [ -f "/storage/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll" ]; then
-    LSFG_DLL_PATH="/storage/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll"
-  fi
+#Lossless Scaling frame generation (native ARMSX2 Vulkan path)
+  ARMSX2_INI="/storage/.config/ARMSX2/inis/PCSX2.ini"
 
-  if [ "${LSFG_ENABLE}" = "1" ] && [ -f "${LSFG_DLL_PATH}" ]; then
-    unset DISABLE_LSFGVK
-    export LSFGVK_ENV=1
-    export LSFGVK_DLL_PATH="${LSFG_DLL_PATH}"
-    export LSFGVK_MULTIPLIER="${LSFG_MULTIPLIER}"
-    export LSFGVK_FLOW_SCALE="${LSFG_FLOW_SCALE}"
-    export LSFGVK_PERFORMANCE_MODE="${LSFG_PERFORMANCE_MODE}"
-    export LSFGVK_PACING=none
-    sed -i '/^Renderer =/c\Renderer = 14' /storage/.config/ARMSX2/inis/PCSX2.ini
-    sed -i '/^VsyncEnable =/c\VsyncEnable = true' /storage/.config/ARMSX2/inis/PCSX2.ini
+  detect_refresh_rate() {
+    local wlr_randr="/usr/bin/wlr-randr"
+    local display_output
+    local refresh_rate
+
+    [ -x "${wlr_randr}" ] || return 1
+    display_output=$(
+      "${wlr_randr}" 2>/dev/null |
+        awk '
+          /^[^[:space:]]/ { output = $1; next }
+          /^[[:space:]]+Enabled:[[:space:]]+yes/ && output != "" {
+            print output
+            found = 1
+            exit
+          }
+          END {
+            if (!found && output != "")
+              print output
+          }
+        '
+    )
+    [ -n "${display_output}" ] || return 1
+    refresh_rate=$(
+      "${wlr_randr}" --output "${display_output}" 2>/dev/null |
+        awk '/current/ {
+          for (i = 1; i <= NF; i++) {
+            if ($i == "Hz") {
+              value = $(i - 1)
+              gsub(/[^0-9.]/, "", value)
+              if (value != "") {
+                print value
+                exit
+              }
+            }
+          }
+        }'
+    )
+    case "${refresh_rate}" in
+      ''|*[!0-9.]*)
+        return 1
+        ;;
+    esac
+    refresh_rate=$(awk -v rate="${refresh_rate}" 'BEGIN { printf "%d", rate + 0.5 }')
+    case "${refresh_rate}" in
+      ''|*[!0-9]*) return 1 ;;
+    esac
+    printf '%s\n' "${refresh_rate}"
+  }
+
+  # Keep settings in the [EmuCore/GS] section. This also upgrades an existing
+  # user configuration created by 2.6.6.7, which has no native LSFG keys yet.
+  set_gs_setting() {
+    local key="${1}"
+    local value="${2}"
+    local tmp="${ARMSX2_INI}.tmp.$$"
+
+    awk -v key="${key}" -v value="${value}" '
+      function add_missing() {
+        if (!seen_value)
+          print key " = " value
+      }
+      /^\[/ {
+        if (in_gs)
+          add_missing()
+        in_gs = ($0 == "[EmuCore/GS]")
+        if (in_gs) {
+          seen_section = 1
+          seen_value = 0
+        }
+      }
+      in_gs && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+        print key " = " value
+        seen_value = 1
+        next
+      }
+      { print }
+      END {
+        if (in_gs)
+          add_missing()
+        if (!seen_section) {
+          print ""
+          print "[EmuCore/GS]"
+          print key " = " value
+        }
+      }
+    ' "${ARMSX2_INI}" > "${tmp}" && mv "${tmp}" "${ARMSX2_INI}"
+  }
+
+  LSFG_DLL_PATH=""
+  for candidate in \
+    "/storage/roms/bios/armsx2/Lossless.dll" \
+    "/storage/games-internal/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll" \
+    "/storage/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll" \
+    "/storage/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll"; do
+    if [ -f "${candidate}" ]; then
+      LSFG_DLL_PATH="${candidate}"
+      break
+    fi
+  done
+
+  # ARMSX2's native implementation and lsfg-vk must never run together.
+  # Keep the external layer disabled even if the system package is installed.
+  export DISABLE_LSFGVK=1
+  unset LSFGVK_ENV LSFGVK_DLL_PATH LSFGVK_MULTIPLIER LSFGVK_FLOW_SCALE LSFGVK_PERFORMANCE_MODE LSFGVK_PACING
+
+  if [ "${LSFG_ENABLE}" = "1" ] && [ -n "${LSFG_DLL_PATH}" ]; then
+    if [ "${LSFG_TARGET_RATE}" = "auto" ]; then
+      LSFG_TARGET_RATE="$(detect_refresh_rate || true)"
+      if [ -z "${LSFG_TARGET_RATE}" ]; then
+        LSFG_TARGET_RATE=0
+        echo "ARMSX2 adaptive LSFG disabled: active display refresh rate could not be detected."
+      fi
+    fi
+    case "${LSFG_TARGET_RATE}" in
+      ''|*[!0-9]*) LSFG_TARGET_RATE=0 ;;
+    esac
+    if [ "${LSFG_PERFORMANCE_MODE}" = "1" ]; then
+      LSFG_PERFORMANCE=true
+    else
+      LSFG_PERFORMANCE=false
+    fi
+    set_gs_setting LsfgEnabled true
+    set_gs_setting LsfgMultiplier "${LSFG_MULTIPLIER}"
+    set_gs_setting LsfgDllPath "${LSFG_DLL_PATH}"
+    set_gs_setting LsfgPerformance "${LSFG_PERFORMANCE}"
+    set_gs_setting LsfgFlowScale "${LSFG_FLOW_SCALE}"
+    # A non-zero target enables 2.6.6.8's adaptive pacer. The EmulationStation
+    # "adaptive (screen)" choice resolves to the active Wayland mode above.
+    set_gs_setting LsfgTargetRate "${LSFG_TARGET_RATE}"
+    sed -i '/^Renderer =/c\Renderer = 14' "${ARMSX2_INI}"
+    sed -i '/^VsyncEnable =/c\VsyncEnable = true' "${ARMSX2_INI}"
+    if [ "${LSFG_TARGET_RATE}" -gt 0 ]; then
+      echo "ARMSX2 native adaptive LSFG enabled: x${LSFG_MULTIPLIER}, target ${LSFG_TARGET_RATE}Hz, flow ${LSFG_FLOW_SCALE}%"
+    else
+      echo "ARMSX2 native LSFG enabled: x${LSFG_MULTIPLIER}, fixed multiplier, flow ${LSFG_FLOW_SCALE}%"
+    fi
   else
-    export DISABLE_LSFGVK=1
-    unset LSFGVK_ENV LSFGVK_DLL_PATH LSFGVK_MULTIPLIER LSFGVK_FLOW_SCALE LSFGVK_PERFORMANCE_MODE LSFGVK_PACING
-    sed -i '/^VsyncEnable =/c\VsyncEnable = false' /storage/.config/ARMSX2/inis/PCSX2.ini
+    set_gs_setting LsfgEnabled false
+    set_gs_setting LsfgDllPath "${LSFG_DLL_PATH}"
+    set_gs_setting LsfgTargetRate 0
+    sed -i '/^VsyncEnable =/c\VsyncEnable = false' "${ARMSX2_INI}"
     if [ "${LSFG_ENABLE}" = "1" ]; then
-      echo "LSFG disabled: Lossless.dll not found in the ARMSX2 BIOS or Steam directories."
+      echo "ARMSX2 native LSFG disabled: Lossless.dll not found in the ARMSX2 BIOS or Steam directories."
     fi
   fi
 
