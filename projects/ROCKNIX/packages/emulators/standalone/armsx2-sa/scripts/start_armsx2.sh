@@ -25,6 +25,7 @@ fi
 if [ ! -d "/storage/roms/bios/armsx2" ]; then
     mkdir -p "/storage/roms/bios/armsx2"
 fi
+sed -i '/^Bios =/c\Bios = /storage/roms/bios/armsx2' /storage/.config/ARMSX2/inis/PCSX2.ini
 
 #Create PS2 savestates folder
 if [ ! -d "/storage/roms/savestates/ps2" ]; then
@@ -44,6 +45,14 @@ GRENDERER=$(get_setting graphics_backend "${PLATFORM}" "${GAME}")
 IRES=$(get_setting internal_resolution "${PLATFORM}" "${GAME}")
 VSYNC=$(get_setting vsync "${PLATFORM}" "${GAME}")
 ENABLE_WIDESCREEN_PATCHES=$(get_setting enable_widescreen_patches "${PLATFORM}" "${GAME}")
+LSFG_ENABLE=$(get_setting lsfg_enable "${PLATFORM}" "${GAME}")
+LSFG_ENABLE=${LSFG_ENABLE:-0}
+LSFG_MULTIPLIER=$(get_setting lsfg_multiplier "${PLATFORM}" "${GAME}")
+LSFG_MULTIPLIER=${LSFG_MULTIPLIER:-2}
+LSFG_FLOW_SCALE=$(get_setting lsfg_flow_scale "${PLATFORM}" "${GAME}")
+LSFG_FLOW_SCALE=${LSFG_FLOW_SCALE:-0.30}
+LSFG_PERFORMANCE_MODE=$(get_setting lsfg_performance_mode "${PLATFORM}" "${GAME}")
+LSFG_PERFORMANCE_MODE=${LSFG_PERFORMANCE_MODE:-1}
 
 #Set the cores to use
 CORES=$(get_setting "cores" "${PLATFORM}" "${GAME}")
@@ -208,6 +217,35 @@ fi
 
 #Graphic driver fixes
 @GRAPHICS@
+
+#Lossless Scaling frame generation
+  LSFG_DLL_PATH="/storage/roms/bios/armsx2/Lossless.dll"
+  if [ ! -f "${LSFG_DLL_PATH}" ] && [ -f "/storage/games-internal/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll" ]; then
+    LSFG_DLL_PATH="/storage/games-internal/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll"
+  elif [ ! -f "${LSFG_DLL_PATH}" ] && [ -f "/storage/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll" ]; then
+    LSFG_DLL_PATH="/storage/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll"
+  elif [ ! -f "${LSFG_DLL_PATH}" ] && [ -f "/storage/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll" ]; then
+    LSFG_DLL_PATH="/storage/roms/steam/steamapps/common/Lossless Scaling/Lossless.dll"
+  fi
+
+  if [ "${LSFG_ENABLE}" = "1" ] && [ -f "${LSFG_DLL_PATH}" ]; then
+    unset DISABLE_LSFGVK
+    export LSFGVK_ENV=1
+    export LSFGVK_DLL_PATH="${LSFG_DLL_PATH}"
+    export LSFGVK_MULTIPLIER="${LSFG_MULTIPLIER}"
+    export LSFGVK_FLOW_SCALE="${LSFG_FLOW_SCALE}"
+    export LSFGVK_PERFORMANCE_MODE="${LSFG_PERFORMANCE_MODE}"
+    export LSFGVK_PACING=none
+    sed -i '/^Renderer =/c\Renderer = 14' /storage/.config/ARMSX2/inis/PCSX2.ini
+    sed -i '/^VsyncEnable =/c\VsyncEnable = true' /storage/.config/ARMSX2/inis/PCSX2.ini
+  else
+    export DISABLE_LSFGVK=1
+    unset LSFGVK_ENV LSFGVK_DLL_PATH LSFGVK_MULTIPLIER LSFGVK_FLOW_SCALE LSFGVK_PERFORMANCE_MODE LSFGVK_PACING
+    sed -i '/^VsyncEnable =/c\VsyncEnable = false' /storage/.config/ARMSX2/inis/PCSX2.ini
+    if [ "${LSFG_ENABLE}" = "1" ]; then
+      echo "LSFG disabled: Lossless.dll not found in the ARMSX2 BIOS or Steam directories."
+    fi
+  fi
 
 #Set QT enviornment to wayland
   export QT_QPA_PLATFORM=wayland
