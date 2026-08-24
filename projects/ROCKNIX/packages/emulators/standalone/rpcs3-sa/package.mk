@@ -22,8 +22,18 @@ pre_configure_target() {
   # llvm is linked from the sysroot, drop its build tree to free disk for rpcs3
   rm -rf "$(get_build_dir llvm)"
 
-  export CFLAGS="${CFLAGS} -DGLEW_EGL"
-  export CXXFLAGS="${CXXFLAGS} -DGLEW_EGL"
+  local CPU_TUNE_FLAGS=""
+  case "${DEVICE}" in
+    SM8250)
+      CPU_TUNE_FLAGS="-mtune=cortex-a77"
+      ;;
+    SM8750)
+      CPU_TUNE_FLAGS="-mtune=oryon-1"
+      ;;
+  esac
+
+  export CFLAGS="${CFLAGS} ${CPU_TUNE_FLAGS} -DGLEW_EGL"
+  export CXXFLAGS="${CXXFLAGS} ${CPU_TUNE_FLAGS} -DGLEW_EGL"
 
   PKG_CMAKE_OPTS_TARGET+=" -DWITH_LLVM=ON \
                            -DBUILD_LLVM=OFF \
