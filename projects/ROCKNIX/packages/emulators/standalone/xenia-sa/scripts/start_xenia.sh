@@ -17,6 +17,8 @@ GAME="${ROM##*/}"
 
 VSYNC=$(get_setting vsync "${PLATFORM}" "${GAME}")
 VSYNC="${VSYNC:-true}"
+DEBUG_LOGGING=$(get_setting debug_logging "${PLATFORM}" "${GAME}")
+DEBUG_LOGGING="${DEBUG_LOGGING:-false}"
 
 # Current Xenia maps its VSync UI toggle to the inverse of Vulkan immediate
 # present mode: VSync on disables tearing/VRR-capable immediate presentation.
@@ -67,6 +69,25 @@ ARGS=(
   "--content_root=${CONTENT_DIR}"
   "--cache_root=${CACHE_DIR}"
 )
+
+case "${DEBUG_LOGGING}" in
+  true|1|on|yes)
+    ARGS+=(
+      "--flush_log=true"
+      "--log_file=${CONF_DIR}/xenia.log"
+      "--log_level=2"
+      "--log_to_stdout=true"
+    )
+    ;;
+  *)
+    ARGS+=(
+      "--flush_log=false"
+      "--log_file=/dev/null"
+      "--log_level=0"
+      "--log_to_stdout=false"
+    )
+    ;;
+esac
 
 if [ -n "${ROM}" ]; then
   ARGS+=("${ROM}")

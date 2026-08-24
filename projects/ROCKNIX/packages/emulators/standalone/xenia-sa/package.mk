@@ -38,11 +38,14 @@ make_target() {
     SM8250)
       CPU_FLAGS="-march=armv8.2-a+crc+crypto -mtune=cortex-a77"
       ;;
-    SM8550|SM8650)
-      CPU_FLAGS="-mcpu=cortex-a78 -mtune=cortex-a78"
+    SM8550)
+      CPU_FLAGS="-march=armv9-a${TARGET_CPU_FLAGS} -mtune=cortex-x3"
+      ;;
+    SM8650)
+      CPU_FLAGS="-march=armv9.2-a${TARGET_CPU_FLAGS} -mtune=cortex-x4"
       ;;
     SM8750)
-      CPU_FLAGS="-march=armv9.2-a${TARGET_CPU_FLAGS} -mtune=${TARGET_CPU}"
+      CPU_FLAGS="-march=armv9.2-a${TARGET_CPU_FLAGS} -mtune=oryon-1"
       ;;
     *)
       CPU_FLAGS="-march=armv8-a -mtune=generic"
