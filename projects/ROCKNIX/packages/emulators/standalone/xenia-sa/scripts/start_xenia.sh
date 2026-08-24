@@ -18,6 +18,17 @@ GAME="${ROM##*/}"
 VSYNC=$(get_setting vsync "${PLATFORM}" "${GAME}")
 VSYNC="${VSYNC:-true}"
 
+# Current Xenia maps its VSync UI toggle to the inverse of Vulkan immediate
+# present mode: VSync on disables tearing/VRR-capable immediate presentation.
+case "${VSYNC}" in
+  true|1|on|yes)
+    VULKAN_ALLOW_PRESENT_MODE_IMMEDIATE="false"
+    ;;
+  *)
+    VULKAN_ALLOW_PRESENT_MODE_IMMEDIATE="true"
+    ;;
+esac
+
 mkdir -p "${CONF_DIR}" "${CONTENT_DIR}" "${CACHE_DIR}"
 
 # Install the packaged defaults only for a new profile. Preserve all existing
@@ -47,6 +58,7 @@ sway_fullscreen "xenia_edge" "pidof" &
 
 ARGS=(
   "--gpu=vulkan"
+  "--vulkan_allow_present_mode_immediate=${VULKAN_ALLOW_PRESENT_MODE_IMMEDIATE}"
   "--apu=alsa"
   "--hid=sdl"
   "--break_on_debugbreak=false"
