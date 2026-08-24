@@ -1,15 +1,14 @@
-# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="qt6"
+PKG_VERSION="6.10.3"
 PKG_LICENSE="GPL"
 PKG_SITE="https://download.qt.io"
+PKG_URL="${PKG_SITE}/archive/qt/${PKG_VERSION%.*}/${PKG_VERSION}/single/qt-everywhere-src-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain qt6:host openssl libjpeg-turbo libpng pcre2 sqlite zlib freetype SDL2 gstreamer gst-plugins-base gst-plugins-good gst-libav"
 PKG_DEPENDS_HOST="toolchain:host"
 PKG_LONGDESC="A cross-platform application and UI framework"
-PKG_VERSION_MAJOR="6.10"
-PKG_VERSION="${PKG_VERSION_MAJOR}.3"
-PKG_URL="${PKG_SITE}/archive/qt/${PKG_VERSION_MAJOR}/${PKG_VERSION}/single/qt-everywhere-src-${PKG_VERSION}.tar.xz"
 
 # Apply project-specific patches
 PKG_PATCH_DIRS="${PROJECT}"
@@ -61,7 +60,7 @@ pre_configure_host() {
   done
 
   # Enable required modules
-  # > qtbase qtshadertools qtdeclarative qtsvg qtlanguageserver qtimageformats qttools
+  # > qtbase qtshadertools qtdeclarative qtsvg qtlanguageserver qttools qtwayland
   MODULES_TO_ENABLE=("qtbase" "qtshadertools" "qtdeclarative" "qtsvg" "qtlanguageserver" "qtimageformats" "qttools")
   for module in "${MODULES_TO_ENABLE[@]}"; do
     PKG_CMAKE_OPTS_HOST+=" -DBUILD_${module}=ON"
@@ -120,10 +119,11 @@ post_makeinstall_target() {
   rm -rf ${INSTALL}/usr
 
   mkdir -p ${INSTALL}/usr/lib
-  mkdir -p ${INSTALL}/usr/plugins
-  mkdir -p ${INSTALL}/usr/qml
+    cp -a ${PKG_BUILD}/.${TARGET_NAME}/qtbase/lib/*.so* ${INSTALL}/usr/lib
 
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/qtbase/lib/*.so* ${INSTALL}/usr/lib/
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/qtbase/plugins/* ${INSTALL}/usr/plugins/
-  cp -rf ${PKG_BUILD}/.${TARGET_NAME}/qtbase/qml/* ${INSTALL}/usr/qml/
+  mkdir -p ${INSTALL}/usr/plugins
+    cp -a ${PKG_BUILD}/.${TARGET_NAME}/qtbase/plugins/* ${INSTALL}/usr/plugins
+
+  mkdir -p ${INSTALL}/usr/qml
+    cp -a ${PKG_BUILD}/.${TARGET_NAME}/qtbase/qml/* ${INSTALL}/usr/qml
 }
