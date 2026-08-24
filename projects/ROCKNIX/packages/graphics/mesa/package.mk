@@ -3,32 +3,31 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
+PKG_VERSION="26.2.1"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
+PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_HOST="toolchain:host expat:host libclc:host libdrm:host llvm:host Mako:host pyyaml:host spirv-tools:host"
 PKG_DEPENDS_TARGET="toolchain expat libdrm Mako:host pyyaml:host"
 PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
-PKG_TOOLCHAIN="meson"
 PKG_PATCH_DIRS+=" ${DEVICE}"
 case "${DEVICE}" in
   SM8250|SM8550|SM8650|SM8750)
     PKG_PATCH_DIRS+=" xenia"
     ;;
 esac
-PKG_VERSION="26.2.1"
-PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
+
+get_graphicdrivers
 
 if listcontains "${GRAPHIC_DRIVERS}" "panfrost"; then
   PKG_DEPENDS_TARGET+=" mesa:host"
 fi
 
-get_graphicdrivers
-
 PKG_MESON_OPTS_HOST="-Dglvnd=disabled \
                      -Dgallium-drivers= \
                      -Dplatforms= \
                      -Dglx=disabled \
-                     -Dvulkan-drivers=imagination \
+                     -Dvulkan-drivers= \
                      -Dshared-llvm=disabled \
                      -Dtools=panfrost \
                      -Dvideo-codecs= \
@@ -37,20 +36,21 @@ PKG_MESON_OPTS_HOST="-Dglvnd=disabled \
                      -Dmesa-clc=enabled \
                      -Dinstall-mesa-clc=true \
                      -Dprecomp-compiler=enabled \
-                     -Dinstall-precomp-compiler=true \
-                     -Dimagination-srv=false"
+                     -Dinstall-precomp-compiler=true"
 
-PKG_MESON_OPTS_TARGET=" ${MESA_LIBS_PATH_OPTS} \
-                       -Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
+PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dgallium-extra-hud=false \
+                       -Dgallium-rusticl=false \
                        -Dshader-cache=enabled \
                        -Dshared-glapi=enabled \
                        -Dopengl=true \
                        -Dgbm=enabled \
                        -Degl=enabled \
+                       -Dvalgrind=disabled \
                        -Dlibunwind=disabled \
                        -Dlmsensors=disabled \
-                       -Dbuild-tests=false"
+                       -Dbuild-tests=false \
+                       -Dmicrosoft-clc=disabled"
 
 if listcontains "${GRAPHIC_DRIVERS}" "panfrost"; then
   # These options require that we have built mesa host as specified above
