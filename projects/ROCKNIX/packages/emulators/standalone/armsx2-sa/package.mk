@@ -3,6 +3,7 @@
 
 PKG_NAME="armsx2-sa"
 PKG_VERSION="2.6.6.8"
+PKG_SHA256="86d9310bddd0a57435336f3b8200e6f34cb2aea27bda7b1178cfaac19cf859e3"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/ARMSX2/ARMSX2"
 PKG_URL="${PKG_SITE}/archive/refs/tags/${PKG_VERSION}.tar.gz"
