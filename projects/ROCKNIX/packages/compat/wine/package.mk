@@ -3,6 +3,7 @@
 
 PKG_NAME="wine"
 PKG_VERSION="11.16"
+PKG_SHA256="513aaf34099a1c1da00e188477a4c4d5e3d3108c4fe1ecc6f715347cef932a0b"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/Kron4ek/Wine-Builds"
 PKG_URL="${PKG_SITE}/releases/download/${PKG_VERSION}/wine-${PKG_VERSION}-staging-tkg-amd64-wow64.tar.xz"

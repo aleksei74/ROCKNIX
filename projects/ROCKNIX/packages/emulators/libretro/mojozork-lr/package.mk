@@ -3,6 +3,7 @@
 
 PKG_NAME="mojozork-lr"
 PKG_VERSION="5672d7e88acd7f583f01a559ad4a93e84b965ff2"
+PKG_SHA256="3ae8e936f3840ff876bfabd35188dbc3da0a3b645ad0d0ab41f762c3c71552fc"
 PKG_SITE="https://github.com/icculus/mojozork"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain sqlite"
