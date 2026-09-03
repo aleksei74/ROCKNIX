@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
-PKG_VERSION="26.2.1"
-PKG_SHA256="47d057dd1a6f226f8c48612e371c69c3c17ea1f3a97a7d674f786e0c84c8bb5a"
+PKG_VERSION="26.2.2"
+PKG_SHA256="9b6850189d4b4a595b1718d57d462412090fab820d3e235e2c1d122c1cf9e9bc"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
 PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
@@ -39,11 +39,12 @@ PKG_MESON_OPTS_HOST="-Dglvnd=disabled \
                      -Dprecomp-compiler=enabled \
                      -Dinstall-precomp-compiler=true"
 
-PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
+PKG_MESON_OPTS_TARGET="-Dc_link_args=-lgcc \
+                       -Dcpp_link_args=-lgcc \
+                       -Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dgallium-extra-hud=false \
                        -Dgallium-rusticl=false \
                        -Dshader-cache=enabled \
-                       -Dshared-glapi=enabled \
                        -Dopengl=true \
                        -Dgbm=enabled \
                        -Degl=enabled \
