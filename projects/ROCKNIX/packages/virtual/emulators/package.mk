@@ -113,6 +113,12 @@ case "${DEVICE}" in
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
 esac
 
+case "${DEVICE}" in
+  RK3566|RK3576|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
+    PKG_EMUS+=" aram-sa"
+    ;;
+esac
+
 # Split building emulators into 2 stages, needed to fit the jobs into the 6 hour GH runner time limit.
 case "${TARGET_TYPE}" in
   cores_only)
@@ -771,6 +777,14 @@ makeinstall_target() {
   add_emu_core j2me retroarch freej2me true
   add_es_system j2me
 
+  ### ARAM Korean feature phone runtime
+  case "${DEVICE}" in
+    RK3566|RK3576|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
+      add_emu_core aram aram aram-sa true
+      add_es_system aram
+      ;;
+  esac
+
   ### Atari Jaguar
   add_emu_core atarijaguar retroarch virtualjaguar true
   case ${DEVICE} in
@@ -1216,10 +1230,6 @@ makeinstall_target() {
       install_script "Start AetherSX2.sh"
       ;;
   esac
-
-
-
-
 
   ### Sony Playstation 3
   case ${DEVICE} in
