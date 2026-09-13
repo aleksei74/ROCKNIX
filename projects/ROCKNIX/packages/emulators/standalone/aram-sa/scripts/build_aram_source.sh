@@ -44,7 +44,12 @@ export GOOS=linux
 export GOARCH=arm64
 export CGO_ENABLED=1
 export GOTOOLCHAIN=go1.25.0+auto
+export GOPATH="${BUILD_DIR}/.gopath"
+export GOMODCACHE="${GOPATH}/pkg/mod"
 export GOCACHE="${BUILD_DIR}/.gocache"
+export GOTMPDIR="${BUILD_DIR}/.gotmp"
+
+mkdir -p "${GOPATH}" "${GOMODCACHE}" "${GOCACHE}" "${GOTMPDIR}"
 
 if [ -n "${CFLAGS:-}" ]; then
   export CGO_CFLAGS="${CFLAGS}"
