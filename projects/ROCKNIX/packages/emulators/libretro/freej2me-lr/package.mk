@@ -28,6 +28,6 @@ makeinstall_target() {
   cp ${PKG_BUILD}/build/freej2me-lr.jar ${INSTALL}/usr/config/game/freej2me
 
   mkdir -p ${INSTALL}/usr/bin
-  cp ${PKG_DIR}/freej2me.sh ${INSTALL}/usr/bin
+  cp ${PKG_DIR}/scripts/freej2me.sh ${INSTALL}/usr/bin
   chmod 0755 ${INSTALL}/usr/bin/freej2me.sh
 }
