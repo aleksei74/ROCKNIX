@@ -26,14 +26,14 @@ pre_configure_target() {
 
 post_makeinstall_target() {
   mkdir -p ${INSTALL}/usr/config/vice
-  if [ -d "${PKG_DIR}/configs" ]
+  if [ -d "${PKG_DIR}/config" ]
   then
-    cp -f ${PKG_DIR}/configs/* ${INSTALL}/usr/config/vice
+    cp -f ${PKG_DIR}/config/* ${INSTALL}/usr/config/vice
   fi
 
   for sc in x128 x64sc xplus4 xvic
   do
-    cp -f ${PKG_DIR}/sources/start_vice.sh ${INSTALL}/usr/bin/start_${sc}.sh
+    cp -f ${PKG_DIR}/scripts/start_vice.sh ${INSTALL}/usr/bin/start_${sc}.sh
     sed -i "s~@EMU@~${sc}~g" ${INSTALL}/usr/bin/start_${sc}.sh
   done
   chmod 0755 ${INSTALL}/usr/bin/*
