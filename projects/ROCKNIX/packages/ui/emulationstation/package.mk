@@ -2,12 +2,12 @@
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="emulationstation"
-PKG_VERSION="0e8a2c7c6163c1010ce4ffc547345ca19a3592ce"
-PKG_SHA256="304d784ebb23f820875b24598c5d11ff53e7192f7743609d30f310ce7f14e058"
+PKG_VERSION="3f8b2098fb1403b7f83cc56c4a87caf02dce715c"
+PKG_SHA256="6e5a42b2eea1e9f8560f2dfd802bdca04f5d6462fe926d50a1718ab7d66ca9e2"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/ROCKNIX/emulationstation-next"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="boost toolchain SDL2 freetype curl freeimage bash rapidjson SDL2_mixer fping p7zip alsa vlc drm_tool pugixml ${OPENGLES}"
+PKG_DEPENDS_TARGET="boost toolchain SDL2 freetype curl freeimage bash rapidjson SDL2_mixer fping p7zip alsa vlc drm_tool pugixml noto-sans-cjk ${OPENGLES}"
 PKG_NEED_UNPACK="busybox"
 PKG_LONGDESC="Emulationstation emulator frontend"
 PKG_BUILD_FLAGS="-gold"
@@ -53,6 +53,9 @@ makeinstall_target() {
 
   mkdir -p ${INSTALL}/usr/config/emulationstation/resources
     cp -a ${PKG_BUILD}/resources/* ${INSTALL}/usr/config/emulationstation/resources
+    rm -f ${INSTALL}/usr/config/emulationstation/resources/DroidSansFallbackFull.ttf
+    ln -sf /usr/share/fonts/truetype/noto-cjk/NotoSansCJKsc-Regular.otf \
+      ${INSTALL}/usr/config/emulationstation/resources/DroidSansFallbackFull.ttf
 
   mkdir -p ${INSTALL}/usr/bin
     cp -a ${PKG_BUILD}/es_settings ${INSTALL}/usr/bin

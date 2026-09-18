@@ -40,7 +40,7 @@ LIBRETRO_CORES="81-lr a5200-lr arduous-lr atari800-lr b2-lr beetle-gba-lr beetle
 ### aarch64 libretro and sa cores
 if [ "${ARCH}" = "aarch64" ]; then
   LIBRETRO_CORES+=" duckstation-lr flycast2021-lr ppsspp-lr"
-  PKG_EMUS+=" box64 portmaster"
+  PKG_EMUS+=" box64 dsperate-sa portmaster"
 fi
 
 ### Emulators or cores for specific devices
@@ -996,6 +996,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       ;;
     RK3566)
       add_emu_core nds drastic advancedrastic-sa false
@@ -1005,6 +1006,7 @@ makeinstall_target() {
       add_emu_core nds melonds melonds-sa false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     RK3399|RK3576|RK3588|SM6115)
@@ -1014,6 +1016,7 @@ makeinstall_target() {
       add_emu_core nds melonds melonds-sa false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     SM4450|SM8250|SM8550)
@@ -1024,6 +1027,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     SM8650|SM8750|AMD64)
@@ -1032,6 +1036,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melonds false
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch skyemu false
+      [ "${ARCH}" = "aarch64" ] && add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     S922X)
@@ -1040,6 +1045,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melondsds false
       add_emu_core nds melonds melonds-sa false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     *)
@@ -1047,6 +1053,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melonds false
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch skyemu false
+      [ "${ARCH}" = "aarch64" ] && add_emu_core nds dsperate dsperate-sa false
       ;;
   esac
   add_es_system nds
