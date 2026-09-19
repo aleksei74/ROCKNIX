@@ -1,0 +1,19 @@
+--- a/rpcs3/Emu/CMakeLists.txt
++++ b/rpcs3/Emu/CMakeLists.txt
+@@ -151,10 +151,15 @@ target_sources(rpcs3_emu PRIVATE
+     Audio/AudioDumper.cpp
+     Audio/AudioBackend.cpp
+     Audio/Cubeb/CubebBackend.cpp
+-    Audio/Oboe/OboeBackend.cpp
+     Audio/Cubeb/cubeb_enumerator.cpp
+ )
+ 
++if(ANDROID)
++    target_sources(rpcs3_emu PRIVATE
++        Audio/Oboe/OboeBackend.cpp
++    )
++endif()
++
+ if(USE_FAUDIO)
+     find_package(SDL3)
+     if(SDL3_FOUND AND SDL3_VERSION VERSION_GREATER_EQUAL 3.2.0)

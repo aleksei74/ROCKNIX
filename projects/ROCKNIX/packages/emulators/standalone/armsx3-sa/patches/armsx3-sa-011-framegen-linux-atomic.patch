@@ -1,0 +1,12 @@
+diff --git a/rpcs3/Emu/RSX/VK/VKFrameGen.cpp b/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
+--- a/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
++++ b/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
+@@ -7,6 +7,8 @@
+ #include "vkutils/commands.h"
+ #include "vkutils/barriers.h"
+ #include "Emu/Cell/timers.hpp"
++
++#include <atomic>
+ 
+ #if defined(__ANDROID__) || defined(__linux__)
+ #include "FrameGen/FrameGen.h"

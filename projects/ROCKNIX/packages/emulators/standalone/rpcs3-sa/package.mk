@@ -2,7 +2,7 @@
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="rpcs3-sa"
-PKG_VERSION="2f4034590f261cc2aafbc10139744c68a146b5a4"
+PKG_VERSION="8db660b185496f115701ef4c77c1ca2bef60e422"
 PKG_LICENSE="GPL-2.0-or-later.txt"
 PKG_SITE="https://github.com/RPCS3/rpcs3"
 PKG_URL="${PKG_SITE}.git"
