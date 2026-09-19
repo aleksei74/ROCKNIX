@@ -1,0 +1,11 @@
+diff --git a/Utilities/Thread.cpp b/Utilities/Thread.cpp
+--- a/Utilities/Thread.cpp
++++ b/Utilities/Thread.cpp
+@@ -57,6 +57,7 @@
+ #include <time.h>
+ #endif
+ #ifdef __linux__
++#include <fcntl.h>
+ #include <sys/syscall.h>
+ #include <sys/timerfd.h>
+ #include <unistd.h>

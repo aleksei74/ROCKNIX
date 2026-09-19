@@ -1,0 +1,10 @@
+diff --git a/rpcs3/Emu/RSX/VK/VKFrameGen.cpp b/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
+--- a/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
++++ b/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
+@@ -825,7 +825,7 @@ namespace vk::frame_gen
+ #else
+-	bool capture_presented_frame(const vk::command_buffer&, const vk::render_device&, VkImage, VkImageLayout, u32, u32)
++	bool capture_presented_frame(const vk::command_buffer&, const vk::render_device&, VkImage, VkImageLayout, u32, u32, u32, u32)
+ 	{
+ 		return false;
+ 	}

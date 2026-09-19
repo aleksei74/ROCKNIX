@@ -1,0 +1,13 @@
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_perf_metrics.cpp b/rpcs3/Emu/RSX/Overlays/overlay_perf_metrics.cpp
+--- a/rpcs3/Emu/RSX/Overlays/overlay_perf_metrics.cpp
++++ b/rpcs3/Emu/RSX/Overlays/overlay_perf_metrics.cpp
+@@ -1,10 +1,10 @@
+ #include "stdafx.h"
+-#include "Emu/RSX/VK/VKFrameGen.h"
+ #include "overlay_manager.h"
+ #include "overlay_perf_metrics.h"
+ #include "Emu/RSX/RSXThread.h"
+ #include "Emu/Cell/SPUThread.h"
+ #include "Emu/Cell/PPUThread.h"
++#include "Emu/RSX/VK/VKFrameGen.h"
+ 
