@@ -1,0 +1,265 @@
+diff --git a/frontend/binding_capture.go b/frontend/binding_capture.go
+index 8850618..80fdb16 100644
+--- a/frontend/binding_capture.go
++++ b/frontend/binding_capture.go
+@@ -49,7 +49,7 @@ func (s *Shell) beginGamepadBindingCapture(control string) {
+ 		return
+ 	}
+ 	blocked := make(map[capturedGamepadButton]bool)
+-	for _, id := range ebiten.AppendGamepadIDs(nil) {
++	for _, id := range connectedGamepadIDs() {
+ 		if !ebiten.IsStandardGamepadLayoutAvailable(id) {
+ 			continue
+ 		}
+@@ -115,7 +115,7 @@ func (s *Shell) handleBindingCapture() bool {
+ 			return true
+ 		}
+ 	case bindingDeviceGamepad:
+-		for _, id := range ebiten.AppendGamepadIDs(nil) {
++		for _, id := range connectedGamepadIDs() {
+ 			if !ebiten.IsStandardGamepadLayoutAvailable(id) {
+ 				continue
+ 			}
+diff --git a/frontend/input_bindings.go b/frontend/input_bindings.go
+index b5d2c85..d585291 100644
+--- a/frontend/input_bindings.go
++++ b/frontend/input_bindings.go
+@@ -381,7 +381,7 @@ func controllerProfileSignature(profile ControllerProfile) string {
+ 
+ func gamepadConnectionSignature() string {
+ 	var devices []string
+-	for _, id := range ebiten.AppendGamepadIDs(nil) {
++	for _, id := range connectedGamepadIDs() {
+ 		devices = append(devices, fmt.Sprintf(
+ 			"%d:%s:%t",
+ 			id,
+@@ -400,7 +400,7 @@ func gamepadConnectionLabel(languages ...Language) string {
+ 	if len(languages) > 0 {
+ 		language = languages[0]
+ 	}
+-	ids := ebiten.AppendGamepadIDs(nil)
++	ids := connectedGamepadIDs()
+ 	if len(ids) == 0 {
+ 		return translate(language, "None")
+ 	}
+diff --git a/frontend/shell_haptics.go b/frontend/shell_haptics.go
+index dc9fadb..4890b1b 100644
+--- a/frontend/shell_haptics.go
++++ b/frontend/shell_haptics.go
+@@ -131,7 +131,7 @@ func hapticPreviewPulse(enabled bool) (float64, time.Duration, bool) {
+ 
+ // vibrateGamepads sets both motors on every connected standard-layout pad.
+ func vibrateGamepads(magnitude float64, duration time.Duration) {
+-	for _, id := range ebiten.AppendGamepadIDs(nil) {
++	for _, id := range connectedGamepadIDs() {
+ 		if !ebiten.IsStandardGamepadLayoutAvailable(id) {
+ 			continue
+ 		}
+diff --git a/frontend/shell_input.go b/frontend/shell_input.go
+index 86257a5..cf41647 100644
+--- a/frontend/shell_input.go
++++ b/frontend/shell_input.go
+@@ -17,7 +17,7 @@ func (s *Shell) gamepadActivityLabel() string {
+ 	}
+ 	var active []string
+ 	seen := make(map[string]bool)
+-	for _, id := range ebiten.AppendGamepadIDs(nil) {
++	for _, id := range connectedGamepadIDs() {
+ 		if !ebiten.IsStandardGamepadLayoutAvailable(id) {
+ 			continue
+ 		}
+@@ -283,7 +283,7 @@ func (s *Shell) collectGamepadState(state map[string]bool, profile ControllerPro
+ 	if !profile.GamepadEnabled {
+ 		return
+ 	}
+-	for _, id := range ebiten.AppendGamepadIDs(nil) {
++	for _, id := range connectedGamepadIDs() {
+ 		if !ebiten.IsStandardGamepadLayoutAvailable(id) {
+ 			continue
+ 		}
+diff --git a/frontend/gamepad_devices.go b/frontend/gamepad_devices.go
+new file mode 100644
+index 0000000..0ae05fe
+--- /dev/null
++++ b/frontend/gamepad_devices.go
+@@ -0,0 +1,32 @@
++package frontend
++
++import (
++	"fmt"
++	"runtime"
++
++	"github.com/hajimehoshi/ebiten/v2"
++)
++
++var pointerGamepadNames = map[string]bool{}
++
++func connectedGamepadIDs() []ebiten.GamepadID {
++	ids := ebiten.AppendGamepadIDs(nil)
++	if runtime.GOOS != "linux" {
++		return ids
++	}
++	filtered := ids[:0]
++	for _, id := range ids {
++		guid := ebiten.GamepadSDLID(id)
++		buttons := ebiten.GamepadButtonCount(id)
++		key := fmt.Sprintf("%s:%d", guid, buttons)
++		pointer, known := pointerGamepadNames[key]
++		if !known {
++			pointer = linuxPointerDevice("/sys/class/input", guid, buttons)
++			pointerGamepadNames[key] = pointer
++		}
++		if !pointer {
++			filtered = append(filtered, id)
++		}
++	}
++	return filtered
++}
+diff --git a/frontend/gamepad_device_properties.go b/frontend/gamepad_device_properties.go
+new file mode 100644
+index 0000000..71b6ea0
+--- /dev/null
++++ b/frontend/gamepad_device_properties.go
+@@ -0,0 +1,82 @@
++package frontend
++
++import (
++	"fmt"
++	"math/bits"
++	"os"
++	"path/filepath"
++	"strconv"
++	"strings"
++)
++
++func linuxPointerDevice(root, guid string, buttons int) bool {
++	paths, _ := filepath.Glob(filepath.Join(root, "event*", "device"))
++	for _, path := range paths {
++		data, err := os.ReadFile(filepath.Join(path, "properties"))
++		if err != nil {
++			continue
++		}
++		words := strings.Fields(string(data))
++		if len(words) == 0 {
++			continue
++		}
++		properties, err := strconv.ParseUint(words[len(words)-1], 16, 64)
++		// INPUT_PROP_POINTER and INPUT_PROP_DIRECT identify touch devices, not sticks.
++		if err != nil || properties&3 == 0 {
++			continue
++		}
++		if linuxInputGUID(path) != guid {
++			continue
++		}
++		data, err = os.ReadFile(filepath.Join(path, "capabilities", "key"))
++		if err != nil {
++			continue
++		}
++		// Composite controllers share a GUID with their touchpad. Compare raw buttons too.
++		if linuxButtonCount(string(data)) == buttons {
++			return true
++		}
++	}
++	return false
++}
++
++func linuxButtonCount(bitmap string) int {
++	words := strings.Fields(bitmap)
++	count := 0
++	for i := len(words) - 1 - 256/strconv.IntSize; i >= 0; i-- {
++		word, err := strconv.ParseUint(words[i], 16, strconv.IntSize)
++		if err != nil {
++			return -1
++		}
++		count += bits.OnesCount64(word)
++	}
++	return count
++}
++
++func linuxInputGUID(path string) string {
++	var ids [4]uint64
++	for i, field := range []string{"bustype", "vendor", "product", "version"} {
++		data, err := os.ReadFile(filepath.Join(path, "id", field))
++		if err != nil {
++			return ""
++		}
++		ids[i], err = strconv.ParseUint(strings.TrimSpace(string(data)), 16, 16)
++		if err != nil {
++			return ""
++		}
++	}
++	guid := fmt.Sprintf("%02x%02x0000", byte(ids[0]), byte(ids[0]>>8))
++	if ids[1] != 0 && ids[2] != 0 && ids[3] != 0 {
++		for _, id := range ids[1:] {
++			guid += fmt.Sprintf("%02x%02x0000", byte(id), byte(id>>8))
++		}
++		return guid
++	}
++	name, err := os.ReadFile(filepath.Join(path, "name"))
++	if err != nil {
++		return ""
++	}
++	var prefix [12]byte
++	copy(prefix[:], strings.TrimSpace(string(name)))
++	return guid + fmt.Sprintf("%x", prefix)
++}
+diff --git a/frontend/gamepad_device_properties_test.go b/frontend/gamepad_device_properties_test.go
+new file mode 100644
+index 0000000..d768225
+--- /dev/null
++++ b/frontend/gamepad_device_properties_test.go
+@@ -0,0 +1,54 @@
++package frontend
++
++import (
++	"os"
++	"path/filepath"
++	"testing"
++)
++
++func TestLinuxPointerDevice(t *testing.T) {
++	root := t.TempDir()
++	write := func(event, file, value string) {
++		t.Helper()
++		path := filepath.Join(root, event, "device", file)
++		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
++			t.Fatal(err)
++		}
++		if err := os.WriteFile(path, []byte(value+"\n"), 0644); err != nil {
++			t.Fatal(err)
++		}
++	}
++	for _, event := range []string{"event8", "event10"} {
++		for field, value := range map[string]string{"bustype": "0003", "vendor": "054c", "product": "0ce6", "version": "8111"} {
++			write(event, "id/"+field, value)
++		}
++	}
++	write("event8", "properties", "0")
++	write("event8", "capabilities/key", "7fdb000000000000 0 0 0 0")
++	write("event10", "properties", "5")
++	write("event10", "capabilities/key", "2420 10000 0 0 0 0")
++	guid := "030000004c050000e60c000011810000"
++	if !linuxPointerDevice(root, guid, 4) {
++		t.Fatal("touchpad with controller GUID accepted")
++	}
++	if linuxPointerDevice(root, guid, 17) {
++		t.Fatal("controller sharing touchpad GUID rejected")
++	}
++	write("event2", "properties", "2")
++	write("event2", "name", "generic ft5x06 (8d)")
++	write("event2", "capabilities/key", "400 0 0 0 0 0")
++	for field, value := range map[string]string{"bustype": "0018", "vendor": "0000", "product": "0000", "version": "0000"} {
++		write("event2", "id/"+field, value)
++	}
++	touchGUID := "1800000067656e657269632066743578"
++	if !linuxPointerDevice(root, touchGUID, 1) {
++		t.Fatal("touchscreen accepted")
++	}
++	if linuxPointerDevice(root, "missing", 4) {
++		t.Fatal("unknown device rejected")
++	}
++	write("event10", "properties", "invalid")
++	if linuxPointerDevice(root, guid, 4) {
++		t.Fatal("invalid properties rejected")
++	}
++}

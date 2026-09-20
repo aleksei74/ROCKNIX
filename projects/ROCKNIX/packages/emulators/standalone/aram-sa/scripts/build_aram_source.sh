@@ -40,6 +40,11 @@ fetch_repo mirusu400/aram-authd "${ARAM_AUTHD_REF}" "${SOURCE_ROOT}/aram-authd"
 git -C "${SOURCE_ROOT}/aram-core" apply \
   "${PKG_DIR}/patches-core/001-enable-linux-arm64-native-jit.patch"
 
+git -C "${SOURCE_ROOT}/aram-frontend" apply \
+  "${PKG_DIR}/patches-frontend/001-ignore-touch-devices-as-gamepads.patch"
+git -C "${SOURCE_ROOT}/aram-frontend" apply \
+  "${PKG_DIR}/patches-frontend/002-bound-audio-player-read-size.patch"
+
 export GOOS=linux
 export GOARCH=arm64
 export CGO_ENABLED=1
