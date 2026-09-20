@@ -1,0 +1,14 @@
+diff --git a/frontend/audio_output.go b/frontend/audio_output.go
+index 41faf59..0dd650c 100644
+--- a/frontend/audio_output.go
++++ b/frontend/audio_output.go
+@@ -467,7 +467,8 @@ func (o *audioOutput) configure(settings AudioSettings) {
+ 	// every sound by a hidden 150 ms floor.
+ 	o.prebufferBytes = audioPrebufferBytes(latency)
+ 	o.prebufferWait = latency
+-	o.player.SetBufferSize(latency)
++	// Keep source reads smaller than the queue target to retain a jitter reserve.
++	o.player.SetBufferSize(min(latency, 30*time.Millisecond))
+ 	o.softenEnabled = settings.Soften
+ 	// Volume can exceed 100% for boosted output. oto multiplies samples by the
+ 	// gain and the driver clips anything past full scale, so amplified audio may
