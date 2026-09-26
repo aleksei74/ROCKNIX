@@ -2,7 +2,7 @@
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="xenia-sa"
-PKG_VERSION="d7a868837c9863feaeb8a1a6f8fe198d036bab41"
+PKG_VERSION="1689b263d3e44a69e9bdf0dd21e24a85c7bcc16d"
 PKG_LICENSE="BSD-3-Clause"
 PKG_SITE="https://github.com/has207/xenia-edge"
 PKG_URL="${PKG_SITE}.git"

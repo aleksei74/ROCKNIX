@@ -17,7 +17,7 @@ if [ "${CODEX_SUPPORT}" = "yes" ]; then
 fi
 
 PKG_EMUS="amiberry duckstation-sa flycast-sa gzdoom-sa hatarisa hypseus-singe moonlight mupen64plus-sa openbor pico-8   \
-          ppsspp-sa scummvmsa touchhle-sa vice-sa wine yabasanshiro-sa"
+          ppsspp-sa scummvm-sa touchhle-sa vice-sa wine yabasanshiro-sa"
 
 EMUS_32BIT=""
 
@@ -40,7 +40,7 @@ LIBRETRO_CORES="81-lr a5200-lr arduous-lr atari800-lr b2-lr beetle-gba-lr beetle
 ### aarch64 libretro and sa cores
 if [ "${ARCH}" = "aarch64" ]; then
   LIBRETRO_CORES+=" duckstation-lr flycast2021-lr ppsspp-lr"
-  PKG_EMUS+=" box64 portmaster"
+  PKG_EMUS+=" box64 dsperate-sa portmaster"
 fi
 
 ### Emulators or cores for specific devices
@@ -87,18 +87,18 @@ case "${DEVICE}" in
     ;;
   SM8250)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
-    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
+    PKG_EMUS+=" aethersx2-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa armsx3-sa supermodel-sa \
                 xemu-sa xenia-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr uae4arm-lr"
     ;;
   SM8550)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 daedalusx64-sa desmume-lr gpsp-lr pcsx_rearmed-lr"
-    PKG_EMUS+=" aethersx2-sa ares-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa drastic-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
+    PKG_EMUS+=" aethersx2-sa ares-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa drastic-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa armsx3-sa supermodel-sa \
                 xemu-sa xenia-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr uae4arm-lr"
     ;;
   SM8650|SM8750)
-    PKG_EMUS+=" aethersx2-sa ares-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa supermodel-sa \
+    PKG_EMUS+=" aethersx2-sa ares-sa armsx2-sa azahar-sa bigpemu-sa cemu-sa dolphin-sa gopher64-sa heroic mednafen melonds-sa nanoboyadvance-sa rpcs3-sa armsx3-sa supermodel-sa \
                 xemu-sa xenia-sa skyemu-sa steam vita3k-sa eden-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr kronos-lr uae4arm-lr"
     ;;
@@ -111,6 +111,12 @@ case "${DEVICE}" in
     PKG_EMUS+=" ares-sa azahar-sa cemu-sa dolphin-sa gopher64-sa mednafen melonds-sa nanoboyadvance-sa \
                 xemu-sa skyemu-sa vita3k-sa armsx2-sa"
     LIBRETRO_CORES+=" beetle-psx-lr beetle-saturn-lr bsnes-lr bsnes-hd-lr dolphin-lr"
+esac
+
+case "${DEVICE}" in
+  RK3566|RK3576|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
+    PKG_EMUS+=" aram-sa"
+    ;;
 esac
 
 # Split building emulators into 2 stages, needed to fit the jobs into the 6 hour GH runner time limit.
@@ -771,6 +777,14 @@ makeinstall_target() {
   add_emu_core j2me retroarch freej2me true
   add_es_system j2me
 
+  ### ARAM Korean feature phone runtime
+  case "${DEVICE}" in
+    RK3566|RK3576|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
+      add_emu_core aram aram aram-sa true
+      add_es_system aram
+      ;;
+  esac
+
   ### Atari Jaguar
   add_emu_core atarijaguar retroarch virtualjaguar true
   case ${DEVICE} in
@@ -982,6 +996,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       ;;
     RK3566)
       add_emu_core nds drastic advancedrastic-sa false
@@ -991,6 +1006,7 @@ makeinstall_target() {
       add_emu_core nds melonds melonds-sa false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     RK3399|RK3576|RK3588|SM6115)
@@ -1000,6 +1016,7 @@ makeinstall_target() {
       add_emu_core nds melonds melonds-sa false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     SM4450|SM8250|SM8550)
@@ -1010,6 +1027,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch desmume false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     SM8650|SM8750|AMD64)
@@ -1018,6 +1036,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melonds false
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch skyemu false
+      [ "${ARCH}" = "aarch64" ] && add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     S922X)
@@ -1026,6 +1045,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melondsds false
       add_emu_core nds melonds melonds-sa false
       add_emu_core nds retroarch skyemu false
+      add_emu_core nds dsperate dsperate-sa false
       install_script "Start MelonDS.sh"
       ;;
     *)
@@ -1033,6 +1053,7 @@ makeinstall_target() {
       add_emu_core nds retroarch melonds false
       add_emu_core nds retroarch melondsds false
       add_emu_core nds retroarch skyemu false
+      [ "${ARCH}" = "aarch64" ] && add_emu_core nds dsperate dsperate-sa false
       ;;
   esac
   add_es_system nds
@@ -1217,16 +1238,14 @@ makeinstall_target() {
       ;;
   esac
 
-
-
-
-
   ### Sony Playstation 3
   case ${DEVICE} in
     SM8250|SM8550|SM8650|SM8750)
       add_emu_core ps3 rpcs3 rpcs3-sa true
+      add_emu_core ps3 armsx3 armsx3-sa false
       add_es_system ps3
       install_script "Start RPCS3.sh"
+      install_script "Start ARMSX3.sh"
       ;;
   esac
 
@@ -1255,7 +1274,7 @@ makeinstall_target() {
   add_es_system pokemini
 
   ### ScummVM
-  add_emu_core scummvm scummvmsa scummvm true
+  add_emu_core scummvm scummvm-sa scummvm true
   add_emu_core scummvm retroarch scummvm false
   add_es_system scummvm
   add_system_dir /storage/roms/scummvm

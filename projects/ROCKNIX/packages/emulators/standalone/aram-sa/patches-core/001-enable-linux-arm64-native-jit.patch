@@ -1,0 +1,20 @@
+diff --git a/application/cpu_native_linux_arm64.go b/application/cpu_native_linux_arm64.go
+new file mode 100644
+index 0000000..5b1951a
+--- /dev/null
++++ b/application/cpu_native_linux_arm64.go
+@@ -0,0 +1,14 @@
++//go:build linux && arm64
++
++package application
++
++import (
++	"github.com/mirusu400/aram-core/cpu"
++	"github.com/mirusu400/aram-core/cpu/interpreter"
++)
++
++func init() {
++	RegisterCPUBackend("native", newNativeCPU)
++}
++
++func newNativeCPU() cpu.Backend { return interpreter.NewNativeJIT() }
