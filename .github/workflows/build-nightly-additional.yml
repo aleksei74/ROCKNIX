@@ -1,5 +1,5 @@
-name: 추가 기기 빌드
-run-name: 추가 기기 빌드 · ${{ github.ref_name }}
+name: '- 추가 기기 빌드'
+run-name: '- 추가 기기 빌드 · ${{ github.ref_name }}'
 
 on:
   workflow_dispatch:
