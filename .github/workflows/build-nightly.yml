@@ -5,13 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'a: T618·SDM845 제외 / b: T618·SDM845만'
+        description: '빌드 타입'
         required: true
-        default: a
+        default: 'a - 전체 기기 빌드'
         type: choice
         options:
-          - a
-          - b
+          - 'a - 전체 기기 빌드'
+          - 'b - 추가 기기 빌드'
       release:
         description: 'Official release (ROCKNIX repository only)'
         required: false
@@ -70,7 +70,7 @@ jobs:
           import os
 
           devices = "RK3326 RK3399 RK3566 RK3576 RK3588 S922X H700 SM8250 SM8550 SM8650 SM8750 SM6115 SM4450 T618 SDM845".split()
-          build_type = os.environ["BUILD_TYPE"]
+          build_type = os.environ["BUILD_TYPE"].split(" - ", 1)[0]
           if os.environ["EVENT_NAME"] == "schedule":
               scheduled = os.environ.get("SCHEDULE_DEVICES", "")
               devices = [d.replace(" ", "") for d in scheduled.split(",") if d.replace(" ", "")] or devices
