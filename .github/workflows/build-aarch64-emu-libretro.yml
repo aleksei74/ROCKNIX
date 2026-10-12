@@ -46,7 +46,7 @@ jobs:
 
       - name: Retrieve ccache
         run: |
-          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}-emu-libretro.tar"
+          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}-emu-libretro.tar"
           curl -L --fail --silent --show-error "$URL" | tar -xvf - || echo "Cache archive not found, skipping."  
 
       - name: Download aarch64 (${{ inputs.DEVICE }})
@@ -156,7 +156,7 @@ jobs:
           prerelease: true
           body: ccache
           token: ${{ secrets.GH_PAT }}
-          repository: ${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repository: ${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}
         continue-on-error: true
 
       - name: Print space

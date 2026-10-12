@@ -4,9 +4,29 @@ on:
     - cron: "0 22 * * 0"
   workflow_dispatch:
   workflow_call:
+
+concurrency:
+  group: update-mirror-sources
+  cancel-in-progress: false
+
+env:
+  SOURCES_REPO: ${{ vars.SOURCES_REPO || 'rocknix-build-sources' }}
+
 jobs:
+  check-mirror:
+    if: github.repository == 'UzuCore/ROCKNIXK'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ secrets.GH_PAT }}
+    steps:
+      - name: Check mirror access
+        run: |
+          test "$(gh api "repos/${GITHUB_REPOSITORY_OWNER}/${SOURCES_REPO}" --jq '.permissions.push')" = true
+          gh release view sources-v2 --repo "${GITHUB_REPOSITORY_OWNER}/${SOURCES_REPO}" >/dev/null
+
   get-sources:
-    if: (github.event_name != 'schedule') || (github.repository == 'ROCKNIX/distribution' && github.ref_name == 'next')
+    needs: check-mirror
+    if: github.event_name != 'schedule' || github.ref_name == 'dev'
     name: Get sources (${{ matrix.device }})
     runs-on: ubuntu-24.04
     env:
@@ -14,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: [RK3326, RK3399, RK3566, RK3588, H700, S922X, SM8250, SM8550, SM8650, SM8750, SM6115, SM4450]
+        device: [RK3326, RK3399, RK3566, RK3576, RK3588, H700, S922X, SM8250, SM8550, SM8650, SM8750, SM6115, SM4450, T618, SDM845]
     steps:
       - name: Maximize build space
         uses: justinthelaw/maximize-github-runner-space@v0.9.0
@@ -69,13 +89,37 @@ jobs:
         id: find_missing
         run: |
           set -euo pipefail
-          EXISTING_FILES=$(gh release view sources-v2 --repo ${{ github.repository_owner }}/distribution-sources --json assets --jq '.assets[].name' || true)
-          mapfile -t LOCAL_FILES < <(find collected-sources/ -type f \( -name '*.tar.gz' -o -name '*.tar.xz' -o -name '*.tgz' -o -name '*.tar.bz2' -o -name '*.deb' -o -name '*.tar.zst' \))
+          EXISTING_FILES=$(gh release view sources-v2 --repo "${GITHUB_REPOSITORY_OWNER}/${SOURCES_REPO}" --json assets --jq '.assets[].name')
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+
+          groups = {}
+          suffixes = (".tar.gz", ".tar.xz", ".tgz", ".tar.bz2", ".deb", ".tar.zst")
+          for path in sorted(Path("collected-sources").rglob("*")):
+              if path.is_file() and path.name.endswith(suffixes):
+                  groups.setdefault(path.name, []).append(path)
+
+          with open("mirror-files.txt", "w") as output:
+              for name, paths in sorted(groups.items()):
+                  hashes = set()
+                  for path in paths:
+                      digest = hashlib.sha256()
+                      with path.open("rb") as source:
+                          for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                              digest.update(chunk)
+                      hashes.add(digest.hexdigest())
+                  if len(hashes) != 1:
+                      print(f"::warning::Skipping conflicting source filename: {name}")
+                      continue
+                  output.write(str(paths[0]) + "\n")
+          PY
+          mapfile -t LOCAL_FILES < mirror-files.txt
 
           MISSING_FILES=()
           for file in "${LOCAL_FILES[@]}"; do
             BASENAME=$(basename "$file")
-            if ! echo "$EXISTING_FILES" | grep -qx "$BASENAME"; then
+            if ! echo "$EXISTING_FILES" | grep -Fxq "$BASENAME"; then
               echo "Missing: $file"
               MISSING_FILES+=("$file")
             fi
@@ -96,8 +140,8 @@ jobs:
           artifacts: ${{ env.ARTIFACTS }}
           allowUpdates: true
           replacesArtifacts: false
-          artifactErrorsFailBuild: false
-          makeLatest: true
+          artifactErrorsFailBuild: true
+          makeLatest: false
           prerelease: true
           token: ${{ secrets.GH_PAT }}
-          repo: distribution-sources
+          repo: ${{ env.SOURCES_REPO }}
