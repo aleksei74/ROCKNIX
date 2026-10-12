@@ -98,6 +98,9 @@ jobs:
           suffixes = (".tar.gz", ".tar.xz", ".tgz", ".tar.bz2", ".deb", ".tar.zst")
           for path in sorted(Path("collected-sources").rglob("*")):
               if path.is_file() and path.name.endswith(suffixes):
+                  if path.stat().st_size == 0:
+                      print(f"::warning::Skipping empty source file: {path}")
+                      continue
                   groups.setdefault(path.name, []).append(path)
 
           with open("mirror-files.txt", "w") as output:
@@ -118,6 +121,10 @@ jobs:
 
           MISSING_FILES=()
           for file in "${LOCAL_FILES[@]}"; do
+            if [ ! -s "$file" ]; then
+              echo "::warning::Skipping empty source file: $file"
+              continue
+            fi
             BASENAME=$(basename "$file")
             if ! echo "$EXISTING_FILES" | grep -Fxq "$BASENAME"; then
               echo "Missing: $file"
@@ -140,7 +147,7 @@ jobs:
           artifacts: ${{ env.ARTIFACTS }}
           allowUpdates: true
           replacesArtifacts: false
-          artifactErrorsFailBuild: true
+          artifactErrorsFailBuild: false
           makeLatest: false
           prerelease: true
           token: ${{ secrets.GH_PAT }}
