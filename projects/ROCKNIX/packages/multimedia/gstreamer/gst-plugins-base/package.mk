@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
+. ${ROOT}/packages/multimedia/gstreamer/gst-plugins-base/package.mk
+
 PKG_NAME="gst-plugins-base"
 PKG_VERSION="$(get_pkg_version gstreamer)"
 PKG_SHA256="eaaaa0bb455812e2277d14c9be8dd3136e2c607e34efd401a33d4b384b2f0253"
