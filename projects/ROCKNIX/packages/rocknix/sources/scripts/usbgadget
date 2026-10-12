@@ -22,13 +22,19 @@ PRODUCT="${PRODUCT:-${OS_NAME}}"
 
 [ -r /storage/.config/profile.d/001-device_config ] && . /storage/.config/profile.d/001-device_config
 
+DEVICE_USB_CONFIGFS_DEBUG="${DEVICE_USB_CONFIGFS_DEBUG:-true}"
+DEVICE_USB_CONFIGFS_DEBUG_SERVICE="${DEVICE_USB_CONFIGFS_DEBUG_SERVICE:-rocknix-usb-shell.service}"
+case "${DEVICE_USB_CONFIGFS_DEBUG_SERVICE}" in
+	t618-usb-shell.service|odin-usb-shell.service) DEVICE_USB_CONFIGFS_DEBUG_SERVICE=rocknix-usb-shell.service ;;
+esac
+
 CACHEDIR=/storage/.cache/usbgadget
 GADGETCONF=${CACHEDIR}/usbgadget.conf
 GADGETNETCONF=${CACHEDIR}/network.conf
 UDHCPCONF=/var/run/udhcpd.conf
 UDHCPPIDFILE=/var/run/udhcpd.pid
 
-for mod in usb_f_ncm usb_f_fs; do
+for mod in libcomposite usb_f_acm usb_f_ncm usb_f_fs; do
 	modprobe -q ${mod}
 done
 
@@ -384,7 +390,11 @@ prepare_usb_debug() {
 start_usb_debug() {
 	release_legacy_debug || return 1
 	[ "${DEVICE_USB_CONFIGFS_DEBUG:-false}" = "true" ] || return 1
-	prepare_usb_debug || return 1
+	if debug_host_role; then
+		usb_stop || return 1
+		set_role host
+		return 0
+	fi
 	set_role device
 	for _ in 1 2 3 4 5 6 7 8 9 10; do
 		UDC_NAME=$(ls -1 /sys/class/udc 2>/dev/null | head -n1)
@@ -392,9 +402,9 @@ start_usb_debug() {
 		sleep 0.1
 	done
 	if [ -z "${UDC_NAME}" ]; then
-		echo "ERROR: no UDC available for USB debug serial" >&2
-		return 1
+		return 0
 	fi
+	prepare_usb_debug || return 1
 	if ! echo "${UDC_NAME}" > "${g_debug}/UDC"; then
 		echo "ERROR: failed to bind USB debug serial to UDC ${UDC_NAME}" >&2
 		return 1
@@ -412,6 +422,7 @@ start_usb_debug() {
 		CURRENT_MODE=disabled
 		return 1
 	fi
+	usb_trigger async
 }
 
 prepare_usb_mtp() (
@@ -513,6 +524,19 @@ external_vbus_present() {
 	return 1
 }
 
+debug_host_role() {
+	[ "$(id_role)" = "host" ] && return 0
+	for role in /sys/class/typec/port*/data_role; do
+		case "$(cat "${role}" 2>/dev/null)" in
+			host|*'[host]'*) return 0 ;;
+		esac
+	done
+	for role in /sys/class/usb_role/*/role; do
+		[ "$(cat "${role}" 2>/dev/null)" = "host" ] && ! external_vbus_present && return 0
+	done
+	return 1
+}
+
 # USB_MODE is how the gadget was last configured (got from state file)
 # CURRENT_MODE is USB gadget subsystem state -- which gadget has UDC
 # $1 is desired mode, passed by caller
@@ -522,8 +546,13 @@ usb_start() {
 	[[ -n "$1" ]] && USB_MODE=$1
 	USB_MODE=${USB_MODE:-disabled}
 
-	# The API calls this mode "disabled"; on T618 we keep the legacy USB
-	# debug serial identity alive as a configfs ACM gadget instead.
+	if [ "${USB_MODE}" = "disabled" ] && [ "${DEVICE_USB_CONFIGFS_DEBUG}" = "true" ] && debug_host_role; then
+		usb_stop || return 1
+		set_role host
+		return 0
+	fi
+
+	# Disabled keeps USB serial debugging available while the port is a device.
 	if [ "${USB_MODE}" = "disabled" ] && [ "${CURRENT_MODE}" = "debug" ] && [ "${DEVICE_USB_CONFIGFS_DEBUG:-false}" = "true" ]; then
 		echo "USB_MODE=disabled" > "${GADGETCONF}"
 		debug_service_start
@@ -541,7 +570,6 @@ usb_start() {
 	fi
 
 	# A clean boot has no bound gadget yet, even though both logical modes are "disabled".
-	# On T618, bind the debug serial gadget in that state.
 	if [ "${CURRENT_MODE}" = "${USB_MODE}" ]; then
 		if [ "${USB_MODE}" = "disabled" ] && [ "${DEVICE_USB_CONFIGFS_DEBUG:-false}" = "true" ]; then
 			start_usb_debug
@@ -772,7 +800,11 @@ case "$1" in
 		usb_stop
 		;;
 	trigger)
-		follow_id_role || :
+		if [ "${USB_MODE:-disabled}" = "disabled" ] && [ "${DEVICE_USB_CONFIGFS_DEBUG}" = "true" ]; then
+			usb_start disabled
+		else
+			follow_id_role || :
+		fi
 		usb_trigger
 		;;
 	restart)
@@ -832,7 +864,7 @@ case "$1" in
 		echo "$0 --options                  List available modes"
 		echo "$0 --start                    Restore previously chosen mode"
 		echo "$0                            Show current mode"
-		echo "$0 disabled                   Disable USB data modes"
+		echo "$0 disabled                   Use USB serial debugging (when supported)"
 		echo "$0 none                       Alias for disabled"
 		echo "$0 <network|file_transfer>    Activate specified mode"
 		echo "$0 address                    Show network gadget IP address"
