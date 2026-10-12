@@ -12,6 +12,66 @@ on:
         options:
           - 'a - 전체 기기 빌드'
           - 'b - 추가 기기 빌드'
+      RK3326:
+        description: 'RK3326 (a)'
+        default: false
+        type: boolean
+      RK3399:
+        description: 'RK3399 (a)'
+        default: false
+        type: boolean
+      RK3566:
+        description: 'RK3566 (a)'
+        default: false
+        type: boolean
+      RK3576:
+        description: 'RK3576 (a)'
+        default: false
+        type: boolean
+      RK3588:
+        description: 'RK3588 (a)'
+        default: false
+        type: boolean
+      S922X:
+        description: 'S922X (a)'
+        default: false
+        type: boolean
+      H700:
+        description: 'H700 (a)'
+        default: false
+        type: boolean
+      SM8250:
+        description: 'SM8250 (a)'
+        default: false
+        type: boolean
+      SM8550:
+        description: 'SM8550 (a)'
+        default: false
+        type: boolean
+      SM8650:
+        description: 'SM8650 (a)'
+        default: false
+        type: boolean
+      SM8750:
+        description: 'SM8750 (a)'
+        default: false
+        type: boolean
+      SM6115:
+        description: 'SM6115 (a)'
+        default: false
+        type: boolean
+      SM4450:
+        description: 'SM4450 (a)'
+        default: false
+        type: boolean
+      T618:
+        description: 'T618 (b)'
+        default: false
+        type: boolean
+      SDM845:
+        description: 'SDM845 (b)'
+        default: false
+        type: boolean
       release:
         description: 'Official release (ROCKNIX repository only)'
         required: false
@@ -62,6 +122,7 @@ jobs:
         shell: bash
         env:
           BUILD_TYPE: ${{ inputs.build_type || 'a' }}
+          DEVICE_INPUTS: ${{ toJSON(inputs) }}
           EVENT_NAME: ${{ github.event_name }}
           SCHEDULE_DEVICES: ${{ vars.SCHEDULE_DEVICES }}
         run: |
@@ -80,6 +141,11 @@ jobs:
               devices = [d for d in devices if d in ("T618", "SDM845")]
           else:
               raise SystemExit(f"Unsupported build type: {build_type}")
+
+          if os.environ["EVENT_NAME"] != "schedule":
+              inputs = json.loads(os.environ.get("DEVICE_INPUTS", "{}"))
+              selected = [d for d in devices if inputs.get(d) in (True, "true")]
+              devices = selected or devices
 
           matrix = [{"device": d, "project": "ROCKNIX"} for d in devices]
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
