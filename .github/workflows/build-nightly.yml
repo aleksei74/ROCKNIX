@@ -1,75 +1,59 @@
-name: Build
-run-name: Build ${{ inputs.build_type || 'a' }} · ${{ github.ref_name }}
+name: a - 전체 기기 빌드
+run-name: a - 전체 기기 빌드 · ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
     inputs:
-      build_type:
-        description: '빌드 타입'
-        required: true
-        default: 'a - 전체 기기 빌드'
-        type: choice
-        options:
-          - 'a - 전체 기기 빌드'
-          - 'b - 추가 기기 빌드'
       RK3326:
-        description: 'RK3326 (a)'
+        description: 'RK3326'
         default: false
         type: boolean
       RK3399:
-        description: 'RK3399 (a)'
+        description: 'RK3399'
         default: false
         type: boolean
       RK3566:
-        description: 'RK3566 (a)'
+        description: 'RK3566'
         default: false
         type: boolean
       RK3576:
-        description: 'RK3576 (a)'
+        description: 'RK3576'
         default: false
         type: boolean
       RK3588:
-        description: 'RK3588 (a)'
+        description: 'RK3588'
         default: false
         type: boolean
       S922X:
-        description: 'S922X (a)'
+        description: 'S922X'
         default: false
         type: boolean
       H700:
-        description: 'H700 (a)'
+        description: 'H700'
         default: false
         type: boolean
       SM8250:
-        description: 'SM8250 (a)'
+        description: 'SM8250'
         default: false
         type: boolean
       SM8550:
-        description: 'SM8550 (a)'
+        description: 'SM8550'
         default: false
         type: boolean
       SM8650:
-        description: 'SM8650 (a)'
+        description: 'SM8650'
         default: false
         type: boolean
       SM8750:
-        description: 'SM8750 (a)'
+        description: 'SM8750'
         default: false
         type: boolean
       SM6115:
-        description: 'SM6115 (a)'
+        description: 'SM6115'
         default: false
         type: boolean
       SM4450:
-        description: 'SM4450 (a)'
-        default: false
-        type: boolean
-      T618:
-        description: 'T618 (b)'
-        default: false
-        type: boolean
-      SDM845:
-        description: 'SDM845 (b)'
+        description: 'SM4450'
         default: false
         type: boolean
       release:
@@ -83,6 +67,10 @@ on:
         type: string
         required: false
         default: a
+      device_inputs:
+        type: string
+        required: false
+        default: ''
   pull_request:
     types: [ assigned ]
 
@@ -122,7 +110,7 @@ jobs:
         shell: bash
         env:
           BUILD_TYPE: ${{ inputs.build_type || 'a' }}
-          DEVICE_INPUTS: ${{ toJSON(inputs) }}
+          DEVICE_INPUTS: ${{ inputs.device_inputs || toJSON(inputs) }}
           EVENT_NAME: ${{ github.event_name }}
           SCHEDULE_DEVICES: ${{ vars.SCHEDULE_DEVICES }}
         run: |
