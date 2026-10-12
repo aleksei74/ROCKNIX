@@ -3,7 +3,7 @@
 
 . ${ROOT}/packages/devel/ncurses/package.mk
 
-PKG_URL="https://ftpmirror.gnu.org/ncurses/ncurses-${PKG_VERSION}.tar.gz"
+PKG_URL="https://invisible-island.net/archives/ncurses/ncurses-${PKG_VERSION}.tar.gz"
 
 PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET/--without-shared/--with-shared}"
 PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET/--without-termlib/--with-termlib}"
