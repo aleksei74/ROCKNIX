@@ -1,4 +1,4 @@
-# T618 / RG405M + RG405V source integration candidate
+# T618 / RG405M + RG405V
 
 Target: `PROJECT=ROCKNIX DEVICE=T618 ARCH=aarch64` in UzuCore/ROCKNIXK.
 Kernel: kernel.org Linux 7.1.2 with the 225-commit
@@ -6,10 +6,31 @@ Kernel: kernel.org Linux 7.1.2 with the 225-commit
 `464b3e7bf45bb300e190339977abba36c8078e1f`, rebased onto 7.1.2 and
 consolidated into 11 subsystem patches with identical final sources.
 
-This remains a source candidate, not a release. A limited RG405V runtime boot
-has since been observed; its cross-axis joystick issue and full device
-acceptance remain open. See `SOURCE_GATES.md` for the precise scope and
-deployment constraints. The full project checklist is separate.
+## Dev integration (2026-10-13)
+
+T618 support is integrated into `dev`; the remote `t618` branch has no commits
+missing from `dev`. Use the Additional Devices workflow
+(`.github/workflows/build-nightly-additional.yml`) on `dev` and select T618.
+It shares the same device build workflow as SDM845 (Odin).
+
+- One image includes the RG405M and RG405V device trees and model-specific
+  Android boot carriers through the existing `dtb,extlinux` hooks.
+- Firmware is supplied from the hash-verified files in this device project;
+  Actions does not require a private local firmware directory.
+- Intermediate build stages honor `ENABLE_32BIT=no`; the final image uses the
+  common 32-bit default and ARM artifact. Like Odin, the `lib32` bundle tracks
+  ARM library inputs so incremental builds refresh it when those inputs change.
+- USB serial debugging uses the shared `rocknix-usb-shell.service` and
+  `usbgadget` implementation; see `documentation/USB_DEBUG.md` at the repo root.
+
+The [T618 Actions run at commit 90ef2ab315](https://github.com/UzuCore/ROCKNIXK/actions/runs/37853580373)
+completed the ARM, aarch64, Qt, emulator and final image stages and published a
+release. It predates the shared USB debugging and lib32 input-tracking changes;
+those changes have not been rebuilt or hardware-tested here.
+
+The hardware observations below are historical checkpoints. Their unresolved
+items describe those checkpoints, not proof of the current image's acceptance.
+See `SOURCE_GATES.md` for their precise scope and deployment constraints.
 
 ## Integrated source
 
