@@ -1,81 +1,59 @@
-name: Build
+name: '- 전체 기기 빌드'
+run-name: '- 전체 기기 빌드 · ${{ github.ref_name }}'
 
 on:
   workflow_dispatch:
     inputs:
       RK3326:
         description: 'RK3326'
-        required: false
         default: false
         type: boolean
       RK3399:
         description: 'RK3399'
-        required: false
         default: false
         type: boolean
       RK3566:
         description: 'RK3566'
-        required: false
         default: false
         type: boolean
       RK3576:
         description: 'RK3576'
-        required: false
         default: false
         type: boolean
       RK3588:
         description: 'RK3588'
-        required: false
         default: false
         type: boolean
       S922X:
         description: 'S922X'
-        required: false
         default: false
         type: boolean
       H700:
         description: 'H700'
-        required: false
         default: false
         type: boolean
       SM8250:
         description: 'SM8250'
-        required: false
         default: false
         type: boolean
       SM8550:
         description: 'SM8550'
-        required: false
         default: false
         type: boolean
       SM8650:
         description: 'SM8650'
-        required: false
         default: false
         type: boolean
       SM8750:
         description: 'SM8750'
-        required: false
         default: false
         type: boolean
       SM6115:
         description: 'SM6115'
-        required: false
         default: false
         type: boolean
       SM4450:
         description: 'SM4450'
-        required: false
-        default: false
-        type: boolean
-      T618:
-        description: 'T618'
-        required: false
-        default: false
-        type: boolean
-      SDM845:
-        description: 'SDM845'
-        required: false
         default: false
         type: boolean
       release:
@@ -84,6 +62,15 @@ on:
         default: false
         type: boolean
   workflow_call:
+    inputs:
+      build_type:
+        type: string
+        required: false
+        default: a
+      device_inputs:
+        type: string
+        required: false
+        default: ''
   pull_request:
     types: [ assigned ]
 
@@ -121,58 +108,38 @@ jobs:
           fi
       - id: generate
         shell: bash
+        env:
+          BUILD_TYPE: ${{ inputs.build_type || 'a' }}
+          DEVICE_INPUTS: ${{ inputs.device_inputs || toJSON(inputs) }}
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE_DEVICES: ${{ vars.SCHEDULE_DEVICES }}
         run: |
-          declare -A DEVICE_INPUTS=(
-            ["RK3326"]="${{ inputs.RK3326 }}"
-            ["RK3399"]="${{ inputs.RK3399 }}"
-            ["RK3566"]="${{ inputs.RK3566 }}"
-            ["RK3576"]="${{ inputs.RK3576 }}"
-            ["RK3588"]="${{ inputs.RK3588 }}"
-            ["S922X"]="${{ inputs.S922X }}"
-            ["H700"]="${{ inputs.H700 }}"
-            ["SM8250"]="${{ inputs.SM8250 }}"
-            ["SM8550"]="${{ inputs.SM8550 }}"
-            ["SM8650"]="${{ inputs.SM8650 }}"
-            ["SM8750"]="${{ inputs.SM8750 }}"
-            ["SM6115"]="${{ inputs.SM6115 }}"
-            ["SM4450"]="${{ inputs.SM4450 }}"
-            ["T618"]="${{ inputs.T618 }}"
-            ["SDM845"]="${{ inputs.SDM845 }}"
-          )
-          
-          SELECTED_MATRIX=""
-          ALL_DEVICES='[{"device":"RK3326","project":"ROCKNIX"},{"device":"RK3399","project":"ROCKNIX"},{"device":"RK3566","project":"ROCKNIX"},{"device":"RK3576","project":"ROCKNIX"},{"device":"RK3588","project":"ROCKNIX"},{"device":"S922X","project":"ROCKNIX"},{"device":"H700","project":"ROCKNIX"},{"device":"SM8250","project":"ROCKNIX"},{"device":"SM8550","project":"ROCKNIX"},{"device":"SM8650","project":"ROCKNIX"},{"device":"SM8750","project":"ROCKNIX"},{"device":"SM6115","project":"ROCKNIX"},{"device":"SM4450","project":"ROCKNIX"},{"device":"T618","project":"ROCKNIX"},{"device":"SDM845","project":"ROCKNIX"}]'
+          python3 - <<'PY'
+          import json
+          import os
 
-          if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            SCHEDULE_VAR="${{ vars.SCHEDULE_DEVICES }}"
-            if [[ -z "$SCHEDULE_VAR" ]]; then
-              echo "matrix=$ALL_DEVICES" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-            IFS=',' read -ra DEVICES <<< "$SCHEDULE_VAR"
-            for D in "${DEVICES[@]}"; do
-              D="${D// /}"
-              [[ -z "$D" ]] && continue
-              [[ -n "$SELECTED_MATRIX" ]] && SELECTED_MATRIX="$SELECTED_MATRIX,"
-              SELECTED_MATRIX="$SELECTED_MATRIX{\"device\":\"$D\",\"project\":\"ROCKNIX\"}"
-            done
-          else
-            for D in "${!DEVICE_INPUTS[@]}"; do
-              VAL="${DEVICE_INPUTS[$D]}"
-              if [[ "$VAL" == "true" ]]; then
-                [[ -n "$SELECTED_MATRIX" ]] && SELECTED_MATRIX="$SELECTED_MATRIX,"
-                SELECTED_MATRIX="$SELECTED_MATRIX{\"device\":\"$D\",\"project\":\"ROCKNIX\"}"
-              fi
-            done
-          fi
-          
-          if [[ -z "$SELECTED_MATRIX" ]]; then
-            MATRIX="$ALL_DEVICES"
-          else
-            MATRIX="[$SELECTED_MATRIX]"
-          fi
-          
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          devices = "RK3326 RK3399 RK3566 RK3576 RK3588 S922X H700 SM8250 SM8550 SM8650 SM8750 SM6115 SM4450 T618 SDM845".split()
+          build_type = os.environ["BUILD_TYPE"].split(" - ", 1)[0]
+          if os.environ["EVENT_NAME"] == "schedule":
+              scheduled = os.environ.get("SCHEDULE_DEVICES", "")
+              devices = [d.replace(" ", "") for d in scheduled.split(",") if d.replace(" ", "")] or devices
+          elif build_type == "a":
+              devices = [d for d in devices if d not in ("T618", "SDM845")]
+          elif build_type == "b":
+              devices = [d for d in devices if d in ("T618", "SDM845")]
+          else:
+              raise SystemExit(f"Unsupported build type: {build_type}")
+
+          if os.environ["EVENT_NAME"] != "schedule":
+              inputs = json.loads(os.environ.get("DEVICE_INPUTS", "{}"))
+              selected = [d for d in devices if inputs.get(d) in (True, "true")]
+              devices = selected or devices
+
+          matrix = [{"device": d, "project": "ROCKNIX"} for d in devices]
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("matrix=" + json.dumps(matrix, separators=(",", ":")) + "\n")
+          print(f"Build {build_type}: {', '.join(devices)}")
+          PY
 
   build-docker:
     if: github.event_name != 'schedule' || (github.repository == 'UzuCore/ROCKNIXK' && github.ref_name == 'next')

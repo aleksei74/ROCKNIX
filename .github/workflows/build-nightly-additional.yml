@@ -1,0 +1,26 @@
+name: '- 추가 기기 빌드'
+run-name: '- 추가 기기 빌드 · ${{ github.ref_name }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      T618:
+        description: 'T618'
+        default: false
+        type: boolean
+      SDM845:
+        description: 'SDM845'
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    permissions:
+      actions: write
+      contents: write
+      packages: write
+    uses: ./.github/workflows/build-nightly.yml
+    secrets: inherit
+    with:
+      build_type: b
+      device_inputs: ${{ toJSON(inputs) }}
