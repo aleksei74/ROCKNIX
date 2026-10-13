@@ -1,0 +1,32 @@
+Subject: [PATCH] sun4i-codec: set playback volume for H616 devices
+
+Upstream alsa-ucm-conf already includes the H616 UCM files. Set the codec
+playback volume for speaker and headphones and enable the DAC at boot.
+--- a/ucm2/Allwinner/sun4i-h616/HiFi.conf
++++ b/ucm2/Allwinner/sun4i-h616/HiFi.conf
+@@ -4,2 +4,3 @@
+	EnableSequence [
++		cset "name='DAC Playback Volume' 63"
+		cset "name='Speaker Switch' on"
+@@ -23,6 +24,10 @@ SectionDevice."Headphones" {
+ SectionDevice."Headphones" {
+ 	Comment "Headphones"
+ 
++	EnableSequence [
++		cset "name='DAC Playback Volume' 63"
++	]
++
+ 	Value {
+ 		PlaybackMixerElem "Line Out"
+ 		PlaybackPCM "hw:${CardId},0"
+--- a/ucm2/Allwinner/sun4i-h616/h616-audio-codec.conf
++++ b/ucm2/Allwinner/sun4i-h616/h616-audio-codec.conf
+@@ -5,4 +5,8 @@
+ SectionUseCase."HiFi" {
+ 	File "/Allwinner/sun4i-h616/HiFi.conf"
+ 	Comment "Play HiFi quality Music"
+ }
++
++FixedBootSequence [
++	cset "name='DAC Playback Switch' on"
++]

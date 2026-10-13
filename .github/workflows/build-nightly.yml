@@ -331,6 +331,7 @@ jobs:
       - name: Generate release body
         env:
           CHANGELOG_MAX_COUNT: 200
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           bash .github/scripts/generate-release-body.sh "${{ env.DATE }}" "${{ steps.get-last-tag.outputs.TAG }}" > release-body.md
       - name: release official
