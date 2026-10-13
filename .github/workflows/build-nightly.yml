@@ -1,5 +1,5 @@
 name: '- 전체 기기 빌드'
-run-name: "- 전체 기기 빌드 · ${{ github.ref_name }} [${{ inputs.build_type || 'a' }}]"
+run-name: "${{ inputs.build_type == 'b' && '- 추가 기기 빌드' || '- 전체 기기 빌드' }} · ${{ github.ref_name }}"
 
 on:
   workflow_dispatch:
