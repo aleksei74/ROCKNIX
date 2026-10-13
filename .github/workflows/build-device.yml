@@ -73,7 +73,7 @@ jobs:
 
   build-aarch64-eden-sa:
     # Supported Snapdragon devices package Eden.
-    if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && (inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750') }}
     needs:
       - build-aarch64
       - build-aarch64-qt6
@@ -86,6 +86,7 @@ jobs:
 
   build-aarch64-qt6:
     needs: build-aarch64
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
     uses: ./.github/workflows/build-aarch64-qt6.yml
     secrets: inherit
     with:
