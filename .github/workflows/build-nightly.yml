@@ -1,9 +1,16 @@
 name: '- 전체 기기 빌드'
-run-name: '- 전체 기기 빌드 · ${{ github.ref_name }}'
+run-name: "- 전체 기기 빌드 · ${{ github.ref_name }} [${{ inputs.build_type || 'a' }}]"
 
 on:
   workflow_dispatch:
     inputs:
+      build_type:
+        description: 'Build group (a: standard 13 devices, b: T618/SDM845)'
+        default: a
+        type: choice
+        options:
+          - a
+          - b
       RK3326:
         description: 'RK3326'
         default: false
@@ -54,6 +61,14 @@ on:
         type: boolean
       SM4450:
         description: 'SM4450'
+        default: false
+        type: boolean
+      T618:
+        description: 'T618 (needs build group b)'
+        default: false
+        type: boolean
+      SDM845:
+        description: 'SDM845 (needs build group b)'
         default: false
         type: boolean
       release:

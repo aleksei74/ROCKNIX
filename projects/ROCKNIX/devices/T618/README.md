@@ -9,8 +9,9 @@ consolidated into 11 subsystem patches with identical final sources.
 ## Dev integration (2026-10-13)
 
 T618 support is integrated into `dev`; the remote `t618` branch has no commits
-missing from `dev`. Use the Additional Devices workflow
-(`.github/workflows/build-nightly-additional.yml`) on `dev` and select T618.
+missing from `dev`. Use the nightly build workflow
+(`.github/workflows/build-nightly.yml`) on `dev` with build group `b`
+and select T618.
 It shares the same device build workflow as SDM845 (Odin).
 
 - One image includes the RG405M and RG405V device trees and model-specific
