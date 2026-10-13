@@ -1,0 +1,30 @@
+name: '- 추가 기기 빌드'
+run-name: '- 추가 기기 빌드 · ${{ github.ref_name }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      T618:
+        description: 'T618'
+        default: false
+        type: boolean
+      SDM845:
+        description: 'SDM845'
+        default: false
+        type: boolean
+
+jobs:
+  trigger:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Trigger nightly build (group b)
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          REF: ${{ github.ref_name }}
+          T618: ${{ inputs.T618 }}
+          SDM845: ${{ inputs.SDM845 }}
+        run: |
+          args=(-f build_type=b)
+          if [ "${T618}" = "true" ]; then args+=(-f T618=true); fi
+          if [ "${SDM845}" = "true" ]; then args+=(-f SDM845=true); fi
+          gh workflow run build-nightly.yml --repo "${GITHUB_REPOSITORY}" --ref "${REF}" "${args[@]}"
