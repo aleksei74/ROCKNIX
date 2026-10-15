@@ -25,6 +25,11 @@ if [ -z "${PKG_NAME}" ]; then
   die "$(print_color CLR_ERROR "${1}: no package.mk file found")"
 fi
 
+# On CI, drop failed package state so the next attempt starts from a clean tree.
+if [ "${CI}" = "true" ]; then
+  trap '[ $? -eq 0 ] || "${SCRIPTS}/clean" "${PKG_NAME}" || true' EXIT
+fi
+
 if [ -n "${PKG_ARCH}" ]; then
   listcontains "${PKG_ARCH}" "!${TARGET_ARCH}" && exit 0
   listcontains "${PKG_ARCH}" "${TARGET_ARCH}" || listcontains "${PKG_ARCH}" "any" || exit 0
