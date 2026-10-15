@@ -56,14 +56,6 @@ on:
         description: 'SM4450'
         default: false
         type: boolean
-      T618:
-        description: 'T618 (needs build group b)'
-        default: false
-        type: boolean
-      SDM845:
-        description: 'SDM845 (needs build group b)'
-        default: false
-        type: boolean
       release:
         description: 'Official release (ROCKNIX repository only)'
         required: false
