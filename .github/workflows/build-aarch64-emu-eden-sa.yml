@@ -12,14 +12,11 @@ on:
       OWNER_LC:
         required: true
         type: string
-      CODEX_SUPPORT:
-        required: true
-        type: string
 
 jobs:
   build-aarch64-eden-sa:
-    # ← SM8250, SM8550, SM8650에서만 실행
-    if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+    # Odin and supported Snapdragon devices package Eden.
+    if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
     runs-on: ubuntu-24.04
     env:
       EMULATION_DEVICE: no
@@ -28,7 +25,6 @@ jobs:
       JAVA_HOME: /usr
       PROJECT: ${{ inputs.PROJECT }}
       DEVICE: ${{ inputs.DEVICE }}
-      CODEX_SUPPORT: ${{ inputs.CODEX_SUPPORT }}
       ARCH: aarch64
       CACHE_KEY: ccache-aarch64-${{ inputs.DEVICE }}-eden-sa-${{ github.sha }}
       DISABLE_COLORS: yes
@@ -57,7 +53,7 @@ jobs:
 
       - name: Retrieve ccache
         run: |
-          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}-eden-sa.tar"
+          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}-eden-sa.tar"
           curl -L --fail --silent --show-error "$URL" | tar -xvf - || echo "Cache archive not found, skipping."
 
       - name: Download aarch64-toolchain (${{ inputs.DEVICE }})
@@ -109,13 +105,13 @@ jobs:
         run: rm build.build.aarch64.tar
 
       - name: Download qt6 (${{ inputs.DEVICE }})
-        if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+        if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
         uses: actions/download-artifact@v8
         with:
           name: qt6 (${{ inputs.DEVICE }})
 
       - name: Extract artifact qt6
-        if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+        if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
         uses: corrupt952/actions-retry-command@v1.0.7
         with:
           command: |
@@ -124,7 +120,7 @@ jobs:
           retry_interval: 10
 
       - name: Clean up compressed qt6 file
-        if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+        if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
         run: rm build.qt6.tar.zst
 
       - name: Build eden-sa
@@ -172,7 +168,7 @@ jobs:
           prerelease: true
           body: ccache
           token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repo: ${{ vars.CACHE_REPO || 'rocknix-build-cache' }}
         continue-on-error: true
 
       - name: Compress directory

@@ -1,0 +1,22 @@
+[Unit]
+Description=ROCKNIX root shell on USB serial gadget
+DefaultDependencies=no
+After=systemd-udevd.service
+IgnoreOnIsolate=yes
+
+[Service]
+Environment=TERM=vt100 HOME=/storage
+EnvironmentFile=-/etc/profile.d/999-export
+WorkingDirectory=/storage
+ExecStart=/bin/bash -l
+StandardInput=tty-force
+StandardOutput=inherit
+StandardError=inherit
+TTYPath=/dev/ttyGS0
+TTYReset=yes
+TTYVHangup=yes
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+Restart=always
+RestartSec=2

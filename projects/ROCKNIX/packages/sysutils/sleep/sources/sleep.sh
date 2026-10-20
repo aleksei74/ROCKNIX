@@ -83,12 +83,15 @@ modules() {
 quirks() {
   for QUIRK in /usr/lib/autostart/quirks/platforms/"${HW_DEVICE}"/sleep.d/${1}/* \
                /usr/lib/autostart/quirks/devices/"${QUIRK_DEVICE}"/sleep.d/${1}/*; do
+    [ -x "${QUIRK}" ] || continue
     "${QUIRK}" >${EVENTLOG} 2>&1
   done
 }
 
 case $1 in
   pre)
+    rocknix-games-freeze freeze >${EVENTLOG} 2>&1
+
     if [ "$(get_setting wifi.enabled)" == "1" ]; then
       # while still associated, so resume rejoins this network and not
       # whichever saved profile NM happens to pick first
@@ -135,5 +138,6 @@ case $1 in
     fi
 
     quirks post
+    rocknix-games-freeze thaw >${EVENTLOG} 2>&1
     ;;
 esac

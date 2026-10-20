@@ -43,7 +43,7 @@ jobs:
 
       - name: Retrieve ccache
         run: |
-          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}.tar"
+          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}.tar"
           curl -L --fail --silent --show-error "$URL" | tar -xvf - || echo "Cache archive not found, skipping."     
 
       - name: Download aarch64-toolchain (${{ inputs.DEVICE }})
@@ -57,6 +57,21 @@ jobs:
 
       - name: Clean up compressed aarch64-toolchain file
         run: rm build.aarch64-toolchain.tar.zst
+
+      - name: Download arm (${{ inputs.DEVICE }})
+        if: ${{ inputs.DEVICE != 'SM8650' && inputs.DEVICE != 'SM8750' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: arm (${{ inputs.DEVICE }})
+
+      - name: Extract artifact arm
+        if: ${{ inputs.DEVICE != 'SM8650' && inputs.DEVICE != 'SM8750' }}
+        run: |
+          tar --zstd -xf build.arm.tar.zst
+
+      - name: Clean up compressed arm file
+        if: ${{ inputs.DEVICE != 'SM8650' && inputs.DEVICE != 'SM8750' }}
+        run: rm build.arm.tar.zst
 
       - name: Build
         uses: corrupt952/actions-retry-command@v1.0.7
@@ -137,7 +152,7 @@ jobs:
           prerelease: true
           body: ccache
           token: ${{ secrets.GH_PAT }}
-          repository: ${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repository: ${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}
         continue-on-error: true
 
       - name: Print space

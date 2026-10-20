@@ -66,6 +66,7 @@ SLAYOUT=$(get_setting screen_layout "${PLATFORM}" "${GAME}")
 CSHADERS=$(get_setting cache_shaders "${PLATFORM}" "${GAME}")
 HSHADERS=$(get_setting hardware_shaders "${PLATFORM}" "${GAME}")
 ACCURATE_HW_SHADERS=$(get_setting accurate_hardware_shaders "${PLATFORM}" "${GAME}")
+ASYNC_SHADER_COMPILATION=$(get_setting async_shader_compilation "${PLATFORM}" "${GAME}")
 DISABLE_RIGHT_EYE_RENDER=$(get_setting disable_right_eye_render "${PLATFORM}" "${GAME}")
 SIMULATE_3DS_GPU_TIMINGS=$(get_setting simulate_3ds_gpu_timings "${PLATFORM}" "${GAME}")
 SIMULATE_HEADPHONES_PLUGGED=$(get_setting simulate_headphones_plugged "${PLATFORM}" "${GAME}")
@@ -138,6 +139,14 @@ case "${ACCURATE_HW_SHADERS}" in
   *) sed -i '/^shaders_accurate_mul=/c\shaders_accurate_mul=true' ${CONF_FILE};;
 esac
 
+# Async shader compilation - default to true
+sed -i '/^async_shader_compilation\\default=/c\async_shader_compilation\\default=false' ${CONF_FILE}
+
+case "${ASYNC_SHADER_COMPILATION}" in
+  0) sed -i '/^async_shader_compilation=/c\async_shader_compilation=false' ${CONF_FILE};;
+  *) sed -i '/^async_shader_compilation=/c\async_shader_compilation=true' ${CONF_FILE};;
+esac
+
 # Screen Layout - default to Top / Bottom, swap = false
 sed -i '/^layout_option\\default=/c\layout_option\\default=false' ${CONF_FILE}
 sed -i '/^swap_screen\\default=/c\swap_screen\\default=false' ${CONF_FILE}
@@ -180,6 +189,27 @@ case "${SLAYOUT}" in
     ;;
 esac
 
+# With separate windows the bottom screen goes on the second screen.
+SCANOUT_LAYOUT=$(awk -F= '/^layout_option=/ {print $2; exit}' ${CONF_FILE})
+case "${SCANOUT_LAYOUT}" in
+  0) SCANOUT_W=400; SCANOUT_H=480 ;;  # top / bottom
+  1) SCANOUT_W=400; SCANOUT_H=240; [ "${SLAYOUT}" = "1b" ] && SCANOUT_W=320 ;;
+  2) SCANOUT_W=480; SCANOUT_H=240 ;;  # large screen beside a quarter-size one
+  3) SCANOUT_W=720; SCANOUT_H=240 ;;  # side by side
+  *) SCANOUT_W=400; SCANOUT_H=240 ;;  # separate windows: the top screen
+esac
+SCANOUT_W2=320; SCANOUT_H2=240
+if [ "${ROTATE}" = "1" ]; then
+  SCANOUT_T=${SCANOUT_W}; SCANOUT_W=${SCANOUT_H}; SCANOUT_H=${SCANOUT_T}
+  SCANOUT_W2=240; SCANOUT_H2=320
+fi
+SCANOUT_SCALE=$(scanout_internal_scale "$(awk -F= '/^resolution_factor=/ {print $2; exit}' ${CONF_FILE})" "${SCANOUT_H}" 1 10)
+sed -i "/^resolution_factor=/c\resolution_factor=${SCANOUT_SCALE}" ${CONF_FILE}
+scanout_render_size "${SCANOUT_H}" "${SCANOUT_SCALE}" "${SCANOUT_W}:${SCANOUT_H}"
+if [ "${SCANOUT_LAYOUT}" = "4" ] && [ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]; then
+  scanout_render_size "${SCANOUT_H2}" "${SCANOUT_SCALE}" "${SCANOUT_W2}:${SCANOUT_H2}" second
+fi
+
 # Force Disable Shader JIT
 sed -i '/^use_shader_jit=/c\use_shader_jit=false' ${CONF_FILE}
 sed -i '/^use_shader_jit\\default=/c\use_shader_jit\\default=false' ${CONF_FILE}
@@ -220,6 +250,12 @@ esac
 case ${HW_DEVICE} in
     SM8550|SM8250)
         [[ "${DEVICE_HAS_DUAL_SCREEN}" = "true" ]] && export QT_QPA_PLATFORM=xcb
+    ;;
+    T618)
+        # Mali-G52 (Bifrost v7) + PanVK advertises Vulkan 1.0 only; Azahar requires 1.1 and aborts with
+        # "Vulkan 1.1 is required, but only 1.0 is supported by device!". With the override the game runs
+        # (checked on RG405M: Cave Story title and menu render on both screens).
+        export MESA_VK_VERSION_OVERRIDE=1.1
     ;;
 esac
 

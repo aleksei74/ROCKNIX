@@ -23,3 +23,7 @@ fi
 for i in ${PKG_DEPENDS_INIT}; do
   PKG_NEED_UNPACK+=" $(get_pkg_directory ${i})"
 done
+
+if [ "${DEVICE}" = "SDM845" ]; then
+  PKG_NEED_UNPACK+=" ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/device.init"
+fi

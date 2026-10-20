@@ -23,10 +23,6 @@ on:
         description: "build official version"
         type: string
         required: true
-      CODEX_SUPPORT:
-        description: "include Codex tooling"
-        type: string
-        required: true
 
 jobs:
   build-arm:
@@ -55,7 +51,10 @@ jobs:
       OWNER_LC: ${{ inputs.OWNER_LC }}
 
   build-aarch64:
-    needs: build-aarch64-toolchain
+    needs:
+      - build-aarch64-toolchain
+      - build-arm
+    if: ${{ always() && !cancelled() && needs.build-aarch64-toolchain.result == 'success' && (inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || needs.build-arm.result == 'success') }}
     uses: ./.github/workflows/build-aarch64.yml
     secrets: inherit
     with:
@@ -73,8 +72,8 @@ jobs:
       OWNER_LC: ${{ inputs.OWNER_LC }}
 
   build-aarch64-eden-sa:
-    # ← SM8250, SM8550, SM8650에서만 실행
-    if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+    # Supported Snapdragon devices package Eden.
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && (inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750') }}
     needs:
       - build-aarch64
       - build-aarch64-qt6
@@ -84,10 +83,10 @@ jobs:
       PROJECT: ${{ inputs.PROJECT }}
       DEVICE: ${{ inputs.DEVICE }}
       OWNER_LC: ${{ inputs.OWNER_LC }}
-      CODEX_SUPPORT: ${{ inputs.CODEX_SUPPORT }}
 
   build-aarch64-qt6:
     needs: build-aarch64
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
     uses: ./.github/workflows/build-aarch64-qt6.yml
     secrets: inherit
     with:
@@ -107,7 +106,6 @@ jobs:
       PROJECT: ${{ inputs.PROJECT }}
       DEVICE: ${{ inputs.DEVICE }}
       OWNER_LC: ${{ inputs.OWNER_LC }}
-      CODEX_SUPPORT: ${{ inputs.CODEX_SUPPORT }}
 
   build-aarch64-emu-standalone:
     needs:
@@ -122,7 +120,6 @@ jobs:
       PROJECT: ${{ inputs.PROJECT }}
       DEVICE: ${{ inputs.DEVICE }}
       OWNER_LC: ${{ inputs.OWNER_LC }}
-      CODEX_SUPPORT: ${{ inputs.CODEX_SUPPORT }}
 
   build-aarch64-image:
     needs:
@@ -138,7 +135,6 @@ jobs:
       OWNER_LC: ${{ inputs.OWNER_LC }}
       NIGHTLY: ${{ inputs.NIGHTLY }}
       OFFICIAL: ${{ inputs.OFFICIAL }}
-      CODEX_SUPPORT: ${{ inputs.CODEX_SUPPORT }}
 
   purge-artifact:
     name: Artifacts cleanup

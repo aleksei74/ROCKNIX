@@ -7,7 +7,7 @@ PKG_SHA256="38afe3e43949ab45ee2afae22c76260cac5473016969a421c0eee7d7b2739619"
 PKG_LICENSE="BSD-3-Clause"
 PKG_SITE="https://github.com/vircon32/vircon32-libretro"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain ${OPENGLES}"
+PKG_DEPENDS_TARGET="toolchain retroarch ${OPENGLES}"
 PKG_LONGDESC="Vircon32 32-bit Virtual Console"
 PKG_TOOLCHAIN="cmake-make"
 
@@ -17,7 +17,10 @@ PKG_CMAKE_OPTS_TARGET="-DPLATFORM=EMUELEC \
                        -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 
 if [ "${PREFER_GLES}" = "yes" ]; then
-  PKG_CMAKE_OPTS_TARGET+=" -DENABLE_OPENGLES2=1"
+  PKG_CMAKE_OPTS_TARGET+=" -DENABLE_OPENGLES2=1 -DOPENGL_LIBRARIES=GLESv2"
+else
+  PKG_DEPENDS_TARGET+=" libglvnd"
+  PKG_CMAKE_OPTS_TARGET+=" -DOPENGL_LIBRARIES=GL"
 fi
 
 makeinstall_target() {

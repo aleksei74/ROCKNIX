@@ -67,13 +67,14 @@ post_install() {
 
   HOTKEY=""
   case "${DEVICE}" in
-    RK3588|S922X|SM*) hotkey='export HOTKEY="guide"' ;;
+    T618) HOTKEY='export HOTKEY="guide"' ;;
+    RK3588|S922X|SDM845|SM*) hotkey='export HOTKEY="guide"' ;;
   esac
 
   LIBMALI=""
   case "${DEVICE}" in
     RK3588|S922X|RK3566)
-      LIBMALI='if [[ -x "/usr/bin/gpudriver" ]] && [[ "$(/usr/bin/gpudriver)" = "libmali" ]]; then sed -i '\''/ScreenUseGL=/c\\ScreenUseGL=0'\'' /storage/.config/melonDS/melonDS.ini; fi'
+      LIBMALI='if [[ -x "/usr/bin/gpudriver" ]] \&\& [[ "$(/usr/bin/gpudriver)" = "libmali" ]]; then sed -i '\''/ScreenUseGL=/c\\ScreenUseGL=0'\'' /storage/.config/melonDS/melonDS.ini; fi'
       ;;
   esac
 

@@ -2,15 +2,16 @@
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="emulationstation"
-PKG_VERSION="3f8b2098fb1403b7f83cc56c4a87caf02dce715c"
-PKG_SHA256="6e5a42b2eea1e9f8560f2dfd802bdca04f5d6462fe926d50a1718ab7d66ca9e2"
+PKG_VERSION="40343cf6e55c57e6219cbc9f28ebb1b9d25951b6"
+PKG_SHA256="5b8c98a978f78b533750bb493e14624937cf312a22fcd8c695501973e04ad61c"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/ROCKNIX/emulationstation-next"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="boost toolchain SDL2 freetype curl freeimage bash rapidjson SDL2_mixer fping p7zip alsa vlc drm_tool pugixml noto-sans-cjk ${OPENGLES}"
+PKG_DEPENDS_TARGET="boost toolchain SDL2 freetype curl freeimage bash rapidjson SDL2_mixer fping p7zip alsa vlc drm_tool poppler pugixml noto-sans-cjk ${OPENGLES}"
 PKG_NEED_UNPACK="busybox"
 PKG_LONGDESC="Emulationstation emulator frontend"
 PKG_BUILD_FLAGS="-gold"
+PKG_PATCH_DIRS+=" ${DEVICE}"
 
 PKG_CMAKE_OPTS_TARGET+=" -DROCKNIX=1 \
                          -DDISABLE_KODI=1 \
@@ -71,7 +72,7 @@ makeinstall_target() {
 
   mkdir -p ${INSTALL}/etc/emulationstation
     ln -sf /storage/.config/emulationstation/themes ${INSTALL}/etc/emulationstation/themes
-    ln -sf ${INSTALL}/usr/config/emulationstation/es_systems.cfg ${INSTALL}/etc/emulationstation/es_systems.cfg
+    ln -sf /usr/config/emulationstation/es_systems.cfg ${INSTALL}/etc/emulationstation/es_systems.cfg
 
 
   # If we're not an emulation device, ES may still be installed so we need a default config.
@@ -99,6 +100,12 @@ EOF
   if [ ! "${VULKAN_SUPPORT}" = "yes" ]; then
     xmlstarlet ed --inplace -d '//choice[contains(@name, "vulkan")]' ${INSTALL}/usr/config/emulationstation/es_features.cfg
   fi
+
+  #ARMSX2's own Turnip ships only on these devices (see armsx2-sa)
+  case ${DEVICE} in
+    SM4450|SM6115|SM8250|SM8550|SM8650) ;;
+    *) xmlstarlet ed --inplace -d '//core[@name="armsx2-sa"]//feature[@name="vulkan driver"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg ;;
+  esac
 }
 
 

@@ -39,7 +39,7 @@ then
   rm -f ${CONFIG_DIR}/keymapv2.json
 
   # Handle inputplumber platforms first
-  if [[ "${HW_DEVICE}" =~ RK3576|SM6115|SM4450|SM8550|SM8650|SM8750|SM8250 ]]; then
+  if [ -d "/usr/share/inputplumber/" ]; then
     GAMEPAD="'Sony Interactive Entertainment DualSense Wireless Controller'"
   else
     # Check for js0, else fall back to joypad
@@ -52,9 +52,11 @@ then
 
   GAMEPADCONFIG=$(xmlstarlet sel -t -c "//inputList/inputConfig[@deviceName=${GAMEPAD}]" -n /storage/.emulationstation/es_input.cfg)
 
-  MAPPING_FILE="/usr/config/yabasanshiro/devices/keymapv2_$(eval echo $GAMEPAD).json"
+  # Determine mapping file from QUIRK DEVICE
+  MAPPING_FILE="/usr/config/yabasanshiro/devices/keymapv2_$(eval echo $QUIRK_DEVICE).json"
   if [ -e "${MAPPING_FILE}" ]; then
-    cp ${MAPPING_FILE} ${CONFIG_DIR}/keymapv2.json
+    # Some files may be symlinks
+    cp -L "${MAPPING_FILE}" ${CONFIG_DIR}/keymapv2.json
   fi
 
   if [ ! -z "${GAMEPADCONFIG}" ]
@@ -95,6 +97,16 @@ then
   cp -f ${SOURCE_DIR}/.config "${CONFIG_DIR}/${GAME}.config"
 fi
 
+# The game's config overrides, so set the resolution there (3 = original, 2 = 2x, 1 = 4x)
+IRES=$(scanout_internal_scale "$(get_setting internal_resolution "${PLATFORM}" "${GAME}")" 224 1 4)
+case "${IRES}" in
+  4) RES=1 ;;
+  2|3) RES=2; IRES=2 ;;
+  *) RES=3; IRES=1 ;;
+esac
+sed -i "s/\"Resolution\": *[0-9]*/\"Resolution\": ${RES}/" "${CONFIG_DIR}/${GAME}.config"
+scanout_render_size 224 "${IRES}" 4:3
+
 #Set the cores to use
 CORES=$(get_setting "cores" "${PLATFORM}" "${GAME}")
 if [ "${CORES}" = "little" ]
@@ -108,5 +120,5 @@ else
   unset EMUPERF
 fi
 
-echo "Command: yabasanshiro -r 2 -i "${1}" ${BIOS}" >>/var/log/exec.log 2>&1
-${EMUPERF} yabasanshiro -r 2 -i "${1}" ${BIOS} >>/var/log/exec.log 2>&1 ||:
+echo "Command: yabasanshiro -r ${RES} -i "${1}" ${BIOS}" >>/var/log/exec.log 2>&1
+${EMUPERF} yabasanshiro -r ${RES} -i "${1}" ${BIOS} >>/var/log/exec.log 2>&1 ||:

@@ -26,7 +26,7 @@ PKG_SHA256="765b7cd74fab26722f144e044643bf569669ba1514e9ee0ce1d4325080e24062"
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/aleksei74/mame2003-plus-dsno-libretro"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain retroarch"
 PKG_LONGDESC="MAME - Multiple Arcade Machine Emulator"
 
 PKG_TOOLCHAIN="make"

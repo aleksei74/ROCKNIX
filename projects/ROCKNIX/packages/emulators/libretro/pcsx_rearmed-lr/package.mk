@@ -7,7 +7,7 @@ PKG_SHA256="ff191a349aa88b7156f2c40ae32b7144884eec921542f07508d88715105d175e"
 PKG_LICENSE="GPL-2.0-or-later"
 PKG_SITE="https://github.com/libretro/pcsx_rearmed"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain retroarch"
 PKG_LONGDESC="ARM optimized PCSX fork"
 PKG_TOOLCHAIN="make"
 
@@ -23,4 +23,8 @@ makeinstall_target() {
       aarch64|x86_64) cp -a ../pcsx_rearmed_libretro.so ${INSTALL}/usr/lib/libretro ;;
       arm) cp -a ../pcsx_rearmed_libretro.so ${INSTALL}/usr/lib/libretro/pcsx_rearmed32_libretro.so ;;
     esac
+    if [ "${TARGET_ARCH}" = "aarch64" ] && [ "${ENABLE_32BIT}" = "true" ]; then
+      local ARM_BUILD="${BUILD_ROOT}/build.${DISTRONAME}-${DEVICE}.arm${BUILD_SUFFIX:+-${BUILD_SUFFIX}}"
+      cp -a "${ARM_BUILD}"/install_pkg/"${PKG_NAME}"-*/usr/lib/libretro/pcsx_rearmed32_libretro.so "${INSTALL}/usr/lib/libretro"
+    fi
 }

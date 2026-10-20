@@ -6,29 +6,27 @@ PKG_VERSION="1.0"
 PKG_LICENSE="custom"
 PKG_SITE=""
 PKG_URL=""
-PKG_DEPENDS_TARGET="toolchain rclone commander qterminal"
+PKG_DEPENDS_TARGET="toolchain rclone commander qterminal bios-downloader"
 PKG_LONGDESC="OS Modules Package"
 PKG_TOOLCHAIN="manual"
 
 case ${DEVICE} in
-  RK3399|RK3588|SM8250|SM8550|SM8650|SM8750|SM4450|SM6115)
-    PKG_DEPENDS_TARGET+=" gamepadtester"
+  RK3399|RK3588|SM8250|SM8550|SM8650|SM8750|SM4450|SM6115|RK3566|RK3576|T618|SDM845)
+    PKG_DEPENDS_TARGET+=" gamepadtester qterminal"
     ;;
 esac
+
+if [ "${DEVICE}" = "SDM845" ]; then
+  PKG_DEPENDS_TARGET+=" odin-tools"
+fi
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/config/modules
     cp -rf ${PKG_DIR}/sources/* ${INSTALL}/usr/config/modules
+    chmod 0755 "${INSTALL}/usr/config/modules/download_bios.sh"
 }
 
 post_makeinstall_target() {
-  if [[ "${CODEX_SUPPORT}" != "yes" ]]; then
-    sed -i \
-      -e '/<path>\.\/Install Codex\.sh<\/path>/,/<\/game>/d' \
-      -e '/<path>\.\/Start Codex\.sh<\/path>/,/<\/game>/d' \
-      ${INSTALL}/usr/config/modules/gamelist.xml
-  fi
-
   case ${DEVICE} in
     SM8650|SM8750) rm -f ${INSTALL}/usr/config/modules/*32bit* ;;
   esac

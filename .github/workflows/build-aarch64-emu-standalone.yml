@@ -12,9 +12,6 @@ on:
       OWNER_LC:
         required: true
         type: string
-      CODEX_SUPPORT:
-        required: true
-        type: string
 
 jobs:
   build-aarch64-emu-standalone:
@@ -27,7 +24,6 @@ jobs:
       AUTOREMOVE: "yes"
       PROJECT: ${{ inputs.PROJECT }}
       DEVICE: ${{ inputs.DEVICE }}
-      CODEX_SUPPORT: ${{ inputs.CODEX_SUPPORT }}
       ARCH: aarch64
       CACHE_KEY: ccache-aarch64-${{ inputs.DEVICE }}-emu-standalone-${{ github.sha }}
       DISABLE_COLORS: yes
@@ -47,7 +43,7 @@ jobs:
 
       - name: Retrieve ccache
         run: |
-          BASE="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}/releases/download/ccache"
+          BASE="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}/releases/download/ccache"
           PREFIX="ccache-aarch64-${{ inputs.DEVICE }}-emu-standalone.tar.part-"
           found_any=0
           for suffix in $(printf "%s\n" {a..z}{a..z}); do
@@ -129,32 +125,32 @@ jobs:
 
       - name: Download qt6 (${{ inputs.DEVICE }})
         if: ${{ inputs.DEVICE == 'RK3399' || inputs.DEVICE == 'RK3566' || inputs.DEVICE == 'RK3576' || inputs.DEVICE == 'RK3588' ||
-          inputs.DEVICE == 'S922X'  || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || inputs.DEVICE == 'SM6115' || inputs.DEVICE == 'SM4450' }}
+          inputs.DEVICE == 'S922X'  || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || inputs.DEVICE == 'SM6115' || inputs.DEVICE == 'SM4450' || inputs.DEVICE == 'T618' || inputs.DEVICE == 'SDM845' }}
         uses: actions/download-artifact@v8
         with:
           name: qt6 (${{ inputs.DEVICE }})
 
       - name: Extract artifact qt6
         if: ${{ inputs.DEVICE == 'RK3399' || inputs.DEVICE == 'RK3566' || inputs.DEVICE == 'RK3576' || inputs.DEVICE == 'RK3588' ||
-          inputs.DEVICE == 'S922X'  || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || inputs.DEVICE == 'SM6115' || inputs.DEVICE == 'SM4450' }}
+          inputs.DEVICE == 'S922X'  || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || inputs.DEVICE == 'SM6115' || inputs.DEVICE == 'SM4450' || inputs.DEVICE == 'T618' || inputs.DEVICE == 'SDM845' }}
         run: |
           sudo tar --zstd -xf build.qt6.tar.zst --same-owner
 
       - name: Clean up compressed qt6 file
         if: ${{ inputs.DEVICE == 'RK3399' || inputs.DEVICE == 'RK3566' || inputs.DEVICE == 'RK3576' || inputs.DEVICE == 'RK3588' ||
-          inputs.DEVICE == 'S922X'  || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || inputs.DEVICE == 'SM6115' || inputs.DEVICE == 'SM4450' }}
+          inputs.DEVICE == 'S922X'  || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' || inputs.DEVICE == 'SM6115' || inputs.DEVICE == 'SM4450' || inputs.DEVICE == 'T618' || inputs.DEVICE == 'SDM845' }}
         run: rm build.qt6.tar.zst
 
-      # SM8250/SM8550/SM8650 모두 eden-sa artifact 수신
-      # build-device.yml의 build-aarch64-eden-sa 조건과 일치시킴
+      # Supported Snapdragon builds reuse the separately built Eden package.
+      # Keep this condition in sync with build-device.yml.
       - name: Download eden-sa (${{ inputs.DEVICE }})
-        if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+        if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
         uses: actions/download-artifact@v8
         with:
           name: eden-sa (${{ inputs.DEVICE }})
 
       - name: Extract artifact eden-sa
-        if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+        if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
         uses: corrupt952/actions-retry-command@v1.0.7
         with:
           command: |
@@ -163,7 +159,7 @@ jobs:
           retry_interval: 10
 
       - name: Clean up compressed eden-sa file
-        if: ${{ inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
+        if: ${{ inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' || inputs.DEVICE == 'SM8750' }}
         run: rm build.eden-sa.tar.zst
 
       - name: Build
@@ -212,7 +208,7 @@ jobs:
           prerelease: true
           body: ccache
           token: ${{ secrets.GH_PAT }}
-          repository: ${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repository: ${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'rocknix-build-cache' }}
         continue-on-error: true
 
       - name: Print space

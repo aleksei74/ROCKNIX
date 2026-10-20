@@ -641,6 +641,7 @@ function set_translation() {
         ;;
         *)
             add_setting "none" "ai_service_enable" "true"
+            add_setting "ai_service_pause" "ai_service_pause"
             local AI_LANG="$(game_setting ai_target_lang)"
             local AI_URL="$(game_setting ai_service_url)"
             case ${AI_URL} in
@@ -845,6 +846,11 @@ function set_runahead() {
     esac
 }
 
+function set_latency() {
+    add_setting "video_frame_delay_auto" "video_frame_delay_auto"
+    add_setting "vrr_runloop_enable" "vrr_runloop_enable"
+}
+
 function set_audiolatency() {
     add_setting "audiolatency" "audio_latency"
 }
@@ -857,6 +863,22 @@ function set_analogsupport() {
         ;;
         *)
             add_setting "analogue" "input_player1_analog_dpad_mode" "1"
+        ;;
+    esac
+}
+
+function set_pcsx_rearmed_rumble() {
+    case ${CORE} in
+        pcsx_rearmed|pcsx_rearmed32)
+            local DEFAULT_REMAP="/usr/config/retroarch/PCSX-ReARMed.rmp"
+            local REMAP_DIR="/storage/remappings/PCSX-ReARMed"
+            local REMAP_FILE="${REMAP_DIR}/PCSX-ReARMed.rmp"
+            if [ -f "${DEFAULT_REMAP}" ] && [ ! -e "${REMAP_FILE}" ]
+            then
+                mkdir -p "${REMAP_DIR}"
+                cp "${DEFAULT_REMAP}" "${REMAP_FILE}"
+                log "Installed default PCSX-ReARMed DualShock remap"
+            fi
         ;;
     esac
 }
@@ -1332,8 +1354,10 @@ set_savestates &
 set_autosave &
 set_netplay &
 set_runahead &
+set_latency &
 set_audiolatency &
 set_analogsupport &
+set_pcsx_rearmed_rumble &
 set_tatemode &
 set_n64opts &
 set_saturnopts &

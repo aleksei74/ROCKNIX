@@ -7,7 +7,7 @@ PKG_SHA256="775abf753714eec786ef8141952d76fcc1cacb94e7a4459ff0ae4ea6eb9ef4e7"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame"
 PKG_URL="https://github.com/libretro/mame/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain zlib flac sqlite expat"
+PKG_DEPENDS_TARGET="toolchain zlib flac libogg sqlite expat"
 PKG_LONGDESC="MAME - Multiple Arcade Machine Emulator"
 PKG_TOOLCHAIN="make"
 PKG_BUILD_FLAGS="-lto +pic"
@@ -60,6 +60,7 @@ make_target() {
   if [ "${PLATFORM}" = "arm64" ]; then
     export ARCHOPTS="-D__aarch64__ -DASMJIT_BUILD_X86"
   fi
+  export LDOPTS="-Wl,--push-state,--no-as-needed -logg -Wl,--pop-state"
   make ${PKG_MAKE_OPTS_TARGET} OVERRIDE_CC=${CC} OVERRIDE_CXX=${CXX} OVERRIDE_LD=$LD AR=${AR} ${MAKEFLAGS}
 }
 
