@@ -1,14 +1,35 @@
-diff --git a/frontend/audio_output.go b/frontend/audio_output.go
-index 41faf59..0dd650c 100644
---- a/frontend/audio_output.go
-+++ b/frontend/audio_output.go
-@@ -467,7 +467,8 @@ func (o *audioOutput) configure(settings AudioSettings) {
- 	// every sound by a hidden 150 ms floor.
- 	o.prebufferBytes = audioPrebufferBytes(latency)
- 	o.prebufferWait = latency
--	o.player.SetBufferSize(latency)
-+	// Keep source reads smaller than the queue target to retain a jitter reserve.
-+	o.player.SetBufferSize(min(latency, 30*time.Millisecond))
- 	o.softenEnabled = settings.Soften
- 	// Volume can exceed 100% for boosted output. oto multiplies samples by the
- 	// gain and the driver clips anything past full scale, so amplified audio may
+diff --git a/frontend/host_audio.go b/frontend/host_audio.go
+index b35fe774..ac84d6ab 100644
+--- a/frontend/host_audio.go
++++ b/frontend/host_audio.go
+@@ -52,7 +52,10 @@
+ 	latency = normalizedAudioLatency(latency)
+ 	burst := properties.burst()
+ 	if burst == 0 {
+-		return audioBufferPlan{queueTarget: latency, player: latency, pump: 4 * time.Millisecond}
++		// On Linux and other hosts without reliable device burst metadata,
++		// keep the requested queue reserve, but cap player read-ahead to
++		// 30 ms so one large host read cannot drain the queue at once.
++		return audioBufferPlan{queueTarget: latency, player: min(latency, 30*time.Millisecond), pump: 4 * time.Millisecond}
+ 	}
+ 	// Budget the Android queue and player read-ahead together instead of
+ 	// giving each the entire requested latency. Round each half up to a burst.
+diff --git a/frontend/host_audio_test.go b/frontend/host_audio_test.go
+index c9353395..2edbce2a 100644
+--- a/frontend/host_audio_test.go
++++ b/frontend/host_audio_test.go
+@@ -90,9 +90,13 @@
+ func TestHostAudioUnavailablePropertiesKeepPortableBuffers(t *testing.T) {
+ 	for _, p := range []HostAudioProperties{{}, {0, 192}, {48_000, 0}, {48_000, -1}, {48_000, 1 << 30}, {1 << 30, 192}} {
+ 		plan := planAudioBuffers(60*time.Millisecond, p)
+-		if plan.queueTarget != 60*time.Millisecond || plan.player != 60*time.Millisecond || plan.pump != 4*time.Millisecond {
++		if plan.queueTarget != 60*time.Millisecond || plan.player != 30*time.Millisecond || plan.pump != 4*time.Millisecond {
+ 			t.Fatalf("invalid properties %+v changed fallback: %+v", p, plan)
+ 		}
++	}
++	short := planAudioBuffers(20*time.Millisecond, HostAudioProperties{})
++	if short.player != 20*time.Millisecond || short.queueTarget != 20*time.Millisecond {
++		t.Fatalf("small latency was not preserved: %+v", short)
+ 	}
+ }
+ 
