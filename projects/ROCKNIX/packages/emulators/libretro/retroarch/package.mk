@@ -37,6 +37,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
                            --disable-sdl \
                            --enable-sdl2 \
                            --enable-kms \
+                           --disable-v4l2 \
                            --enable-ffmpeg"
 
 case ${ARCH} in
