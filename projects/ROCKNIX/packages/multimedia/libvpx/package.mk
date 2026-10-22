@@ -81,3 +81,40 @@ post_makeinstall_target() {
   [ -f "${INSTALL}/usr/lib/${vpx_lib}" ] || die "libvpx: no installed library to point libvpx.so.6 at"
   ln -sfv "${vpx_lib}" "${INSTALL}/usr/lib/libvpx.so.6"
 }
+
+
+# libvpx's own headers must precede headers installed by an older libvpx
+# in the host toolchain or target sysroot. Its generated makefile appends
+# the source include directory *after* inherited CFLAGS/CXXFLAGS, which
+# otherwise selects stale headers (vpx_codec_enc_init_multi_ver const ABI).
+libvpx_source_header_first() {
+  local mk flag found=0
+  for mk in "${PKG_REAL_BUILD}"/libs-*.mk; do
+    [ -f "${mk}" ] || continue
+    found=1
+
+    for flag in CFLAGS CXXFLAGS; do
+      grep -q "^${flag}[[:space:]]*=" "${mk}" || {
+        echo "libvpx: missing ${flag} in ${mk}" >&2
+        return 1
+      }
+
+      if ! grep -Eq "^${flag}[[:space:]]*=[[:space:]]*-I${PKG_BUILD}([[:space:]]|$)" "${mk}"; then
+        sed -i -E "s|^(${flag}[[:space:]]*=[[:space:]]*)|\\1-I${PKG_BUILD} |" "${mk}" || return 1
+      fi
+    done
+  done
+
+  [ "${found}" -eq 1 ] || {
+    echo "libvpx: generated libs-*.mk not found in ${PKG_REAL_BUILD}" >&2
+    return 1
+  }
+}
+
+pre_make_host() {
+  libvpx_source_header_first
+}
+
+pre_make_target() {
+  libvpx_source_header_first
+}
