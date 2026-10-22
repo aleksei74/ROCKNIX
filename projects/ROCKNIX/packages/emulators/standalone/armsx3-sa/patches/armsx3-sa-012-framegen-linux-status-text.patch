@@ -1,0 +1,25 @@
+--- a/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
++++ b/rpcs3/Emu/RSX/VK/VKFrameGen.cpp
+@@ -1380,6 +1380,7 @@
+ 
+ 		if (shader_count() <= 0)
+ 		{
++#ifdef __ANDROID__
+ 			using VideoCore::FrameGen::LosslessStatus;
+ 
+ 			const std::string_view why = [](int status) -> std::string_view
+@@ -1397,6 +1398,14 @@
+ 			}(g_shader_probe_status.load(std::memory_order_relaxed));
+ 
+ 			return fmt::format("LSFG: no shaders (%s)", why);
++#else
++			// Android-only shader probe status is not present on native Linux.
++			// Fall back to the platform's own importer error (if there is one).
++			const char* why = last_error();
++			return (why && *why)
++				? fmt::format("LSFG: no shaders (%s)", why)
++				: std::string("LSFG: no shaders");
++#endif
+ 		}
+ 
+ 		if (const f32 fps = g_display_fps.load(); fps > 0.f)

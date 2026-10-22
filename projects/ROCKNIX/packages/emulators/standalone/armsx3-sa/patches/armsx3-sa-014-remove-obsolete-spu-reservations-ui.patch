@@ -1,0 +1,30 @@
+diff --git a/rpcs3/rpcs3qt/settings_dialog.cpp b/rpcs3/rpcs3qt/settings_dialog.cpp
+index cd92d4d2..724f33e5 100644
+--- a/rpcs3/rpcs3qt/settings_dialog.cpp
++++ b/rpcs3/rpcs3qt/settings_dialog.cpp
+@@ -248,7 +248,6 @@
+ 
+ 	EnhanceCheckBox(emu_settings_type::SPULoopDetection, ui->spuLoopDetection, tooltips.settings.spu_loop_detection);
+ 	EnhanceCheckBox(emu_settings_type::PPUReservationPriorityOverSPUs, ui->ppuReservationPrority, tooltips.settings.ppu_reservation_priority);
+-	EnhanceCheckBox(emu_settings_type::AccurateSpuReservations, ui->accurateSpuReservations, tooltips.settings.accurate_spu_reservations);
+ 
+ 	// Comboboxes
+ 	EnhanceComboBox(emu_settings_type::XFloatAccuracy, ui->xfloatAccuracy, tooltips.settings.xfloat, ui->gb_xfloat_accuracy);
+diff --git a/rpcs3/rpcs3qt/settings_dialog.ui b/rpcs3/rpcs3qt/settings_dialog.ui
+index 660b4573..87b8d387 100644
+--- a/rpcs3/rpcs3qt/settings_dialog.ui
++++ b/rpcs3/rpcs3qt/settings_dialog.ui
+@@ -2503,13 +2503,6 @@
+                    </widget>
+                   </item>
+                   <item>
+-                   <widget class="QCheckBox" name="accurateSpuReservations">
+-                    <property name="text">
+-                     <string>Accurate SPU Reservations</string>
+-                    </property>
+-                   </widget>
+-                  </item>
+-                  <item>
+                    <widget class="QCheckBox" name="debugConsoleMode">
+                     <property name="text">
+                      <string>Debug Console Mode</string>
