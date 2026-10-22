@@ -1,8 +1,8 @@
 diff --git a/bin/resources/shaders/common/fxaa.fx b/bin/resources/shaders/common/fxaa.fx
-index 3efba5c..951b944 100644
+index 3efba5c7..951b9445 100644
 --- a/bin/resources/shaders/common/fxaa.fx
 +++ b/bin/resources/shaders/common/fxaa.fx
-@@ -30,6 +30,15 @@ layout(binding = 0) uniform sampler2D TextureSampler;
+@@ -30,6 +30,15 @@
  layout(location = 0) in vec2 PSin_t;
  layout(location = 0) out vec4 SV_Target0;
  layout(set = 0, binding = 0) uniform sampler2D TextureSampler;
@@ -18,7 +18,7 @@ index 3efba5c..951b944 100644
  
  #elif (FXAA_HLSL == 1)
  Texture2D Texture : register(t0);
-@@ -455,7 +464,15 @@ float4 FxaaPass(float4 FxaaColor, float2 uv0, texture2d<float> tex)
+@@ -455,7 +464,15 @@
  	FxaaColor = FxaaPixelShader(uv0, tex, 1.0/PixelSize.xy, FxaaSubpixMax, FxaaEdgeThreshold, FxaaEdgeThresholdMin);
  
  	#elif (FXAA_GLSL_130 == 1 || FXAA_GLSL_VK == 1)
@@ -35,10 +35,10 @@ index 3efba5c..951b944 100644
  	#elif defined(__METAL_VERSION__)
  	float2 PixelSize = float2(tex.get_width(), tex.get_height());
 diff --git a/bin/resources/shaders/vulkan/convert.glsl b/bin/resources/shaders/vulkan/convert.glsl
-index db4f844..e144f9a 100644
+index 12477cb6..f82115e0 100644
 --- a/bin/resources/shaders/vulkan/convert.glsl
 +++ b/bin/resources/shaders/vulkan/convert.glsl
-@@ -281,8 +281,24 @@ void ps_convert_depth32_depth24()
+@@ -293,8 +293,24 @@
  }
  #endif
  
@@ -65,10 +65,10 @@ index db4f844..e144f9a 100644
  	ivec2 top_left = ivec2(floor(top_left_f)); \
  	ivec4 coords = clamp(ivec4(top_left, top_left + 1), ivec4(0), dims.xyxy - 1); \
 diff --git a/bin/resources/shaders/vulkan/present.glsl b/bin/resources/shaders/vulkan/present.glsl
-index bc319b6..45d6e7b 100644
+index bc319b6e..45d6e7bf 100644
 --- a/bin/resources/shaders/vulkan/present.glsl
 +++ b/bin/resources/shaders/vulkan/present.glsl
-@@ -100,7 +100,11 @@ void ps_filter_triangular() // triangular
+@@ -100,7 +100,11 @@
  void ps_filter_complex() // triangular
  {
  	const float PI = 3.14159265359f;
@@ -81,10 +81,10 @@ index bc319b6..45d6e7b 100644
  	o_col0 = (0.9 - 0.4 * cos(2 * PI * v_tex.y * texdim.y)) * sample_c(vec2(v_tex.x, (floor(v_tex.y * texdim.y) + 0.5) / texdim.y));
  }
 diff --git a/bin/resources/shaders/vulkan/tfx.glsl b/bin/resources/shaders/vulkan/tfx.glsl
-index 6b786b3..cb4317d 100644
+index a090c111..0540ad60 100644
 --- a/bin/resources/shaders/vulkan/tfx.glsl
 +++ b/bin/resources/shaders/vulkan/tfx.glsl
-@@ -757,7 +757,11 @@ vec4 sample_c_af(vec2 uv, float uv_w)
+@@ -764,7 +764,11 @@
  	// Below taken from https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#7.18.11%20LOD%20Calculations
  	// And https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
  	// With guidance from https://pema.dev/2025/05/09/mipmaps-too-much-detail/ 
@@ -97,10 +97,10 @@ index 6b786b3..cb4317d 100644
  	vec2 dY = dFdy(uv) * sz;
  
 diff --git a/pcsx2/GS/Renderers/Common/GSGPUDriverProfile.cpp b/pcsx2/GS/Renderers/Common/GSGPUDriverProfile.cpp
-index 992e784..a872450 100644
+index a460c26d..632f0c14 100644
 --- a/pcsx2/GS/Renderers/Common/GSGPUDriverProfile.cpp
 +++ b/pcsx2/GS/Renderers/Common/GSGPUDriverProfile.cpp
-@@ -399,7 +399,7 @@ static bool RuleMatches(const DriverRule& rule, const GpuProfileSelection& selec
+@@ -429,7 +429,7 @@
  // Sources and upstream revisions are mirrored in docs/gpu-driver-database.json. A known bug is
  // not automatically an active workaround: expensive fallbacks stay off until they have a bounded,
  // tested condition.
@@ -109,7 +109,7 @@ index 992e784..a872450 100644
  	{"gl-arm-buffer-stream", MobileGpuApi::OpenGL, RuntimeGpuProfile::Mali,
  		MobileGpuDriver::ArmProprietary, MobileGpuArchitecture::Unknown, 0, 0, 0, {}, {}, 0, 0, false,
  		Bug(DriverBug::BrokenBufferStreaming) | Bug(DriverBug::BrokenUnsynchronizedMapping) |
-@@ -455,6 +455,13 @@ static constexpr std::array<DriverRule, 35> s_driver_rules = {{
+@@ -485,6 +485,13 @@
  		Workaround(DriverWorkaround::UseDescriptorSets) |
  			Workaround(DriverWorkaround::DisableAttachmentFeedbackLoopLayout) |
  			Workaround(DriverWorkaround::ScalarizeVectorBitwiseAnd)},
@@ -124,10 +124,10 @@ index 992e784..a872450 100644
  	// r44p1 / Mali-G615: a non-coherent cached type with explicit invalidates beat the coherent
  	// map about 12x per readback. That does not prove it wrong on older parts, so the preference
 diff --git a/pcsx2/GS/Renderers/Common/GSGPUProfile.cpp b/pcsx2/GS/Renderers/Common/GSGPUProfile.cpp
-index 0b82189..accacae 100644
+index 1724bd48..a8ca1e6d 100644
 --- a/pcsx2/GS/Renderers/Common/GSGPUProfile.cpp
 +++ b/pcsx2/GS/Renderers/Common/GSGPUProfile.cpp
-@@ -348,6 +348,7 @@ const char* GpuProfileDetector::BugToString(DriverBug value)
+@@ -364,6 +364,7 @@
  		case DriverBug::BrokenGraphicsPipelineLibrary: return "BrokenGraphicsPipelineLibrary";
  		case DriverBug::BrokenRoaaDestinationRead: return "BrokenRoaaDestinationRead";
  		case DriverBug::BrokenBlendConstant: return "BrokenBlendConstant";
@@ -135,19 +135,19 @@ index 0b82189..accacae 100644
  		case DriverBug::Count:
  		default: return "Unknown";
  	}
-@@ -375,6 +376,7 @@ const char* GpuProfileDetector::WorkaroundToString(DriverWorkaround value)
- 		case DriverWorkaround::DisableStencilBuffer: return "DisableStencilBuffer";
+@@ -392,6 +393,7 @@
  		case DriverWorkaround::PreferVulkanRenderer: return "PreferVulkanRenderer";
  		case DriverWorkaround::PreferCachedStreamRingMemory: return "PreferCachedStreamRingMemory";
+ 		case DriverWorkaround::ReadBackRemotePlayFrames: return "ReadBackRemotePlayFrames";
 +		case DriverWorkaround::PassTextureSizeInUniform: return "PassTextureSizeInUniform";
  		case DriverWorkaround::Count:
  		default: return "Unknown";
  	}
 diff --git a/pcsx2/GS/Renderers/Common/GSGPUProfile.h b/pcsx2/GS/Renderers/Common/GSGPUProfile.h
-index fdf1068..8b2325b 100644
+index 8f2be19e..3c71ce8f 100644
 --- a/pcsx2/GS/Renderers/Common/GSGPUProfile.h
 +++ b/pcsx2/GS/Renderers/Common/GSGPUProfile.h
-@@ -129,6 +129,9 @@ enum class DriverBug : u8
+@@ -129,6 +129,9 @@
  	/// The trigger is run history, not anything the draw carries, so it cannot be probed at
  	/// start-up and no emission order avoids it.
  	BrokenBlendConstant,
@@ -157,20 +157,20 @@ index fdf1068..8b2325b 100644
  	Count,
  };
  
-@@ -170,6 +173,8 @@ enum class DriverWorkaround : u8
- 	/// a defect. Without this bit the rings stay write-combined even when a cached coherent type
- 	/// exists (that road lost on the SD865). See GSStreamRingMemoryPolicy.h.
- 	PreferCachedStreamRingMemory,
+@@ -175,6 +178,8 @@
+ 	/// extensions stay enabled, only their use is off. No rule declares it yet: it is the switch
+ 	/// that excludes one driver without new code.
+ 	ReadBackRemotePlayFrames,
 +	/// Shaders take texture sizes from a uniform or push constant instead of textureSize().
 +	PassTextureSizeInUniform,
  	Count,
  };
  
 diff --git a/pcsx2/GS/Renderers/Vulkan/GSDeviceVK.cpp b/pcsx2/GS/Renderers/Vulkan/GSDeviceVK.cpp
-index a23210c..9b56ec9 100644
+index 60a219fd..e78eb9ff 100644
 --- a/pcsx2/GS/Renderers/Vulkan/GSDeviceVK.cpp
 +++ b/pcsx2/GS/Renderers/Vulkan/GSDeviceVK.cpp
-@@ -4839,6 +4839,12 @@ void GSDeviceVK::DoStretchRect(GSTexture* sTex, const GSVector4& sRect, GSTextur
+@@ -4808,6 +4808,12 @@
  	pxAssert(dTex);
  	filter = shader.SupportsBilinear() ? Nearest : filter; // Don't allow HW bilinear if SW bilinear is needed.
  	const bool allow_discard = (shader.Mask() == 0xf);
@@ -183,7 +183,7 @@ index a23210c..9b56ec9 100644
  	DoStretchRect(static_cast<GSTextureVK*>(sTex), sRect, static_cast<GSTextureVK*>(dTex), dRect,
  		GetConvertPipeline(shader), filter, allow_discard);
  }
-@@ -4974,6 +4980,11 @@ void GSDeviceVK::DoMultiStretchRects(
+@@ -4943,6 +4949,11 @@
  	if (!InRenderPass())
  		BeginRenderPassForStretchRect(dTex, rc, rc, false);
  	SetUtilityTexture(rects[0].src, rects[0].filter == Biln ? m_linear_sampler : m_point_sampler);
@@ -195,7 +195,7 @@ index a23210c..9b56ec9 100644
  
  	SetPipeline(GetConvertPipeline(shader.SetMask(rects[0].wmask.wrgba)));
  
-@@ -5406,6 +5417,9 @@ void GSDeviceVK::DoFXAA(GSTexture* sTex, GSTexture* dTex)
+@@ -5375,6 +5386,9 @@
  	EndRenderPass();
  	OMSetRenderTargets(dTex, nullptr, dRect);
  	SetUtilityTexture(sTex, m_linear_sampler);
@@ -205,7 +205,7 @@ index a23210c..9b56ec9 100644
  	BeginRenderPass(m_utility_color_render_pass_discard, dRect);
  	dTex->SetState(GSTexture::State::Dirty);
  	SetPipeline(m_fxaa_pipeline);
-@@ -5943,6 +5957,8 @@ static void AddShaderHeader(std::stringstream& ss)
+@@ -5914,6 +5928,8 @@
  		dev->UsesMobileDriverWorkaround(DriverWorkaround::ScalarizeVectorBitwiseAnd) ? 1 : 0);
  	AddMacro(ss, "DRIVER_REWRITE_UNIFORM_INDEXING",
  		dev->UsesMobileDriverWorkaround(DriverWorkaround::RewriteUniformIndexing) ? 1 : 0);
@@ -215,13 +215,13 @@ index a23210c..9b56ec9 100644
  	// happens to return it. Overloads cost an OpFunctionCall in the SPIR-V at every call site --
  	// including inside the texture loop in tfx.glsl and the region-clamp path -- and Qualcomm's
 diff --git a/pcsx2/ShaderCacheVersion.h b/pcsx2/ShaderCacheVersion.h
-index e540379..600ce0c 100644
+index d1f5815a..8b6fc395 100644
 --- a/pcsx2/ShaderCacheVersion.h
 +++ b/pcsx2/ShaderCacheVersion.h
-@@ -35,4 +35,5 @@
- // PS constant buffer's former pad after RcpScaleFactor, instead of the texture's.
- // 125: the weave and MAD buffering passes fill the undrawn field band where the display rect
- // starts, read from FieldPad.xy as a row range, instead of from row 0 down to a row count.
--static constexpr u32 SHADER_CACHE_VERSION = 125; // 108 was upstream PR 14688; their 109 = our 111, their 110 = our 115, their 112 = our 116, their 113 = our 117
-+// 126: DRIVER_NO_IMAGE_QUERY (Mali r29) takes texture sizes from uniforms in convert/present/tfx/fxaa.
-+static constexpr u32 SHADER_CACHE_VERSION = 126; // 108 was upstream PR 14688; their 109 = our 111, their 110 = our 115, their 112 = our 116, their 113 = our 117
+@@ -44,4 +44,5 @@
+ // 129: the Vulkan expanded-line vertex shader pairs a line's two ends by index (top reads +1, bottom
+ // reads -1) on every device and no longer gets a VS_PROVOKING_VERTEX_LAST define, so its source text
+ // changed.
+-static constexpr u32 SHADER_CACHE_VERSION = 129; // 108 was upstream PR 14688; their 109 = our 111, their 110 = our 115, their 112 = our 116, their 113 = our 117, their 118 = our 126
++// 130: DRIVER_NO_IMAGE_QUERY on Mali r29 takes source texture dimensions from uniforms/push constants.
++static constexpr u32 SHADER_CACHE_VERSION = 130; // 108 was upstream PR 14688; their 109 = our 111, their 110 = our 115, their 112 = our 116, their 113 = our 117, their 118 = our 126

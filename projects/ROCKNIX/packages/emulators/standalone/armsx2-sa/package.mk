@@ -2,8 +2,8 @@
 # Copyright (C) 2024-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="armsx2-sa"
-PKG_VERSION="19c83bf065ed21a19d8c46a1f578e37d2dab8efd"
-PKG_SHA256="361b98beb943976f6c0ec5494eba26ded04abcd41683149c74317e089b3ff860"
+PKG_VERSION="2.8.4"
+PKG_SHA256="dcb35ee5db20f798f7d6d1ae5e0352bb3f66a0484d99485077cb63b239d8ade9"
 PKG_LICENSE="GPL-3.0-or-later"
 PKG_SITE="https://github.com/ARMSX2/ARMSX2"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
@@ -37,7 +37,7 @@ esac
 pre_configure_target() {
   PCSX2_CMAKE_BASE=(
     # Reported version
-    -DARMSX2_VERSION=2.7.1
+    -DARMSX2_VERSION=2.8.4
     -DCMAKE_BUILD_TYPE=Release
     # Release builds don't need the unit tests or the recompiler test hooks
     -DENABLE_TESTS=OFF
