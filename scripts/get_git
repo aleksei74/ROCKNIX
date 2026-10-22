@@ -34,8 +34,12 @@ _repo_exists_and_valid() {
     pushd "${PACKAGE}" > /dev/null
     _clean_repo || return 1
 
-    if ! git ls-remote . | grep -q -m1 "^${PKG_VERSION}"; then
-      echo "ERROR: ${PACKAGE}: failed to determine git HEAD" >&2
+    # git ls-remote . | grep -q can return 141 under pipefail when the
+    # clone has many refs. Validate the checked-out commit directly.
+    local checked_out_sha
+    checked_out_sha="$(git rev-parse --verify HEAD)" || return 1
+    if [[ "${checked_out_sha}" != "${PKG_VERSION}"* ]]; then
+      echo "ERROR: ${PACKAGE}: unexpected checked-out commit ${checked_out_sha}, wanted ${PKG_VERSION}" >&2
       return 1
     fi
 
