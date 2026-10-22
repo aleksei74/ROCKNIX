@@ -23,7 +23,9 @@ makeinstall_target() {
 
   mkdir -p ${INSTALL}/usr/config/drastic/config
     cp -a ${PKG_BUILD}/drastic_aarch64/* ${INSTALL}/usr/config/drastic
-    cp -a ${PKG_DIR}/config/${DEVICE}/* ${INSTALL}/usr/config/drastic/config
+    if [ -d ${PKG_DIR}/config/${DEVICE} ]; then
+      cp -a ${PKG_DIR}/config/${DEVICE}/* ${INSTALL}/usr/config/drastic/config
+    fi
     cp -a ${PKG_DIR}/config/drastic.gptk ${INSTALL}/usr/config/drastic
 
   mkdir -p ${INSTALL}/usr/config/drastic/microphone
