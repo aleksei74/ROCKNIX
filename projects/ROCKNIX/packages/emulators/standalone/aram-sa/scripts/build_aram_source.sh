@@ -8,6 +8,10 @@ SOURCE_ROOT="${BUILD_DIR}/source"
 export GOTOOLCHAIN=go1.25.0+auto
 export GOPATH="${BUILD_DIR}/.gopath"
 export GOMODCACHE="${GOPATH}/pkg/mod"
+# Go makes downloaded module directories read-only by default. ROCKNIX may
+# delete this entire package build directory on later rebuilds; keep the
+# dedicated module cache writable even if a build is interrupted.
+export GOFLAGS="${GOFLAGS:+${GOFLAGS} }-modcacherw"
 export GOCACHE="${BUILD_DIR}/.gocache"
 export GOTMPDIR="${BUILD_DIR}/.gotmp"
 

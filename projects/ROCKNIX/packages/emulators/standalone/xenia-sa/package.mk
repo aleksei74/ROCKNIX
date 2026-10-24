@@ -2,7 +2,7 @@
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
 
 PKG_NAME="xenia-sa"
-PKG_VERSION="1689b263d3e44a69e9bdf0dd21e24a85c7bcc16d"
+PKG_VERSION="c885006936a378169ddfbb37dd04497a822eedce"
 PKG_LICENSE="BSD-3-Clause"
 PKG_SITE="https://github.com/has207/xenia-edge"
 PKG_URL="${PKG_SITE}.git"
@@ -12,11 +12,11 @@ PKG_GIT_SUBMODULE_DEPTH="1"
 # lint tooling and the unused portal backend.
 PKG_GIT_SUBMODULES="third_party/FFmpeg third_party/FidelityFX-CAS third_party/FidelityFX-FSR \
                     third_party/SDL3 third_party/SPIRV-Headers third_party/SPIRV-Tools \
-                    third_party/VulkanMemoryAllocator third_party/aes_128 \
+                    third_party/VulkanMemoryAllocator \
                     third_party/asio third_party/boost_context/context \
                     third_party/capstone third_party/cxxopts third_party/date \
                     third_party/discord-rpc third_party/disruptorplus third_party/fmt \
-                    third_party/glslang third_party/imgui third_party/miniaudio \
+                    third_party/glslang third_party/imgui third_party/mbedtls third_party/miniaudio \
                     third_party/pugixml third_party/rapidjson third_party/snappy \
                     third_party/tomlplusplus third_party/utfcpp third_party/wxWidgets \
                     third_party/xbyak_aarch64 third_party/xxhash third_party/zarchive \
@@ -25,6 +25,21 @@ PKG_LONGDESC="Xenia Edge - Xbox 360 emulator (experimental AArch64 build)."
 PKG_DEPENDS_TARGET="toolchain llvm:host Python3:host glslang:host spirv-tools spirv-tools:host \
                     vulkan-loader vulkan-headers gtk3 SDL2 alsa-lib lz4 xwayland"
 PKG_TOOLCHAIN="manual"
+
+# The git downloader can treat a pinned checkout as cached even when an
+# earlier submodule fetch failed. Verify the selected modules before unpacking.
+# Do not fetch unrelated Windows, Android or Mesa submodules.
+pre_unpack() {
+  local source_dir="${SOURCES}/${PKG_NAME}/${PKG_SOURCE_NAME}"
+  local status
+
+  status="$(git -C "${source_dir}" submodule status -- ${PKG_GIT_SUBMODULES})" || return 1
+
+  if grep -qE '^[-+U]' <<< "${status}"; then
+    git -C "${source_dir}" submodule update --init \
+      --depth="${PKG_GIT_SUBMODULE_DEPTH:-1}" --jobs=4 -- ${PKG_GIT_SUBMODULES} || return 1
+  fi
+}
 
 make_target() {
   local LLVM_BIN="${TOOLCHAIN}/bin"

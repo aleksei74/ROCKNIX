@@ -1,0 +1,132 @@
+diff --git a/rpcs3/Emu/RSX/remote_capture.h b/rpcs3/Emu/RSX/remote_capture.h
+index 3432d1a9..78a809de 100644
+--- a/rpcs3/Emu/RSX/remote_capture.h
++++ b/rpcs3/Emu/RSX/remote_capture.h
+@@ -57,7 +57,7 @@
+ 
+ 	struct ring
+ 	{
+-		std::array<slot, 4> slots;
++		std::array<slot, 4> capture_slots;
+ 		const volatile u32* markers = nullptr; // one per slot, written by the GPU
+ 	};
+ 
+diff --git a/rpcs3/Emu/RSX/VK/VKPresent.cpp b/rpcs3/Emu/RSX/VK/VKPresent.cpp
+index fe0e7796..0e09e84a 100644
+--- a/rpcs3/Emu/RSX/VK/VKPresent.cpp
++++ b/rpcs3/Emu/RSX/VK/VKPresent.cpp
+@@ -2428,23 +2428,23 @@
+ 	// A slot the app's side has finished with. When the GPU or the app still holds all of them,
+ 	// drop this frame rather than wait.
+ 	auto& ring = m_remote_capture_ring;
+-	usz index = ring.slots.size();
+-	for (usz i = 0; i < ring.slots.size(); i++)
+-	{
+-		if (ring.slots[i].state.load(std::memory_order_acquire) == remote_capture::slot_free)
++	usz index = ring.capture_slots.size();
++	for (usz i = 0; i < ring.capture_slots.size(); i++)
++	{
++		if (ring.capture_slots[i].state.load(std::memory_order_acquire) == remote_capture::slot_free)
+ 		{
+ 			index = i;
+ 			break;
+ 		}
+ 	}
+ 
+-	if (index == ring.slots.size())
++	if (index == ring.capture_slots.size())
+ 	{
+ 		g_remote_play_skipped++;
+ 		return;
+ 	}
+ 
+-	auto& slot = ring.slots[index];
++	auto& slot = ring.capture_slots[index];
+ 
+ 	// Every frame is the stream's full size, whatever size the game's own frame is. Games switch
+ 	// buffer sizes between menus, videos and play, and a stream that followed them changed
+@@ -2537,8 +2537,8 @@
+ 	{
+ 		m_remote_capture_marker = std::make_unique<vk::buffer>(*m_device, 0x100, m_device->get_memory_mapping().host_visible_coherent,
+ 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT, 0, VMM_ALLOCATION_POOL_UNDEFINED);
+-		auto markers = static_cast<u32*>(m_remote_capture_marker->map(0, sizeof(u32) * ring.slots.size()));
+-		std::memset(markers, 0, sizeof(u32) * ring.slots.size());
++		auto markers = static_cast<u32*>(m_remote_capture_marker->map(0, sizeof(u32) * ring.capture_slots.size()));
++		std::memset(markers, 0, sizeof(u32) * ring.capture_slots.size());
+ 		ring.markers = markers;
+ 	}
+ 
+@@ -2759,9 +2759,9 @@
+ 
+ 	if (!device_idle && ring.markers)
+ 	{
+-		for (usz i = 0; i < ring.slots.size(); i++)
+-		{
+-			const auto& slot = ring.slots[i];
++		for (usz i = 0; i < ring.capture_slots.size(); i++)
++		{
++			const auto& slot = ring.capture_slots[i];
+ 
+ 			if (slot.state.load(std::memory_order_acquire) == remote_capture::slot_recorded && ring.markers[i] != slot.seq)
+ 			{
+@@ -2800,9 +2800,9 @@
+ 		}
+ 	};
+ 
+-	for (usz i = 0; i < ring.slots.size(); i++)
+-	{
+-		auto& slot = ring.slots[i];
++	for (usz i = 0; i < ring.capture_slots.size(); i++)
++	{
++		auto& slot = ring.capture_slots[i];
+ 		slot.state.store(remote_capture::slot_free, std::memory_order_relaxed);
+ 		slot.data = nullptr;
+ 		slot.hardware_buffer = nullptr;
+diff --git a/android/src/remote_play.cpp b/android/src/remote_play.cpp
+index 2e199af4..0a869b82 100644
+--- a/android/src/remote_play.cpp
++++ b/android/src/remote_play.cpp
+@@ -146,9 +146,9 @@
+ 		remote_capture::slot* newest = nullptr;
+ 		usz newest_index = 0;
+ 
+-		for (usz i = 0; i < ring->slots.size(); i++)
+-		{
+-			auto& slot = ring->slots[i];
++		for (usz i = 0; i < ring->capture_slots.size(); i++)
++		{
++			auto& slot = ring->capture_slots[i];
+ 
+ 			if (slot.state.load(std::memory_order_acquire) != remote_capture::slot_recorded)
+ 			{
+@@ -440,13 +440,13 @@
+ 
+ 	auto* const ring = remote_capture::g_ring;
+ 
+-	if (!ring || slot < 0 || static_cast<usz>(slot) >= ring->slots.size() || ring->slots[slot].seq != seq)
++	if (!ring || slot < 0 || static_cast<usz>(slot) >= ring->capture_slots.size() || ring->capture_slots[slot].seq != seq)
+ 	{
+ 		return;
+ 	}
+ 
+ 	u32 held = remote_capture::slot_held;
+-	ring->slots[slot].state.compare_exchange_strong(held, remote_capture::slot_free, std::memory_order_acq_rel);
++	ring->capture_slots[slot].state.compare_exchange_strong(held, remote_capture::slot_free, std::memory_order_acq_rel);
+ }
+ 
+ // The AHardwareBuffer behind a hardware frame's slot, with a reference the caller releases, or null.
+@@ -457,12 +457,12 @@
+ 
+ 	auto* const ring = remote_capture::g_ring;
+ 
+-	if (!ring || slot < 0 || static_cast<usz>(slot) >= ring->slots.size())
++	if (!ring || slot < 0 || static_cast<usz>(slot) >= ring->capture_slots.size())
+ 	{
+ 		return nullptr;
+ 	}
+ 
+-	auto& entry = ring->slots[slot];
++	auto& entry = ring->capture_slots[slot];
+ 
+ 	if (!entry.hardware_buffer)
+ 	{
