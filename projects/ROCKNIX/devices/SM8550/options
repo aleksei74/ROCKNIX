@@ -19,7 +19,7 @@
     esac
 
     PARTITION_TABLE="gpt"
-    HW_CPU="Snapdragon 8 Gen2"
+    HW_CPU="Snapdragon 8 Gen 2"
 
   # Kernel target
     KERNEL_TARGET="Image"
@@ -31,7 +31,7 @@
     EXTRA_CMDLINE="quiet rootwait console=tty0 allow_mismatched_32bit_el0 fw_devlink.strict=1 pcie_ports=compat irqaffinity=0-2 cgroup.memory=nokmem,nosocket nosoftlockup usbcore.interrupt_interval_override=045e:028e:2 gpt"
 
   # Bootloader to use (syslinux / u-boot)
-    BOOTLOADER="qcom-abl"
+    BOOTLOADER="arm-efi"
 
   # Adreno GPU family
     GRAPHIC_DRIVERS="freedreno"

@@ -32,7 +32,7 @@
     EXTRA_CMDLINE="quiet rootwait console=tty0 video=efifb:off gpt"
 
   # Bootloader to use (syslinux / u-boot)
-    BOOTLOADER="qcom-abl"
+    BOOTLOADER="arm-efi"
 
   # Adreno GPU family
     GRAPHIC_DRIVERS="freedreno"
@@ -51,9 +51,6 @@
 
   # Windowmanager to use (weston / swaywm-env / no)
     WINDOWMANAGER="swaywm-env"
-
-  # Grub rotation (panel is portrait-mounted, 90 CW like Pocket Max)
-    GRUB_ROTATION="90"
 
   # Additional drivers to install:
   # for a list of additional drivers see packages/linux-drivers
