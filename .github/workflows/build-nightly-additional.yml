@@ -5,11 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       T618:
-        description: 'T618'
         default: false
         type: boolean
       SDM845:
-        description: 'SDM845'
         default: false
         type: boolean
 

@@ -5,55 +5,42 @@ on:
   workflow_dispatch:
     inputs:
       RK3326:
-        description: 'RK3326'
         default: false
         type: boolean
       RK3399:
-        description: 'RK3399'
         default: false
         type: boolean
       RK3566:
-        description: 'RK3566'
         default: false
         type: boolean
       RK3576:
-        description: 'RK3576'
         default: false
         type: boolean
       RK3588:
-        description: 'RK3588'
         default: false
         type: boolean
       S922X:
-        description: 'S922X'
         default: false
         type: boolean
       H700:
-        description: 'H700'
         default: false
         type: boolean
       SM8250:
-        description: 'SM8250'
         default: false
         type: boolean
       SM8550:
-        description: 'SM8550'
         default: false
         type: boolean
       SM8650:
-        description: 'SM8650'
         default: false
         type: boolean
       SM8750:
-        description: 'SM8750'
         default: false
         type: boolean
       SM6115:
-        description: 'SM6115'
         default: false
         type: boolean
       SM4450:
-        description: 'SM4450'
         default: false
         type: boolean
   workflow_call:
