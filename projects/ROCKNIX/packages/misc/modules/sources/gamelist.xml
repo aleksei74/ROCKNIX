@@ -385,7 +385,7 @@
     <game>
         <path>./Start touchHLE.sh</path>
         <name>touchHLE 실행</name>
-        <desc>초기 iOS 게임을 실행하는 touchHLE의 설정 화면을 엽니다. 세부 설정에는 마우스와 키보드 사용을 권장합니다.</desc>
+        <desc>초기 iOS용 게임을 실행하는 touchHLE의 설정 화면을 엽니다. 세부 설정에는 마우스와 키보드 사용을 권장합니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
@@ -409,7 +409,7 @@
     <game>
         <path>./Start Xemu.sh</path>
         <name>Xemu 실행</name>
-        <desc>초기 Xbox 에뮬레이터 xemu의 설정 화면을 엽니다. 세부 설정에는 마우스와 키보드 사용을 권장합니다.</desc>
+        <desc>초대 Xbox 에뮬레이터 xemu의 설정 화면을 엽니다. 세부 설정에는 마우스와 키보드 사용을 권장합니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
@@ -445,7 +445,7 @@
     <game>
         <path>./Test Gamepad.sh</path>
         <name>게임패드 테스트</name>
-        <desc>버튼, 방향키 및 아날로그 스틱 등 게임패드 입력이 정상적으로 인식되는지 확인합니다.</desc>
+        <desc>게임패드의 버튼, 방향 패드, 아날로그 스틱 입력이 정상적으로 인식되는지 확인합니다.</desc>
         <developer>ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
