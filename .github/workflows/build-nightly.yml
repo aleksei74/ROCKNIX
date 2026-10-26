@@ -56,11 +56,6 @@ on:
         description: 'SM4450'
         default: false
         type: boolean
-      release:
-        description: 'Official release (ROCKNIX repository only)'
-        required: false
-        default: false
-        type: boolean
   workflow_call:
     inputs:
       build_type:
@@ -96,10 +91,7 @@ jobs:
       - name: Determine release type
         id: set-release-type
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.release }}" == "true" ]]; then
-            echo "OFFICIAL=yes" >> $GITHUB_OUTPUT
-            echo "NIGHTLY=no" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event_name }}" == "schedule" && "${{ github.event.schedule }}" == "0 0 1 * *" ]]; then
+          if [[ "${{ github.event_name }}" == "schedule" && "${{ github.event.schedule }}" == "0 0 1 * *" ]]; then
             echo "OFFICIAL=yes" >> $GITHUB_OUTPUT
             echo "NIGHTLY=no" >> $GITHUB_OUTPUT
           else
