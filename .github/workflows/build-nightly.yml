@@ -4,6 +4,14 @@ run-name: "${{ inputs.build_type == 'b' && '- 추가 기기 빌드' || '- 전체
 on:
   workflow_dispatch:
     inputs:
+      build_type:
+        description: 'Build group (a: standard devices, b: T618/SDM845)'
+        required: false
+        default: a
+        type: choice
+        options:
+          - a
+          - b
       RK3326:
         description: 'RK3326'
         default: false
@@ -54,6 +62,14 @@ on:
         type: boolean
       SM4450:
         description: 'SM4450'
+        default: false
+        type: boolean
+      T618:
+        description: 'T618 (build group b)'
+        default: false
+        type: boolean
+      SDM845:
+        description: 'SDM845 (build group b)'
         default: false
         type: boolean
       release:
