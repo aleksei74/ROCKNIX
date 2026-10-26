@@ -1,15 +1,12 @@
 #!/usr/bin/python3
-import importlib.machinery
-import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 
-loader = importlib.machinery.SourceFileLoader('odin_slot_control', '/usr/bin/odin-reboot-android')
-spec = importlib.util.spec_from_loader(loader.name, loader)
-control = importlib.util.module_from_spec(spec)
-loader.exec_module(control)
+sys.path.insert(0, '/usr/lib/odin')
+import odin_slot_control as control
 
 android, tables, paths, carriers, lun_path = control.inspect()
 slot = control.active_slot(tables)

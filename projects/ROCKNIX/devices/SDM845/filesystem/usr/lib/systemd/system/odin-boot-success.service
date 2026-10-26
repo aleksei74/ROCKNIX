@@ -2,7 +2,7 @@
 Description=Mark the validated Odin ROCKNIX slot as successfully booted
 After=rocknix-autostart.service essway.service
 Requires=essway.service
-ConditionPathExists=/usr/bin/odin-reboot-android
+ConditionPathExists=/usr/lib/odin/odin_slot_control.py
 
 [Service]
 Type=oneshot

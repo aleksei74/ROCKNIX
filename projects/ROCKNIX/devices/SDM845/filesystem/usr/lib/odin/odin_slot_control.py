@@ -1,17 +1,10 @@
-#!/usr/bin/python3
-"""Select the stock Android slot on an Odin using Qualcomm boot control."""
-import argparse
-import fcntl
+"""Inspect boot partitions and A/B slot state on supported AYN Odin devices."""
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import stat
 import struct
-import subprocess
-import sys
-import time
 import zlib
 
 PARTLABEL = Path('/dev/disk/by-partlabel')
@@ -103,7 +96,6 @@ def read_gpt(disk):
                 name = entry[56:128].decode('utf-16-le').rstrip('\0')
                 require(name not in names, 'Duplicate GPT partition name')
                 names[name] = entry
-        # Save only the GPT regions, including the protective MBR.
         front_size = primary[2] * sector
         tail_size = (total - primary[3] - 1) * sector
         require(front_size <= 2 ** 20 and tail_size <= 2 ** 20, 'Unexpected GPT region size')
@@ -115,7 +107,7 @@ def read_gpt(disk):
 
 def active_slot(tables):
     entries = next(t['entries'] for t in tables.values() if 'boot_a' in t['entries'])
-    active = [s for s in 'ab' if entries['boot_' + s][54] & 4]
+    active = [slot for slot in 'ab' if entries['boot_' + slot][54] & 4]
     require(len(active) == 1, 'Boot slot flags are ambiguous')
     return active[0]
 
@@ -124,11 +116,11 @@ def inspect():
     model = Path('/proc/device-tree/model').read_bytes().rstrip(b'\0').decode()
     require(model in ('AYN Odin', 'AYN Odin M2'), 'This action supports SDM845 Odin only')
     manifest = json.loads(Path('/usr/share/odin/slot-carriers.json').read_text())
-    carriers = [r for r in manifest['variants'].values() if r['dtb_model'] == model]
+    carriers = [row for row in manifest['variants'].values() if row['dtb_model'] == model]
     require(carriers, 'No supported boot carrier for this Odin model')
     paths = {}; disks = set()
     for base in (*SWAPPED, 'xbl'):
-        present = [(PARTLABEL / (base + '_' + s)).exists() for s in 'ab']
+        present = [(PARTLABEL / (base + '_' + slot)).exists() for slot in 'ab']
         require(present[0] == present[1], 'Incomplete A/B partition pair: ' + base)
         require(base not in ('boot', 'dtbo', 'abl', 'xbl') or all(present),
                 'Missing required partition pair: ' + base)
@@ -138,13 +130,15 @@ def inspect():
                 paths[base + '_' + slot] = path; disks.add(disk)
     require(partition('boot_a')[1] == partition('boot_b')[1], 'Boot partitions span UFS LUNs')
     tables = {disk: read_gpt(disk) for disk in disks}
-    images = {s: classify_boot(read_boot(paths['boot_' + s], carriers), carriers) for s in 'ab'}
+    images = {slot: classify_boot(read_boot(paths['boot_' + slot], carriers), carriers)
+              for slot in 'ab'}
     target = choose_android(images)
     active = active_slot(tables)
     for name in paths:
         if name.startswith('xbl_'):
             continue
-        entry = next((t['entries'][name] for t in tables.values() if name in t['entries']), None)
+        entry = next((table['entries'][name] for table in tables.values()
+                      if name in table['entries']), None)
         require(entry is not None and bool(entry[54] & 4) == (name[-1] == active),
                 'Inconsistent active-slot flags: ' + name)
     lun_paths = list(Path('/sys/bus/platform/devices').glob('1d84000.*/attributes/boot_lun_enabled'))
@@ -153,70 +147,3 @@ def inspect():
     require(lun in (1, 2) and lun == 'ab'.index(active) + 1, 'UFS boot LUN disagrees with GPT')
     require(Path('/dev/bsg/ufs-bsg0').exists(), 'UFS boot-control interface is missing')
     return target, tables, paths, carriers, lun_paths[0]
-
-
-def select_android(dry_run=False):
-    target, tables, paths, carriers, lun_path = inspect()
-    print('ANDROID_SLOT=' + target, flush=True)
-    if dry_run:
-        print('READ_ONLY=1', flush=True)
-        return target
-    folder = Path('/storage/backup/odin-boot-control') / time.strftime('%Y%m%d-%H%M%S')
-    folder.mkdir(parents=True, mode=0o700, exist_ok=False)
-    fingerprints = {}
-    for name in ('boot_a', 'boot_b'):
-        with paths[name].open('rb') as stream:
-            fingerprints[name] = hashlib.file_digest(stream, 'sha256').hexdigest()
-    metadata = {'android_slot': target, 'ufs_boot_lun': lun_path.read_text().strip(),
-                'boot_sha256': fingerprints, 'disks': {}}
-    for disk, table in tables.items():
-        for region in ('front', 'tail'):
-            with (folder / (disk.name + '-' + region + '.bin')).open('xb') as out:
-                out.write(table[region]); out.flush(); os.fsync(out.fileno())
-        metadata['disks'][str(disk)] = {'sector': table['sector'], 'tail_offset': table['tail_offset']}
-    with (folder / 'state.json').open('x') as out:
-        json.dump(metadata, out, indent=2); out.flush(); os.fsync(out.fileno())
-    os.sync()
-    subprocess.run([BOOTCTL, '-s', target], check=True)
-    after = {disk: read_gpt(disk) for disk in tables}
-    require(active_slot(after) == target and int(lun_path.read_text().strip(), 0) == 'ab'.index(target) + 1,
-            'Android slot selection did not pass readback; reboot was cancelled')
-    for disk, before in tables.items():
-        require(before['entries'].keys() == after[disk]['entries'].keys(), 'Partition list changed')
-        for name, old in before['entries'].items():
-            new = after[disk]['entries'][name]
-            require(old[16:48] == new[16:48] and old[56:] == new[56:], 'Partition layout changed')
-            if name in paths and not name.startswith('xbl_'):
-                require(bool(new[54] & 4) == (name[-1] == target), 'Slot readback failed: ' + name)
-                if name[-1] == target:
-                    require(not new[54] & 128, 'Selected slot is marked unbootable: ' + name)
-            else:
-                require(old == new, 'Unexpected partition metadata change: ' + name)
-    for name, expected in fingerprints.items():
-        with paths[name].open('rb') as stream:
-            require(hashlib.file_digest(stream, 'sha256').hexdigest() == expected, 'Boot image changed')
-    os.sync()
-    print('SELECTED=' + target + '\nBACKUP=' + str(folder), flush=True)
-    return target
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--dry-run', action='store_true')
-    parser.add_argument('--no-reboot', action='store_true')
-    args = parser.parse_args()
-    try:
-        require(os.geteuid() == 0, 'Run as root')
-        with open('/run/odin-boot-control.lock', 'a') as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            select_android(args.dry_run)
-        if not args.dry_run and not args.no_reboot:
-            subprocess.run(['/usr/bin/systemctl', 'reboot'], check=True)
-        return 0
-    except (OSError, RuntimeError, ValueError, KeyError, subprocess.CalledProcessError) as exc:
-        print('Android boot selection failed: ' + str(exc), file=sys.stderr)
-        return 1
-
-
-if __name__ == '__main__':
-    sys.exit(main())
