@@ -4,11 +4,11 @@
         <path>./commander.sh</path>
         <name>파일 관리자</name>
         <desc>ROCKNIX의 파일을 탐색하고 관리합니다. 외장 드라이브와 ROCKNIX 저장소 사이에서 파일을 복사할 수도 있습니다.</desc>
-        <developer>Tardigrade and ROCKNIX</developer>
+        <developer>Tardigrade 및 ROCKNIX</developer>
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2022</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/file-manager.svg</image>
     </game>
@@ -20,7 +20,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2022</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/m8c.svg</image>
     </game>
@@ -32,7 +32,7 @@
         <publisher>FEX-Emu</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/fexemu.svg</image>
     </game>
@@ -44,7 +44,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2022</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/install-rocknix.svg</image>
     </game>
@@ -56,7 +56,7 @@
         <publisher>UzuCore</publisher>
         <rating>1.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Script</genre>
+        <genre>스크립트</genre>
     </game>
     <game>
         <path>./Start PortMaster.sh</path>
@@ -66,7 +66,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2022</releasedate>         
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/portmaster.svg</image>
     </game>
@@ -78,7 +78,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>Script</genre>
+        <genre>스크립트</genre>
         <players>1</players>
         <image>./images/rclone-backup.svg</image>
     </game>
@@ -90,7 +90,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>Script</genre>
+        <genre>스크립트</genre>
         <players>1</players>
         <image>./images/rclone-restore.svg</image>
     </game>
@@ -102,7 +102,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Script</genre>
+        <genre>스크립트</genre>
         <players>1</players>
         <image>./images/remove-mac-files.svg</image>
     </game>
@@ -114,7 +114,7 @@
         <publisher>LXQTX</publisher>
         <rating>5.0</rating>
         <releasedate>2025</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/qterminal.svg</image>
     </game>
@@ -126,7 +126,7 @@
         <publisher>Valve</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/steam.svg</image>
     </game>
@@ -138,7 +138,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/steam.svg</image>
     </game>
@@ -150,7 +150,7 @@
         <publisher>Heroic Games Launcher</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/heroic.svg</image>
     </game>
@@ -162,7 +162,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/heroic.svg</image>
     </game>
@@ -174,7 +174,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Script</genre>
+        <genre>스크립트</genre>
         <players>1</players>
         <image>./images/heroic.svg</image>
     </game>
@@ -186,7 +186,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/azahar.svg</image>
     </game>
@@ -198,7 +198,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2025</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/bigpemu.svg</image>
     </game>
@@ -210,7 +210,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/cemu.svg</image>
     </game>
@@ -222,7 +222,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/daedalusx64.svg</image>
     </game>
@@ -234,7 +234,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/dolphin.svg</image>
     </game>
@@ -246,7 +246,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/duckstation.svg</image>
     </game>
@@ -258,7 +258,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2025</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/flycast.svg</image>
     </game>
@@ -270,7 +270,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/hatari.svg</image>
     </game>
@@ -282,7 +282,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/melonds.svg</image>
     </game>
@@ -294,7 +294,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Game Stream</genre>
+        <genre>게임 스트리밍</genre>
         <players>1</players>
         <image>./images/moonlight.svg</image>
     </game>
@@ -306,7 +306,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/pcsx2.svg</image>
     </game>
@@ -318,7 +318,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/ppsspp.svg</image>
     </game>
@@ -330,7 +330,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2025</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/skyemu.svg</image>
     </game>
@@ -342,7 +342,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/retroarch-32.svg</image>
     </game>
@@ -354,7 +354,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/retroarch-64.svg</image>
     </game>
@@ -366,7 +366,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/rpcs3.svg</image>
     </game>
@@ -378,7 +378,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/scummvm.svg</image>
     </game>
@@ -390,7 +390,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2026</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/touchhle.svg</image>
     </game>
@@ -402,7 +402,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/vita3k.svg</image>
     </game>
@@ -414,7 +414,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/xemu.svg</image>
     </game>
@@ -426,7 +426,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2023</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/idtech.svg</image>
     </game>
@@ -438,7 +438,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2021</releasedate>
-        <genre>Emulator</genre>
+        <genre>에뮬레이터</genre>
         <players>1</players>
         <image>./images/scummvm.svg</image>
     </game>
@@ -450,7 +450,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>tool</genre>
+        <genre>도구</genre>
         <players>1</players>
     </game>
     <game>
@@ -461,7 +461,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/test-touchscreen.svg</image>
     </game>
@@ -473,7 +473,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/calibrate-gamepad.svg</image>
     </game>
@@ -485,7 +485,7 @@
         <publisher>ROCKNIX</publisher>
         <rating>5.0</rating>
         <releasedate>2024</releasedate>
-        <genre>tool</genre>
+        <genre>도구</genre>
         <players>1</players>
         <image>./images/nfs.svg</image>
      </game>
