@@ -4,7 +4,7 @@
 PKG_NAME="armsx3-sa"
 PKG_LICENSE="GPLv2"
 PKG_LONGDESC="ARMSX3 is an ARM64-focused fork of the RPCS3 PlayStation 3 emulator."
-PKG_VERSION="788cb2220ca7f7939c08c91b47c877abaaeeb10f"
+PKG_VERSION="e94c6724b72cadb6a6c65a3ac59a43702659648f"
 PKG_SITE="https://github.com/ARMSX2/ARMSX3"
 PKG_URL="${PKG_SITE}.git"
 PKG_TOOLCHAIN="cmake"

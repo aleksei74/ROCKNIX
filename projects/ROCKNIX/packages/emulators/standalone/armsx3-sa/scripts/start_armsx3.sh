@@ -241,6 +241,11 @@ SHOW UI: ${SUI}
 CONFIG_YML: ${CONFIG_YML}
 EOF
 
+if [ -r /usr/share/turnip/turnip-env.sh ]; then
+  . /usr/share/turnip/turnip-env.sh
+  rocknix_turnip_apply armsx3 "$(get_setting turnip_driver "${PLATFORM}" "${GAME}")"
+fi
+
 # Run ARMSX3
 if [ "$SUI" = "true" ]; then
   export QT_QPA_PLATFORM=wayland
