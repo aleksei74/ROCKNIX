@@ -224,6 +224,11 @@ if [ -f "${ARMSX2_ICD}" ] && [ "${VKDRIVER}" != "system" ]; then
   export VK_DRIVER_FILES="${ARMSX2_ICD}"
 fi
 
+if [ -r /usr/share/turnip/turnip-env.sh ]; then
+  . /usr/share/turnip/turnip-env.sh
+  rocknix_turnip_apply armsx2 "$(get_setting turnip_driver "${PLATFORM}" "${GAME}")"
+fi
+
 #Set QT enviornment to wayland
   export QT_QPA_PLATFORM=wayland
 
