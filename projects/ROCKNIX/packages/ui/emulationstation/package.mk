@@ -106,6 +106,14 @@ EOF
     SM4450|SM6115|SM8250|SM8550|SM8650) ;;
     *) xmlstarlet ed --inplace -d '//core[@name="armsx2-sa"]//feature[@name="vulkan driver"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg ;;
   esac
+
+  case "${DEVICE}" in
+    SM8250|SM8550)
+      xmlstarlet ed --inplace -d '//emulator[@name="hakux"]//feature[@name="turnip driver"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg
+      ;;
+    SM8750) ;;
+    *) xmlstarlet ed --inplace -d '//emulator[@name="hakux"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg ;;
+  esac
 }
 
 
