@@ -15,6 +15,6 @@ diff --git a/drivers/power/supply/qcom_smbx.c b/drivers/power/supply/qcom_smbx.c
 -	{ .addr = USBIN_OPTIONS_1_CFG, .mask = HVDCP_EN_BIT, .val = 0 },
 +	/* Enable authentication and autonomous HVDCP voltage negotiation. */
 +	{ .addr = USBIN_OPTIONS_1_CFG,
-+	  .mask = HVDCP_AUTH_ALG_EN_CFG_BIT | HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT | HVDCP_EN_BIT,
-+	  .val = HVDCP_AUTH_ALG_EN_CFG_BIT | HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT | HVDCP_EN_BIT },
++	  .mask = BIT(6) | BIT(5) | HVDCP_EN_BIT,
++	  .val = BIT(6) | BIT(5) | HVDCP_EN_BIT },
  	{ .addr = CHARGING_ENABLE_CMD,
