@@ -7,6 +7,14 @@
 . /etc/profile.d/001-functions
 
 set_leds() {
+  if command -v odin-ledctl >/dev/null 2>&1; then
+    if [ "${1}" = "0" ]; then
+      odin-ledctl off >/dev/null
+    else
+      odin-ledctl restore >/dev/null
+    fi
+    return $?
+  fi
   for n in 1 2 3 4; do
     echo ${1} >/sys/class/leds/blue:backlight-${n}/brightness
   done
@@ -14,7 +22,7 @@ set_leds() {
 
 case ${1} in
   off)
-    set_leds 0
+    set_leds 0 || exit $?
     set_setting led.color off
   ;;
   poweroff)
@@ -27,7 +35,7 @@ off
 EOT
   ;;
   default)
-    set_leds 1
+    set_leds 1 || exit $?
     del_setting led.color
   ;;
   *)

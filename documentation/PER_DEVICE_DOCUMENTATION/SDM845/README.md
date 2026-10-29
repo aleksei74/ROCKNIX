@@ -9,10 +9,11 @@ package and standard image boot routing follow the official implementation.
 SDM845 selects Linux 7.1.2 and OpenABL 1.2. Boot files use `/dtbs`,
 `/loader/entries` and `/openabl`.
 
-The previous U-Boot carrier, GRUB defaults, slot-success service, custom
-gamepad driver and Odin LED GUI are excluded from this baseline. Their
+The previous U-Boot carrier, GRUB defaults, slot-success service and custom
+gamepad driver are excluded from this baseline. The Odin LED GUI, backend
+and existing scan trigger are restored with official M0/M2 compatibility. Their
 previous implementation remains in Git history. Generic fork emulator,
-Eden, BIOS and T618 support is retained; restoring Odin enhancements is a
+Eden, BIOS and T618 support is retained; remaining Odin enhancements require a
 separate compatibility pass against the official drivers and model names.
 
 An existing U-Boot/GRUB installation is not a verified migration path for
@@ -45,3 +46,18 @@ Inherited validation issues, also present before integration:
 - `update-kernel-configs-docs.yml` contains an existing `if: false` actionlint warning.
 - Imported upstream patch files contain whitespace in patch context/signatures;
   those original patches are preserved verbatim.
+
+## LED integration
+
+LED configuration uses the same persistent-file flock protocol as native
+system settings. Native SDM845 LED commands delegate to the GUI backend
+when installed, and suspend uses temporary poweroff. This preserves saved
+channel states and effects across native status updates and battery alerts.
+Saving GUI settings re-enables the native active LED mode. An all-off user
+configuration suppresses visible low-battery flashes.
+
+Host tests also cover the real shell settings/suspend/low-battery script
+paths. Build the GUI CTest with BUILD_TESTING=ON; firmware packaging disables
+host tests. The GUI has retry and a 10-second backend timeout. Host and ARM64
+GUI compilation passed; physical LEDs, the scan module against official
+Linux 7.1.2, and a complete firmware image still require validation.
