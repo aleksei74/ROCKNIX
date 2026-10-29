@@ -1,20 +1,305 @@
-Subject: [PATCH] power: supply: qcom_smbx: enable HVDCP for AYN Odin
+Subject: [PATCH] power: supply: qcom_smbx: port Odin HVDCP flow
 
-The AYN Odin supports Quick Charge. Enable the complete HVDCP negotiation
-path for this device while keeping the generic SMBX default unchanged.
+Follow the AYN PMI8998 sequence: allow 5V/9V-to-12V adapters, enable
+HVDCP authentication and autonomous mode, rerun APSD for an already
+detected QC adapter, and apply the QC input-current limit after source
+changes. Keep the behavior opt-in through the Odin device tree.
 
 ---
- drivers/power/supply/qcom_smbx.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
+diff --git a/Documentation/devicetree/bindings/power/supply/qcom,pmi8998-charger.yaml b/Documentation/devicetree/bindings/power/supply/qcom,pmi8998-charger.yaml
+index 70f5cd6..d9417a6 100644
+--- a/Documentation/devicetree/bindings/power/supply/qcom,pmi8998-charger.yaml
++++ b/Documentation/devicetree/bindings/power/supply/qcom,pmi8998-charger.yaml
+@@ -19,14 +19,16 @@ properties:
+     maxItems: 1
+ 
+   interrupts:
+-    maxItems: 4
++    maxItems: 5
+ 
+   interrupt-names:
++    minItems: 4
+     items:
+       - const: usb-plugin
+       - const: bat-ov
+       - const: wdog-bark
+       - const: usbin-icl-change
++      - const: usbin-src-change
+ 
+   io-channels:
+     items:
+@@ -40,6 +42,10 @@ properties:
+ 
+   monitored-battery: true
+ 
++  qcom,hvdcp-enable:
++    type: boolean
++    description: Enable Qualcomm HVDCP negotiation.
++
+ required:
+   - compatible
+   - reg
+@@ -66,11 +72,13 @@ examples:
+         compatible = "qcom,pmi8998-charger";
+         reg = <0x1000>;
+ 
+-        interrupts = <0x2 0x12 0x2 IRQ_TYPE_EDGE_BOTH>,
+-                     <0x2 0x13 0x4 IRQ_TYPE_EDGE_BOTH>,
++        interrupts = <0x2 0x13 0x4 IRQ_TYPE_EDGE_BOTH>,
++                     <0x2 0x12 0x2 IRQ_TYPE_EDGE_BOTH>,
++                     <0x2 0x16 0x1 IRQ_TYPE_EDGE_RISING>,
+                      <0x2 0x13 0x6 IRQ_TYPE_EDGE_RISING>,
+-                     <0x2 0x16 0x1 IRQ_TYPE_EDGE_RISING>;
+-        interrupt-names = "usb-plugin", "bat-ov", "wdog-bark", "usbin-icl-change";
++                     <0x2 0x13 0x5 IRQ_TYPE_EDGE_RISING>;
++        interrupt-names = "usb-plugin", "bat-ov", "wdog-bark",
++                          "usbin-icl-change", "usbin-src-change";
+ 
+         io-channels = <&pmi8998_rradc 3>,
+                       <&pmi8998_rradc 4>;
+diff --git a/arch/arm64/boot/dts/qcom/pmi8998.dtsi b/arch/arm64/boot/dts/qcom/pmi8998.dtsi
+index 1d4cf7a..d9b9b6a 100644
+--- a/arch/arm64/boot/dts/qcom/pmi8998.dtsi
++++ b/arch/arm64/boot/dts/qcom/pmi8998.dtsi
+@@ -17,11 +17,13 @@
+ 			interrupts = <0x2 0x13 0x4 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x2 0x12 0x2 IRQ_TYPE_EDGE_BOTH>,
+ 				     <0x2 0x16 0x1 IRQ_TYPE_EDGE_RISING>,
+-				     <0x2 0x13 0x6 IRQ_TYPE_EDGE_RISING>;
++				     <0x2 0x13 0x6 IRQ_TYPE_EDGE_RISING>,
++				     <0x2 0x13 0x5 IRQ_TYPE_EDGE_RISING>;
+ 			interrupt-names = "usb-plugin",
+ 					  "bat-ov",
+ 					  "wdog-bark",
+-					  "usbin-icl-change";
++					  "usbin-icl-change",
++					  "usbin-src-change";
+ 
+ 			io-channels = <&pmi8998_rradc 3>,
+ 				      <&pmi8998_rradc 4>;
 diff --git a/drivers/power/supply/qcom_smbx.c b/drivers/power/supply/qcom_smbx.c
+index b191dba..ea00da4 100644
 --- a/drivers/power/supply/qcom_smbx.c
 +++ b/drivers/power/supply/qcom_smbx.c
-@@ -817,3 +817,6 @@ static const struct smb_init_register smb_init_seq[] = {
- 	/* Enable charging */
--	{ .addr = USBIN_OPTIONS_1_CFG, .mask = HVDCP_EN_BIT, .val = 0 },
-+	/* Enable authentication and autonomous HVDCP voltage negotiation. */
-+	{ .addr = USBIN_OPTIONS_1_CFG,
-+	  .mask = BIT(6) | BIT(5) | HVDCP_EN_BIT,
-+	  .val = BIT(6) | BIT(5) | HVDCP_EN_BIT },
- 	{ .addr = CHARGING_ENABLE_CMD,
+@@ -17,6 +17,7 @@
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_wakeirq.h>
++#include <linux/property.h>
+ #include <linux/of.h>
+ #include <linux/power_supply.h>
+ #include <linux/regmap.h>
+@@ -64,10 +65,13 @@
+ #define OTG_EN_SRC_CFG_BIT				BIT(1)
+ 
+ #define APSD_STATUS					0x307
++#define QC_CHARGER_BIT					BIT(1)
+ #define APSD_DTC_STATUS_DONE_BIT			BIT(0)
+ 
+ #define APSD_RESULT_STATUS				0x308
+ #define APSD_RESULT_STATUS_MASK				GENMASK(6, 0)
++#define QC_3P0_BIT					BIT(6)
++#define QC_2P0_BIT					BIT(5)
+ #define FLOAT_CHARGER_BIT				BIT(4)
+ #define DCP_CHARGER_BIT					BIT(3)
+ #define CDP_CHARGER_BIT					BIT(2)
+@@ -80,11 +84,17 @@
+ #define CMD_APSD					0x341
+ #define APSD_RERUN_BIT					BIT(0)
+ 
++#define USBIN_ADAPTER_ALLOW_CFG				0x360
++#define USBIN_ADAPTER_ALLOW_MASK				GENMASK(3, 0)
++#define USBIN_ADAPTER_ALLOW_5V_OR_9V_TO_12V		7
++
+ #define TYPE_C_CFG					0x358
+ #define FACTORY_MODE_DETECTION_EN_BIT			BIT(5)
+ #define VCONN_OC_CFG_BIT				BIT(1)
+ 
+ #define USBIN_OPTIONS_1_CFG				0x362
++#define HVDCP_AUTH_ALG_EN_CFG_BIT			BIT(6)
++#define HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT		BIT(5)
+ #define HVDCP_EN_BIT					BIT(2)
+ 
+ #define USBIN_ICL_OPTIONS				0x366
+@@ -145,6 +155,7 @@
+ #define SDP_CURRENT_UA					500000
+ #define CDP_CURRENT_UA					1500000
+ #define DCP_CURRENT_UA					1500000
++#define HVDCP_CURRENT_UA				3000000
+ #define CURRENT_MAX_UA					DCP_CURRENT_UA
+ 
+ /* pmi8998 registers represent current in increments of 1/40th of an amp */
+@@ -192,6 +203,7 @@ struct smb_chip {
+ 	struct delayed_work status_change_work;
+ 	int cable_irq;
+ 	bool wakeup_enabled;
++	bool hvdcp_enable;
+ 
+ 	struct iio_channel *usb_in_i_chan;
+ 	struct iio_channel *usb_in_v_chan;
+@@ -231,12 +243,16 @@ static int smb_get_prop_usb_online(struct smb_chip *chip, int *val)
+  * Qualcomm "automatic power source detection" aka APSD
+  * tells us what type of charger we're connected to.
+  */
+-static int smb_apsd_get_charger_type(struct smb_chip *chip, int *val)
++static int smb_apsd_get_charger_type(struct smb_chip *chip, int *val,
++				     bool *hvdcp_active)
+ {
+ 	unsigned int apsd_stat, stat;
+ 	int usb_online = 0;
+ 	int rc;
+ 
++	if (hvdcp_active)
++		*hvdcp_active = false;
++
+ 	rc = smb_get_prop_usb_online(chip, &usb_online);
+ 	if (!usb_online) {
+ 		*val = POWER_SUPPLY_USB_TYPE_UNKNOWN;
+@@ -261,6 +277,10 @@ static int smb_apsd_get_charger_type(struct smb_chip *chip, int *val)
+ 
+ 	stat &= APSD_RESULT_STATUS_MASK;
+ 
++	if (hvdcp_active && chip->hvdcp_enable)
++		*hvdcp_active = (apsd_stat & QC_CHARGER_BIT) ||
++				(stat & (QC_2P0_BIT | QC_3P0_BIT));
++
+ 	if (stat & CDP_CHARGER_BIT)
+ 		*val = POWER_SUPPLY_USB_TYPE_CDP;
+ 	else if (stat & (DCP_CHARGER_BIT | OCP_CHARGER_BIT | FLOAT_CHARGER_BIT))
+@@ -347,6 +367,7 @@ static int smb_set_current_limit(struct smb_chip *chip, unsigned int val)
+ static void smb_status_change_work(struct work_struct *work)
+ {
+ 	unsigned int charger_type, current_ua;
++	bool hvdcp_active = false;
+ 	int usb_online = 0;
+ 	int count, rc;
+ 	struct smb_chip *chip;
+@@ -359,7 +380,8 @@ static void smb_status_change_work(struct work_struct *work)
+ 
+ 	for (count = 0; count < 3; count++) {
+ 		dev_dbg(chip->dev, "get charger type retry %d\n", count);
+-		rc = smb_apsd_get_charger_type(chip, &charger_type);
++		rc = smb_apsd_get_charger_type(chip, &charger_type,
++					 &hvdcp_active);
+ 		if (rc != -EAGAIN)
+ 			break;
+ 		msleep(100);
+@@ -384,7 +406,8 @@ static void smb_status_change_work(struct work_struct *work)
+ 		current_ua = CDP_CURRENT_UA;
+ 		break;
+ 	case POWER_SUPPLY_USB_TYPE_DCP:
+-		current_ua = chip->batt_info->constant_charge_current_max_ua;
++		current_ua = hvdcp_active ? HVDCP_CURRENT_UA :
++			chip->batt_info->constant_charge_current_max_ua;
+ 		break;
+ 	case POWER_SUPPLY_USB_TYPE_SDP:
+ 	default:
+@@ -479,7 +502,7 @@ static int smb_get_property(struct power_supply *psy,
+ 	case POWER_SUPPLY_PROP_HEALTH:
+ 		return smb_get_prop_health(chip, &val->intval);
+ 	case POWER_SUPPLY_PROP_USB_TYPE:
+-		return smb_apsd_get_charger_type(chip, &val->intval);
++		return smb_apsd_get_charger_type(chip, &val->intval, NULL);
+ 	default:
+ 		dev_err(chip->dev, "invalid property: %d\n", psp);
+ 		return -EINVAL;
+@@ -545,6 +568,17 @@ static irqreturn_t smb_handle_usb_plugin(int irq, void *data)
+ 	return IRQ_HANDLED;
+ }
+ 
++static irqreturn_t smb_handle_usb_source_change(int irq, void *data)
++{
++	struct smb_chip *chip = data;
++
++	power_supply_changed(chip->chg_psy);
++	schedule_delayed_work(&chip->status_change_work,
++			      msecs_to_jiffies(250));
++
++	return IRQ_HANDLED;
++}
++
+ static irqreturn_t smb_handle_usb_icl_change(int irq, void *data)
+ {
+ 	struct smb_chip *chip = data;
+@@ -678,6 +712,45 @@ static const struct smb_init_register smb_init_seq[] = {
+ 	  .val = 500000 / CURRENT_SCALE_FACTOR },
+ };
+ 
++
++static int smb_enable_hvdcp(struct smb_chip *chip)
++{
++	unsigned int apsd_stat;
++	int rc;
++	u8 hvdcp_bits = HVDCP_AUTH_ALG_EN_CFG_BIT |
++			HVDCP_AUTONOMOUS_MODE_EN_CFG_BIT | HVDCP_EN_BIT;
++
++	rc = regmap_update_bits(chip->regmap,
++				chip->base + USBIN_ADAPTER_ALLOW_CFG,
++				USBIN_ADAPTER_ALLOW_MASK,
++				USBIN_ADAPTER_ALLOW_5V_OR_9V_TO_12V);
++	if (rc < 0)
++		return dev_err_probe(chip->dev, rc,
++				     "Couldn't set HVDCP adapter allowance\n");
++
++	rc = regmap_update_bits(chip->regmap,
++				chip->base + USBIN_OPTIONS_1_CFG,
++				hvdcp_bits, hvdcp_bits);
++	if (rc < 0)
++		return dev_err_probe(chip->dev, rc,
++				     "Couldn't enable HVDCP\n");
++
++	rc = regmap_read(chip->regmap, chip->base + APSD_STATUS, &apsd_stat);
++	if (rc < 0)
++		return dev_err_probe(chip->dev, rc,
++				     "Couldn't read APSD status\n");
++
++	if (apsd_stat & QC_CHARGER_BIT) {
++		rc = regmap_update_bits(chip->regmap, chip->base + CMD_APSD,
++					APSD_RERUN_BIT, APSD_RERUN_BIT);
++		if (rc < 0)
++			return dev_err_probe(chip->dev, rc,
++					     "Couldn't rerun APSD for HVDCP\n");
++	}
++
++	return 0;
++}
++
+ static int smb_init_hw(struct smb_chip *chip)
+ {
+ 	int rc, i;
+@@ -733,6 +806,8 @@ static int smb_probe(struct platform_device *pdev)
+ 
+ 	chip->dev = &pdev->dev;
+ 	chip->name = pdev->name;
++	chip->hvdcp_enable = device_property_read_bool(chip->dev,
++						      "qcom,hvdcp-enable");
+ 
+ 	chip->regmap = dev_get_regmap(pdev->dev.parent, NULL);
+ 	if (!chip->regmap)
+@@ -759,6 +834,12 @@ static int smb_probe(struct platform_device *pdev)
+ 	if (rc < 0)
+ 		return rc;
+ 
++	if (chip->hvdcp_enable) {
++		rc = smb_enable_hvdcp(chip);
++		if (rc < 0)
++			return rc;
++	}
++
+ 	supply_config.drv_data = chip;
+ 	supply_config.fwnode = dev_fwnode(&pdev->dev);
+ 
+@@ -806,6 +887,13 @@ static int smb_probe(struct platform_device *pdev)
+ 	if (rc < 0)
+ 		return rc;
+ 
++	if (chip->hvdcp_enable) {
++		rc = smb_init_irq(chip, &irq, "usbin-src-change",
++				   smb_handle_usb_source_change);
++		if (rc < 0)
++			return rc;
++	}
++
+ 	rc = smb_init_irq(chip, &irq, "usbin-icl-change",
+ 			   smb_handle_usb_icl_change);
+ 	if (rc < 0)

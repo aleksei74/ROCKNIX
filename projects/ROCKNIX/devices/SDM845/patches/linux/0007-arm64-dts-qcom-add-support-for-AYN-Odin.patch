@@ -46,7 +46,7 @@ new file mode 100644
 index 000000000000..cd67aeaabae0
 --- /dev/null
 +++ b/arch/arm64/boot/dts/qcom/sdm845-ayn-odin-common.dtsi
-@@ -0,0 +1,1289 @@
+@@ -0,0 +1,1290 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (c) 2022, Teguh Sobirin.
@@ -934,6 +934,7 @@ index 000000000000..cd67aeaabae0
 +&pmi8998_charger {
 +	status = "okay";
 +	monitored-battery = <&battery>;
++	qcom,hvdcp-enable;
 +};
 +
 +&pmi8998_fg {
