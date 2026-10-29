@@ -4,6 +4,22 @@ Experimental standalone Linux port, separate from xemu-sa. On SM8250, SM8550,
 and SM8750 the Xbox system offers hakuX as an optional emulator; xemu remains
 the default.
 
+## ROCKNIX controls
+
+In ES Xbox game settings, select the hakuX emulator. Its optional settings
+include render scale (1-4x), aspect ratio, FXAA, Bilinear/SGSR upscaling,
+asynchronous shaders and shader prebuild. Unset options use hakuX defaults.
+Scale and shader startup options take effect when the game is launched.
+
+While a game is running, press L3+R3 together (or F1 on a keyboard) for the
+in-game quick menu. D-pad or arrow keys navigate, left/right change values,
+A or Enter select, B or Escape resume. The menu pauses the guest and audio
+and offers live aspect ratio, FXAA and upscaling changes plus Resume and Exit.
+Render scale and shader compilation options remain in ES because they need
+the game to restart. The menu is composed into hakuX's existing Vulkan frame;
+it does not open a second Wayland window. Actual device visual and input
+testing of this menu is still pending.
+
 ## Sources and build
 
 - hakuX: rfandango/hakuX, e11ee60b90742a368a08f7f5339af10048a63a04
@@ -41,6 +57,8 @@ save states, mods, and network code.
 6. Confirm all three devices offer hakuX in ES, with the stock Vulkan driver
    available on SM8250/SM8550 and the optional per-game Turnip selector on
    SM8750. Other devices must retain xemu-only settings.
+7. Verify in-game quick-menu navigation, pause/resume, and option adjustments,
+   including on portrait-panel devices with pre-rotated Vulkan swapchains.
 
 Current status: ARM64 Linux compile and link pass for SM8750 (2026-10-29).
 SM8250 and SM8550 have not completed their own target builds or device tests.

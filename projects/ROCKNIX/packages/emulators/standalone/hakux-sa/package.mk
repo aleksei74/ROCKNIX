@@ -31,6 +31,7 @@ pre_configure_target() {
     External/unordered_dense External/xxhash Source/Common/cpp-optparse || return 1
   mkdir -p "${PKG_BUILD}/linux"
   cp "${PKG_DIR}/sources/linux/"*.c "${PKG_BUILD}/linux/" || return 1
+  cp "${PKG_DIR}/sources/linux/"*.h "${PKG_BUILD}/linux/" || return 1
 
   local deps="${PKG_BUILD}/.hakux-deps"
   hakux_fetch https://github.com/zeux/volk.git \

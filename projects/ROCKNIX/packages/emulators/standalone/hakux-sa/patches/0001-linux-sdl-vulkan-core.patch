@@ -76,13 +76,17 @@ index 7729858..c0ce531 100644
  }
  
 diff --git a/hw/xbox/hle/vk/swapchain.c b/hw/xbox/hle/vk/swapchain.c
-index 398b7a0..999a3d9 100644
+index 398b7a0..6c986fd 100644
 --- a/hw/xbox/hle/vk/swapchain.c
 +++ b/hw/xbox/hle/vk/swapchain.c
-@@ -36,7 +36,27 @@
+@@ -36,20 +36,48 @@
  #include "hw/xbox/hle/vk/quirks.h"
  #include "hw/xbox/hle/vk/swapchain.h"
  
++#ifdef HAKUX_ROCKNIX
++#include "linux/menu.h"
++#endif
++
 +#ifdef HAKUX_ROCKNIX
 +#include <SDL3/SDL_vulkan.h>
 +static int rocknix_window_w(SDL_Window *win)
@@ -107,7 +111,26 @@ index 398b7a0..999a3d9 100644
  
  #define T (g_ps.t)
  #define PS_FRAMES 3             /* the presenter's submits in flight */
-@@ -72,7 +92,7 @@ static struct {
+ #define PS_IMAGES 8             /* swapchain images at most */
+ #define PS_RAMP 1024            /* a frame's share of the ramp buffer (768 used) */
+ 
+-enum { P_BILINEAR, P_AREA, P_SGSR, P_FXAA, P_COUNT };
++enum { P_BILINEAR, P_AREA, P_SGSR, P_FXAA,
++#ifdef HAKUX_ROCKNIX
++       P_MENU,
++#endif
++       P_COUNT };
+ 
+ typedef struct PsFrame {
+     VkCommandPool pool;
+     VkCommandBuffer cb;
+     VkSemaphore acquired;       /* its swapchain image is ready */
+-    VkDescriptorSet set[2];     /* the window pass's, FXAA's */
++    VkDescriptorSet set[3];     /* window pass, FXAA, Linux menu */
+     uint64_t value;             /* its last submit's on the timeline */
+     bool ramp_stale;            /* its share of the ramp buffer is behind */
+ } PsFrame;
+@@ -72,7 +100,7 @@ static struct {
      PsFrame fr[PS_FRAMES];
      unsigned cur;
      /* the window */
@@ -116,7 +139,104 @@ index 398b7a0..999a3d9 100644
      int64_t lost_ns;            /* its surface was lost then: tried again a while after */
      VkSurfaceKHR surf;
      VkSwapchainKHR sc;
-@@ -641,11 +661,11 @@ static void lose_window(void)
+@@ -102,6 +130,16 @@ static struct {
+      * key (hle_present_unchanged) */
+     bool shown;
+     uint64_t shown_key;
++#ifdef HAKUX_ROCKNIX
++    VkBuffer menu_buf;
++    VkDeviceMemory menu_buf_mem;
++    uint8_t *menu_map;
++    VkImage menu_img;
++    VkDeviceMemory menu_img_mem;
++    VkImageView menu_view;
++    uint32_t menu_revision;
++    bool menu_uploaded, menu_failed;
++#endif
+ } g_ps;
+ 
+ /* ---- shaders ---- */
+@@ -143,6 +181,10 @@ static const char k_fs_bilinear[] =
+ /* Down: each window pixel covers extra.xy frame pixels (at most 6 a side
+  * counted), each weighted by how much of it it covers: a box filter (on an
+  * axis scaled up, 1 pixel wide: the same as bilinear). */
++#ifdef HAKUX_ROCKNIX
++static const char k_fs_menu[] =
++    "void main() { o = texture(u_tex, v_uv); }\n";
++#endif
+ static const char k_fs_area[] =
+     "void main() {\n"
+     "  vec2 size = vec2(textureSize(u_tex, 0));\n"
+@@ -344,6 +386,17 @@ static VkPipeline pipeline(VkShaderModule fs, VkFormat fmt)
+         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+         .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT };
+     VkPipelineColorBlendAttachmentState ba = { .colorWriteMask = 0xF };
++#ifdef HAKUX_ROCKNIX
++    if (fs == g_ps.fs[P_MENU]) {
++        ba.blendEnable = VK_TRUE;
++        ba.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
++        ba.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
++        ba.colorBlendOp = VK_BLEND_OP_ADD;
++        ba.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
++        ba.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
++        ba.alphaBlendOp = VK_BLEND_OP_ADD;
++    }
++#endif
+     VkPipelineColorBlendStateCreateInfo cb = {
+         .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+         .attachmentCount = 1, .pAttachments = &ba };
+@@ -395,10 +448,10 @@ static bool init(void)
+     VkPipelineLayoutCreateInfo lci = {
+         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, .setLayoutCount = 1,
+         .pSetLayouts = &g_ps.dsl, .pushConstantRangeCount = 1, .pPushConstantRanges = &pcr };
+-    VkDescriptorPoolSize ps[2] = { { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, PS_FRAMES * 2 },
+-                                   { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, PS_FRAMES * 2 } };
++    VkDescriptorPoolSize ps[2] = { { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, PS_FRAMES * 3 },
++                                   { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, PS_FRAMES * 3 } };
+     VkDescriptorPoolCreateInfo pci = {
+-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, .maxSets = PS_FRAMES * 2,
++        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, .maxSets = PS_FRAMES * 3,
+         .poolSizeCount = 2, .pPoolSizes = ps };
+     VkBufferCreateInfo bci = { .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, .size = PS_FRAMES * PS_RAMP,
+                                .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT };
+@@ -427,9 +480,9 @@ static bool init(void)
+                                         .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT,
+                                         .queueFamilyIndex = g_hvk.qfam };
+         VkSemaphoreCreateInfo si = { .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+-        VkDescriptorSetLayout l[2] = { g_ps.dsl, g_ps.dsl };
++        VkDescriptorSetLayout l[3] = { g_ps.dsl, g_ps.dsl, g_ps.dsl };
+         VkDescriptorSetAllocateInfo dai = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+-                                            .descriptorPool = g_ps.dp, .descriptorSetCount = 2,
++                                            .descriptorPool = g_ps.dp, .descriptorSetCount = 3,
+                                             .pSetLayouts = l };
+         if (T.vkCreateCommandPool(g_hvk.dev, &cpi, NULL, &f->pool) != VK_SUCCESS ||
+             T.vkCreateSemaphore(g_hvk.dev, &si, NULL, &f->acquired) != VK_SUCCESS ||
+@@ -445,7 +498,11 @@ static bool init(void)
+         f->ramp_stale = true;
+     }
+     g_ps.vs = module(HLE_SHADER_VERTEX, k_vs, "");
++#ifdef HAKUX_ROCKNIX
++    static const char *const body[P_COUNT] = { k_fs_bilinear, k_fs_area, k_fs_sgsr, k_fs_fxaa, k_fs_menu };
++#else
+     static const char *const body[P_COUNT] = { k_fs_bilinear, k_fs_area, k_fs_sgsr, k_fs_fxaa };
++#endif
+     for (unsigned i = 0; i < P_COUNT; i++) {
+         g_ps.fs[i] = module(HLE_SHADER_FRAGMENT, k_fs_head, body[i]);
+     }
+@@ -611,6 +668,12 @@ static bool make_swapchain(uint32_t w, uint32_t h)
+             }
+             g_ps.pipe[i] = pipeline(g_ps.fs[i], fmt.format);
+         }
++#ifdef HAKUX_ROCKNIX
++        if (g_ps.pipe[P_MENU]) {
++            T.vkDestroyPipeline(g_hvk.dev, g_ps.pipe[P_MENU], NULL);
++        }
++        g_ps.pipe[P_MENU] = pipeline(g_ps.fs[P_MENU], fmt.format);
++#endif
+         g_ps.pipe_fmt = fmt.format;
+     }
+     g_ps.fmt = fmt.format;
+@@ -641,11 +704,11 @@ static void lose_window(void)
      drop_window();
  }
  
@@ -131,7 +251,7 @@ index 398b7a0..999a3d9 100644
          return false;
      }
      uint32_t gen, swap_id;
-@@ -656,7 +676,7 @@ bool hle_present_unchanged(struct ANativeWindow *win, uint64_t key)
+@@ -656,7 +719,7 @@ bool hle_present_unchanged(struct ANativeWindow *win, uint64_t key)
      return !front || (gen == g_ps.f.gen && swap_id == g_ps.f.swap_id);
  }
  
@@ -140,7 +260,7 @@ index 398b7a0..999a3d9 100644
  {
      if (g_ps.failed || !hle_vk_ready() || hle_vk_lost()) {
          return false;
-@@ -675,9 +695,13 @@ bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
+@@ -675,9 +738,13 @@ bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
      if (win != g_ps.win && (!win || hle_now_ns() - g_ps.lost_ns > 250000000ll)) {
          drop_window();
          if (win) {
@@ -154,7 +274,7 @@ index 398b7a0..999a3d9 100644
                  g_ps.surf = VK_NULL_HANDLE;
                  g_ps.lost_ns = hle_now_ns();
                  hle_log("hakuX-hle-back", "present: no surface for the window");
-@@ -689,7 +713,7 @@ bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
+@@ -689,7 +756,7 @@ bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
      if (!g_ps.surf) {
          return false;
      }
@@ -163,6 +283,168 @@ index 398b7a0..999a3d9 100644
      if ((!g_ps.sc || g_ps.stale || ww != g_ps.wsize.width || wh != g_ps.wsize.height) && !make_swapchain(ww, wh)) {
          return false;
      }
+@@ -846,6 +913,141 @@ static void rendering(VkCommandBuffer cb, VkImageView v, uint32_t w, uint32_t h,
+     T.vkCmdBeginRendering(cb, &ri);
+ }
+ 
++
++#ifdef HAKUX_ROCKNIX
++static void menu_release(void)
++{
++    if (g_ps.menu_map) T.vkUnmapMemory(g_hvk.dev, g_ps.menu_buf_mem);
++    if (g_ps.menu_view) T.vkDestroyImageView(g_hvk.dev, g_ps.menu_view, NULL);
++    if (g_ps.menu_img) T.vkDestroyImage(g_hvk.dev, g_ps.menu_img, NULL);
++    if (g_ps.menu_img_mem) T.vkFreeMemory(g_hvk.dev, g_ps.menu_img_mem, NULL);
++    if (g_ps.menu_buf) T.vkDestroyBuffer(g_hvk.dev, g_ps.menu_buf, NULL);
++    if (g_ps.menu_buf_mem) T.vkFreeMemory(g_hvk.dev, g_ps.menu_buf_mem, NULL);
++    g_ps.menu_map = NULL;
++    g_ps.menu_view = VK_NULL_HANDLE;
++    g_ps.menu_img = VK_NULL_HANDLE;
++    g_ps.menu_img_mem = VK_NULL_HANDLE;
++    g_ps.menu_buf = VK_NULL_HANDLE;
++    g_ps.menu_buf_mem = VK_NULL_HANDLE;
++}
++
++static bool menu_resources(void)
++{
++    if (g_ps.menu_map && g_ps.menu_view) return true;
++    if (g_ps.menu_failed) return false;
++
++    const VkDeviceSize bytes = (VkDeviceSize)HAKUX_MENU_WIDTH * HAKUX_MENU_HEIGHT * 4u;
++    VkBufferCreateInfo bci = {
++        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
++        .size = bytes, .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
++    };
++    if (T.vkCreateBuffer(g_hvk.dev, &bci, NULL, &g_ps.menu_buf) != VK_SUCCESS) goto fail;
++
++    VkMemoryRequirements mr;
++    T.vkGetBufferMemoryRequirements(g_hvk.dev, g_ps.menu_buf, &mr);
++    int mt = hle_vk_memtype(mr.memoryTypeBits,
++                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 0);
++    if (mt < 0) goto fail;
++    VkMemoryAllocateInfo ai = {
++        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
++        .allocationSize = mr.size, .memoryTypeIndex = (uint32_t)mt
++    };
++    if (T.vkAllocateMemory(g_hvk.dev, &ai, NULL, &g_ps.menu_buf_mem) != VK_SUCCESS ||
++        T.vkBindBufferMemory(g_hvk.dev, g_ps.menu_buf, g_ps.menu_buf_mem, 0) != VK_SUCCESS ||
++        T.vkMapMemory(g_hvk.dev, g_ps.menu_buf_mem, 0, bytes, 0,
++                      (void **)&g_ps.menu_map) != VK_SUCCESS) goto fail;
++
++    VkImageCreateInfo ici = {
++        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
++        .imageType = VK_IMAGE_TYPE_2D, .format = VK_FORMAT_R8G8B8A8_UNORM,
++        .extent = { HAKUX_MENU_WIDTH, HAKUX_MENU_HEIGHT, 1 },
++        .mipLevels = 1, .arrayLayers = 1, .samples = VK_SAMPLE_COUNT_1_BIT,
++        .tiling = VK_IMAGE_TILING_OPTIMAL,
++        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
++        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
++    };
++    if (T.vkCreateImage(g_hvk.dev, &ici, NULL, &g_ps.menu_img) != VK_SUCCESS) goto fail;
++    T.vkGetImageMemoryRequirements(g_hvk.dev, g_ps.menu_img, &mr);
++    mt = hle_vk_memtype(mr.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0);
++    if (mt < 0) goto fail;
++    ai = (VkMemoryAllocateInfo) {
++        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
++        .allocationSize = mr.size, .memoryTypeIndex = (uint32_t)mt
++    };
++    if (T.vkAllocateMemory(g_hvk.dev, &ai, NULL, &g_ps.menu_img_mem) != VK_SUCCESS ||
++        T.vkBindImageMemory(g_hvk.dev, g_ps.menu_img, g_ps.menu_img_mem, 0) != VK_SUCCESS) goto fail;
++
++    VkImageViewCreateInfo vi = {
++        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
++        .image = g_ps.menu_img, .viewType = VK_IMAGE_VIEW_TYPE_2D,
++        .format = VK_FORMAT_R8G8B8A8_UNORM,
++        .subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }
++    };
++    if (T.vkCreateImageView(g_hvk.dev, &vi, NULL, &g_ps.menu_view) != VK_SUCCESS) goto fail;
++    return true;
++
++fail:
++    hle_log("hakuX-rocknix", "menu: unable to allocate Vulkan overlay");
++    menu_release();
++    g_ps.menu_failed = true;
++    return false;
++}
++
++static bool menu_upload(VkCommandBuffer cb)
++{
++    if (!hakux_menu_visible() || !g_ps.pipe[P_MENU] || !menu_resources()) return false;
++
++    const uint32_t revision = hakux_menu_revision();
++    if (g_ps.menu_uploaded && g_ps.menu_revision == revision) return true;
++    if (!wait_value(g_ps.submitted)) return g_ps.menu_uploaded;
++    if (!hakux_menu_render(g_ps.menu_map)) return g_ps.menu_uploaded;
++
++    VkMemoryBarrier2 host = {
++        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
++        .srcStageMask = VK_PIPELINE_STAGE_2_HOST_BIT,
++        .srcAccessMask = VK_ACCESS_2_HOST_WRITE_BIT,
++        .dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
++        .dstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT
++    };
++    VkDependencyInfo info = {
++        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
++        .memoryBarrierCount = 1, .pMemoryBarriers = &host
++    };
++    T.vkCmdPipelineBarrier2(cb, &info);
++    barrier(cb, g_ps.menu_img,
++            g_ps.menu_uploaded ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_UNDEFINED,
++            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
++            g_ps.menu_uploaded ? VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT : VK_PIPELINE_STAGE_2_NONE,
++            g_ps.menu_uploaded ? VK_ACCESS_2_SHADER_SAMPLED_READ_BIT : 0,
++            VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT);
++
++    VkBufferImageCopy region = {
++        .bufferOffset = 0,
++        .imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
++        .imageExtent = { HAKUX_MENU_WIDTH, HAKUX_MENU_HEIGHT, 1 }
++    };
++    T.vkCmdCopyBufferToImage(cb, g_ps.menu_buf, g_ps.menu_img,
++                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
++    barrier(cb, g_ps.menu_img, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
++            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
++            VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
++            VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT);
++    g_ps.menu_uploaded = true;
++    g_ps.menu_revision = revision;
++    return true;
++}
++
++static void menu_draw(VkCommandBuffer cb, PsFrame *f, uint32_t w, uint32_t h)
++{
++    if (!hakux_menu_visible() || !g_ps.menu_uploaded || !g_ps.pipe[P_MENU]) return;
++    const float pc[12] = {
++        -1.0f, -1.0f, 1.0f, 1.0f, 0, 0, 0, 0,
++        g_ps.rot[0], g_ps.rot[1], g_ps.rot[2], g_ps.rot[3]
++    };
++    quad(cb, f, 2, g_ps.pipe[P_MENU], g_ps.menu_view, pc, w, h);
++}
++#endif
++
+ /* How the frame meets the window, logged when that changes. */
+ static void log_path(unsigned p, bool fxaa, uint32_t vw, uint32_t vh)
+ {
+@@ -920,6 +1122,9 @@ void hle_present_end(float sx, float sy, bool fxaa, int upscale, bool average, u
+             fxaa_done = true;
+         }
+     }
++#ifdef HAKUX_ROCKNIX
++    menu_upload(cb);
++#endif
+     VkImage dst = g_ps.img[g_ps.idx];
+     barrier(cb, dst, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, 0, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+@@ -946,6 +1151,9 @@ void hle_present_end(float sx, float sy, bool fxaa, int upscale, bool average, u
+         quad(cb, f, 0, g_ps.pipe[p], src, pc, iw, ih);
+         log_path(p, fxaa_done, (uint32_t)(vw + 0.5f), (uint32_t)(vh + 0.5f));
+     }
++#ifdef HAKUX_ROCKNIX
++    menu_draw(cb, f, iw, ih);
++#endif
+     T.vkCmdEndRendering(cb);
+     barrier(cb, dst, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+             VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
 diff --git a/hw/xbox/hle/vk/swapchain.h b/hw/xbox/hle/vk/swapchain.h
 index c1c1c94..65496ee 100644
 --- a/hw/xbox/hle/vk/swapchain.h
@@ -245,7 +527,7 @@ index 63ad06e..66b5abd 100644
          .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
          .pApplicationInfo = &app,
 diff --git a/native/CMakeLists.txt b/native/CMakeLists.txt
-index 95a0b58..672cb46 100644
+index 95a0b58..c7970a7 100644
 --- a/native/CMakeLists.txt
 +++ b/native/CMakeLists.txt
 @@ -24,6 +24,10 @@ if(HAKUX_LTO AND CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -259,7 +541,7 @@ index 95a0b58..672cb46 100644
  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/fex.cmake")
  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/hle.cmake")
  
-@@ -79,19 +83,35 @@ add_library(hakux_native STATIC
+@@ -79,19 +83,36 @@ add_library(hakux_native STATIC
    "${NC_REPO}/hw/xbox/hle/core/xbe.c"
  )
  target_include_directories(hakux_native PUBLIC "${NC_REPO}")
@@ -293,6 +575,7 @@ index 95a0b58..672cb46 100644
 +else()
 +  add_executable(hakux-sa
 +    "${NC_REPO}/linux/main.c"
++    "${NC_REPO}/linux/menu.c"
 +    "${NC_REPO}/linux/vsync.c"
 +    "${NC_REPO}/linux/math_compat.c"
 +    "${NC_REPO}/native/app/present.c"
@@ -328,10 +611,18 @@ index 7f48661..933c71e 100644
   * 4:3, 16:9 (a widescreen title's anamorphic 640x480), or the whole window. */
  enum { NC_ASPECT_AUTO, NC_ASPECT_4_3, NC_ASPECT_16_9, NC_ASPECT_STRETCH };
 diff --git a/native/app/present.c b/native/app/present.c
-index dfd48bd..3f3aa31 100644
+index dfd48bd..8150732 100644
 --- a/native/app/present.c
 +++ b/native/app/present.c
-@@ -13,7 +13,6 @@
+@@ -8,12 +8,14 @@
+  * (nc_present_set_fxaa, nc_present_set_upscale).
+  */
+ #include "native/app/app.h"
++#ifdef HAKUX_ROCKNIX
++#include "linux/menu.h"
++#endif
+ #include "native/dev/dev.h"
+ #include "hw/xbox/hle/vk/display.h"
  #include "hw/xbox/hle/vk/swapchain.h"
  
  #include <string.h>
@@ -339,7 +630,7 @@ index dfd48bd..3f3aa31 100644
  #include "hw/xbox/hle/prop.h"
  #include <time.h>
  
-@@ -164,7 +163,7 @@ static void wait_next_vsync(void)
+@@ -164,15 +166,18 @@ static void wait_next_vsync(void)
      clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
  }
  
@@ -348,6 +639,19 @@ index dfd48bd..3f3aa31 100644
  {
      count_frames();
      debug_poll();
+     const bool fxaa = g_dbg.fxaa < 0 ? g_fxaa : g_dbg.fxaa != 0;
+     const int upscale = g_dbg.upscale < 0 ? g_upscale : g_dbg.upscale;
+     /* what places and filters the frame, beside it and the window */
+-    const uint64_t key = (uint64_t)fxaa | (uint64_t)upscale << 1 | (uint64_t)g_dbg.average << 4 |
+-                         (uint64_t)g_widescreen << 5 | (uint64_t)(uint32_t)g_aspect << 8;
++    uint64_t key = (uint64_t)fxaa | (uint64_t)upscale << 1 | (uint64_t)g_dbg.average << 4 |
++                   (uint64_t)g_widescreen << 5 | (uint64_t)(uint32_t)g_aspect << 8;
++#ifdef HAKUX_ROCKNIX
++    key |= (uint64_t)hakux_menu_revision() << 16;
++#endif
+     if (hle_present_unchanged(win, key)) {
+         nc_dev_nv2a_display_pickup(now_ns()); /* it looked: the vblank keeps clear of it */
+         wait_next_vsync();
 diff --git a/native/cmake/fex.cmake b/native/cmake/fex.cmake
 index 7d16aa3..cef0bd1 100644
 --- a/native/cmake/fex.cmake

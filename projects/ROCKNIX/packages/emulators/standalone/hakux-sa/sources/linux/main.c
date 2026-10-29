@@ -6,6 +6,7 @@
 #include "native/dev/usb.h"
 #include "native/kernel/kernel.h"
 #include "native/hle/hle_native.h"
+#include "linux/menu.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <fcntl.h>
@@ -22,6 +23,7 @@
 static NcCore g_core;
 static int g_disc_fd = -1;
 static SDL_AtomicInt g_core_state;
+void nc_audio_set_paused(bool on);
 /* SIGSEGV/SIGBUS: the core's own faults first (MMIO, dirty tracking, the
  * call-ret stack, a title's pager), anything else to whoever handled them
  * before (ART's handlers, then the crash reporter).
@@ -163,24 +165,31 @@ int main(int argc, char **argv)
     setenv("HAKUX_HLE_MODE", "replace", 0);
     NcOptions opt;
     nc_options_init(&opt);
+    int menu_aspect = NC_ASPECT_AUTO;
+    bool menu_fxaa = false;
+    int menu_upscale = NC_UPSCALE_BILINEAR;
     for (int i = 3; i < argc; i++) {
         if (nc_option(&opt, argv[i])) {
             continue;
         }
         if (!strncmp(argv[i], "aspect=", 7)) {
             const char *v = argv[i] + 7;
-            nc_present_set_aspect(!strcmp(v, "4:3") ? NC_ASPECT_4_3 :
-                                  !strcmp(v, "16:9") ? NC_ASPECT_16_9 :
-                                  !strcmp(v, "stretch") ? NC_ASPECT_STRETCH : NC_ASPECT_AUTO);
+            menu_aspect = !strcmp(v, "4:3") ? NC_ASPECT_4_3 :
+                          !strcmp(v, "16:9") ? NC_ASPECT_16_9 :
+                          !strcmp(v, "stretch") ? NC_ASPECT_STRETCH : NC_ASPECT_AUTO;
+            nc_present_set_aspect(menu_aspect);
         } else if (!strncmp(argv[i], "fxaa=", 5)) {
-            nc_present_set_fxaa(atoi(argv[i] + 5) != 0);
+            menu_fxaa = atoi(argv[i] + 5) != 0;
+            nc_present_set_fxaa(menu_fxaa);
         } else if (!strncmp(argv[i], "upscale=", 8)) {
-            nc_present_set_upscale(!strcmp(argv[i] + 8, "sgsr") ? NC_UPSCALE_SGSR : NC_UPSCALE_BILINEAR);
+            menu_upscale = !strcmp(argv[i] + 8, "sgsr") ? NC_UPSCALE_SGSR : NC_UPSCALE_BILINEAR;
+            nc_present_set_upscale(menu_upscale);
         } else {
             fprintf(stderr, "hakuX: unrecognized argument: %s\n", argv[i]);
         }
     }
     nc_options_apply(&opt);
+    hakux_menu_configure(menu_aspect, menu_fxaa, menu_upscale);
     nc_present_set_widescreen(opt.video >= 0 && (opt.video & NC_VIDEO_WIDESCREEN));
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_AUDIO)) {
@@ -210,14 +219,39 @@ int main(int argc, char **argv)
     pthread_attr_destroy(&attr);
 
     SDL_Gamepad *pad = NULL;
+    int num_pads = 0;
+    SDL_JoystickID *ids = SDL_GetGamepads(&num_pads);
+    if (ids && num_pads > 0) {
+        pad = SDL_OpenGamepad(ids[0]);
+    }
+    SDL_free(ids);
     uint16_t last_l = 0, last_r = 0;
     bool quit = false;
+    bool combo_held = false;
+    bool menu_paused = false;
     while (!quit) {
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
-            if (ev.type == SDL_EVENT_QUIT ||
-                (ev.type == SDL_EVENT_KEY_DOWN && ev.key.key == SDLK_ESCAPE)) {
+            if (ev.type == SDL_EVENT_QUIT) {
                 quit = true;
+            } else if (ev.type == SDL_EVENT_KEY_DOWN && !ev.key.repeat) {
+                if (ev.key.key == SDLK_F1) {
+                    hakux_menu_toggle();
+                } else if (hakux_menu_visible()) {
+                    HakuxMenuResult result = HAKUX_MENU_NO_ACTION;
+                    switch (ev.key.key) {
+                    case SDLK_UP: result = hakux_menu_press(HAKUX_MENU_UP); break;
+                    case SDLK_DOWN: result = hakux_menu_press(HAKUX_MENU_DOWN); break;
+                    case SDLK_LEFT: result = hakux_menu_press(HAKUX_MENU_LEFT); break;
+                    case SDLK_RIGHT: result = hakux_menu_press(HAKUX_MENU_RIGHT); break;
+                    case SDLK_RETURN: result = hakux_menu_press(HAKUX_MENU_SELECT); break;
+                    case SDLK_ESCAPE: result = hakux_menu_press(HAKUX_MENU_BACK); break;
+                    default: break;
+                    }
+                    if (result == HAKUX_MENU_EXIT) quit = true;
+                } else if (ev.key.key == SDLK_ESCAPE) {
+                    quit = true;
+                }
             } else if (ev.type == SDL_EVENT_GAMEPAD_ADDED && !pad) {
                 pad = SDL_OpenGamepad(ev.gdevice.which);
                 if (pad) {
@@ -227,12 +261,41 @@ int main(int argc, char **argv)
                        SDL_GetGamepadID(pad) == ev.gdevice.which) {
                 SDL_CloseGamepad(pad);
                 pad = NULL;
+                combo_held = false;
+            } else if (ev.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN &&
+                       pad && ev.gbutton.which == SDL_GetGamepadID(pad) &&
+                       hakux_menu_visible()) {
+                HakuxMenuResult result = HAKUX_MENU_NO_ACTION;
+                switch (ev.gbutton.button) {
+                case SDL_GAMEPAD_BUTTON_DPAD_UP: result = hakux_menu_press(HAKUX_MENU_UP); break;
+                case SDL_GAMEPAD_BUTTON_DPAD_DOWN: result = hakux_menu_press(HAKUX_MENU_DOWN); break;
+                case SDL_GAMEPAD_BUTTON_DPAD_LEFT: result = hakux_menu_press(HAKUX_MENU_LEFT); break;
+                case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: result = hakux_menu_press(HAKUX_MENU_RIGHT); break;
+                case SDL_GAMEPAD_BUTTON_SOUTH: result = hakux_menu_press(HAKUX_MENU_SELECT); break;
+                case SDL_GAMEPAD_BUTTON_EAST: result = hakux_menu_press(HAKUX_MENU_BACK); break;
+                default: break;
+                }
+                if (result == HAKUX_MENU_EXIT) quit = true;
             }
+        }
+        const bool combo = pad && SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_LEFT_STICK) &&
+                           SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_RIGHT_STICK);
+        if (combo && !combo_held) {
+            hakux_menu_toggle();
+        }
+        combo_held = combo;
+        if (SDL_GetAtomicInt(&g_core_state) == 1 && hakux_menu_visible() != menu_paused) {
+            menu_paused = hakux_menu_visible();
+            nc_pause_set(menu_paused);
+            nc_audio_set_paused(menu_paused);
         }
         if (SDL_GetAtomicInt(&g_core_state) == 1) {
             NcPadState state = {0};
-            if (pad) {
+            if (pad && !hakux_menu_visible()) {
                 read_gamepad(pad, &state);
+                if (combo) {
+                    state.buttons &= ~(NC_PAD_LTHUMB | NC_PAD_RTHUMB);
+                }
             }
             nc_pad_set(0, &state);
             uint16_t l = 0, r = 0;
