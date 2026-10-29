@@ -7,7 +7,7 @@ PKG_SHA256="cbc81e726b0ff3c0cdb0219bf74545e91cec013c4a8503c20f93f83d73dff5d2"
 PKG_LICENSE="GPL"
 PKG_SITE="https://download.qt.io"
 PKG_URL="${PKG_SITE}/archive/qt/${PKG_VERSION%.*}/${PKG_VERSION}/single/qt-everywhere-src-${PKG_VERSION}.tar.xz"
-PKG_DEPENDS_TARGET="toolchain qt6:host openssl libjpeg-turbo libpng pcre2 sqlite zlib freetype SDL2 gstreamer gst-plugins-base gst-plugins-good gst-libav"
+PKG_DEPENDS_TARGET="toolchain qt6:host openssl libjpeg-turbo libpng pcre2 sqlite zlib freetype SDL2 gstreamer gst-plugins-base gst-plugins-good gst-libav icu"
 PKG_DEPENDS_HOST="toolchain:host"
 PKG_LONGDESC="A cross-platform application and UI framework"
 
@@ -106,6 +106,7 @@ pre_configure_target(){
                            -DQT_HOST_PATH=${TOOLCHAIN}/usr/local/qt6 \
                            -DCMAKE_BUILD_TYPE=Release \
                            -DQT_DEBUG_FIND_PACKAGE=ON \
+                           -DQT_FEATURE_icu=ON \
                            -DBUILD_SHARED_LIBS=ON \
                            -DQT_BUILD_EXAMPLES=OFF \
                            -DQT_BUILD_TESTS=OFF \
@@ -114,6 +115,11 @@ pre_configure_target(){
                            -DQT_FEATURE_xcb=ON \
                            -DQT_GENERATE_SBOM=OFF \
                            -DBUILD_WITH_PCH=OFF"
+
+  # The GLES GStreamer build only provides Wayland/EGL GL support, not X11.
+  if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
+    PKG_CMAKE_OPTS_TARGET+=" -DQT_FEATURE_gstreamer_gl_x11=OFF"
+  fi
 }
 
 post_makeinstall_target() {
