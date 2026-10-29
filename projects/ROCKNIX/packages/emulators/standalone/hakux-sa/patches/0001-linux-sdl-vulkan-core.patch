@@ -1,0 +1,556 @@
+diff --git a/hw/xbox/hle/prop.h b/hw/xbox/hle/prop.h
+index 81628b8..a9760d3 100644
+--- a/hw/xbox/hle/prop.h
++++ b/hw/xbox/hle/prop.h
+@@ -45,6 +45,27 @@ static inline bool hle_prop_new(HleProp *p, const char *name, char v[PROP_VALUE_
+     strcpy(p->last, v);
+     return !first && v[0];
+ }
++#else
++#include <stdbool.h>
++#include <string.h>
++#define PROP_VALUE_MAX 92
++typedef struct HleProp {
++    char last[PROP_VALUE_MAX];
++    bool polled;
++} HleProp;
++static inline int hle_prop_get(const char *name, char v[PROP_VALUE_MAX])
++{
++    (void)name;
++    v[0] = 0;
++    return 0;
++}
++static inline bool hle_prop_new(HleProp *p, const char *name, char v[PROP_VALUE_MAX])
++{
++    (void)p;
++    (void)name;
++    v[0] = 0;
++    return false;
++}
+ #endif
+ 
+ #endif
+diff --git a/hw/xbox/hle/vk/guest_ram.c b/hw/xbox/hle/vk/guest_ram.c
+index 7729858..c0ce531 100644
+--- a/hw/xbox/hle/vk/guest_ram.c
++++ b/hw/xbox/hle/vk/guest_ram.c
+@@ -3,7 +3,9 @@
+  */
+ #include "hw/xbox/hle/base.h"
+ 
++#ifdef __ANDROID__
+ #include <android/hardware_buffer.h>
++#endif
+ #include "hw/xbox/hle/hle.h"
+ #include "hw/xbox/hle/mem/guestmem.h"
+ #include "hw/xbox/hle/uma/uma.h"
+@@ -16,6 +18,7 @@ bool g_hland_coherent;
+ 
+ #define T (g_hvk.t)
+ 
++#ifdef __ANDROID__
+ static bool import(AHardwareBuffer *ahb, bool bda)
+ {
+     VkAndroidHardwareBufferPropertiesANDROID props = {
+@@ -77,15 +80,21 @@ static bool import(AHardwareBuffer *ahb, bool bda)
+     return true;
+ }
+ 
++#endif
+ int hle_vk_guest_ram_init(void)
+ {
+-    AHardwareBuffer *ahb = hle_uma_ahb();
+     g_hram.size = hle_ram_size();
++#ifdef __ANDROID__
++    AHardwareBuffer *ahb = hle_uma_ahb();
+     g_hram.zero_copy = ahb && ((g_hvk.caps.bda && import(ahb, true)) || import(ahb, false));
+     if (!g_hram.zero_copy) {
+         hle_log("hakuX-hle-back", "guest RAM not imported (%s): copy fallback",
+                 ahb ? "import failed" : "RAM is not an AHB");
+     }
++#else
++    g_hram.zero_copy = false;
++    hle_log("hakuX-hle-back", "guest RAM: Linux staging-buffer fallback");
++#endif
+     return 0;
+ }
+ 
+diff --git a/hw/xbox/hle/vk/swapchain.c b/hw/xbox/hle/vk/swapchain.c
+index 398b7a0..999a3d9 100644
+--- a/hw/xbox/hle/vk/swapchain.c
++++ b/hw/xbox/hle/vk/swapchain.c
+@@ -36,7 +36,27 @@
+ #include "hw/xbox/hle/vk/quirks.h"
+ #include "hw/xbox/hle/vk/swapchain.h"
+ 
++#ifdef HAKUX_ROCKNIX
++#include <SDL3/SDL_vulkan.h>
++static int rocknix_window_w(SDL_Window *win)
++{
++    int w = 0, h = 0;
++    SDL_GetWindowSizeInPixels(win, &w, &h);
++    return w;
++}
++static int rocknix_window_h(SDL_Window *win)
++{
++    int w = 0, h = 0;
++    SDL_GetWindowSizeInPixels(win, &w, &h);
++    return h;
++}
++#define HAKUX_WIN_W(w) rocknix_window_w(w)
++#define HAKUX_WIN_H(w) rocknix_window_h(w)
++#else
+ #include <android/native_window.h>
++#define HAKUX_WIN_W(w) ANativeWindow_getWidth(w)
++#define HAKUX_WIN_H(w) ANativeWindow_getHeight(w)
++#endif
+ 
+ #define T (g_ps.t)
+ #define PS_FRAMES 3             /* the presenter's submits in flight */
+@@ -72,7 +92,7 @@ static struct {
+     PsFrame fr[PS_FRAMES];
+     unsigned cur;
+     /* the window */
+-    struct ANativeWindow *win;
++    HakuXWindow *win;
+     int64_t lost_ns;            /* its surface was lost then: tried again a while after */
+     VkSurfaceKHR surf;
+     VkSwapchainKHR sc;
+@@ -641,11 +661,11 @@ static void lose_window(void)
+     drop_window();
+ }
+ 
+-bool hle_present_unchanged(struct ANativeWindow *win, uint64_t key)
++bool hle_present_unchanged(HakuXWindow *win, uint64_t key)
+ {
+     if (!g_ps.shown || !win || win != g_ps.win || g_ps.stale || !g_ps.sc || key != g_ps.shown_key ||
+-        (uint32_t)ANativeWindow_getWidth(win) != g_ps.wsize.width ||
+-        (uint32_t)ANativeWindow_getHeight(win) != g_ps.wsize.height || hle_disp_gamma_seq() != g_ps.ramp_gen) {
++        (uint32_t)HAKUX_WIN_W(win) != g_ps.wsize.width ||
++        (uint32_t)HAKUX_WIN_H(win) != g_ps.wsize.height || hle_disp_gamma_seq() != g_ps.ramp_gen) {
+         return false;
+     }
+     uint32_t gen, swap_id;
+@@ -656,7 +676,7 @@ bool hle_present_unchanged(struct ANativeWindow *win, uint64_t key)
+     return !front || (gen == g_ps.f.gen && swap_id == g_ps.f.swap_id);
+ }
+ 
+-bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
++bool hle_present_begin(HakuXWindow *win, uint32_t *w, uint32_t *h)
+ {
+     if (g_ps.failed || !hle_vk_ready() || hle_vk_lost()) {
+         return false;
+@@ -675,9 +695,13 @@ bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
+     if (win != g_ps.win && (!win || hle_now_ns() - g_ps.lost_ns > 250000000ll)) {
+         drop_window();
+         if (win) {
++#ifdef HAKUX_ROCKNIX
++            if (!SDL_Vulkan_CreateSurface(win, g_hvk.inst, NULL, &g_ps.surf)) {
++#else
+             VkAndroidSurfaceCreateInfoKHR sci = { .sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
+                                                   .window = win };
+             if (vkCreateAndroidSurfaceKHR(g_hvk.inst, &sci, NULL, &g_ps.surf) != VK_SUCCESS) {
++#endif
+                 g_ps.surf = VK_NULL_HANDLE;
+                 g_ps.lost_ns = hle_now_ns();
+                 hle_log("hakuX-hle-back", "present: no surface for the window");
+@@ -689,7 +713,7 @@ bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h)
+     if (!g_ps.surf) {
+         return false;
+     }
+-    const uint32_t ww = (uint32_t)ANativeWindow_getWidth(win), wh = (uint32_t)ANativeWindow_getHeight(win);
++    const uint32_t ww = (uint32_t)HAKUX_WIN_W(win), wh = (uint32_t)HAKUX_WIN_H(win);
+     if ((!g_ps.sc || g_ps.stale || ww != g_ps.wsize.width || wh != g_ps.wsize.height) && !make_swapchain(ww, wh)) {
+         return false;
+     }
+diff --git a/hw/xbox/hle/vk/swapchain.h b/hw/xbox/hle/vk/swapchain.h
+index c1c1c94..65496ee 100644
+--- a/hw/xbox/hle/vk/swapchain.h
++++ b/hw/xbox/hle/vk/swapchain.h
+@@ -8,7 +8,12 @@
+ #include <stdbool.h>
+ #include <stdint.h>
+ 
+-struct ANativeWindow;
++#ifdef HAKUX_ROCKNIX
++#include <SDL3/SDL.h>
++typedef SDL_Window HakuXWindow;
++#else
++typedef struct ANativeWindow HakuXWindow;
++#endif
+ 
+ /* A frame smaller than its place in the window: scaled up bilinearly, or by
+  * Snapdragon Game Super Resolution (a larger one is always averaged down). */
+@@ -19,14 +24,14 @@ enum { HLE_UPSCALE_BILINEAR, HLE_UPSCALE_SGSR };
+  * filters, as at the last present that went through): the caller may skip
+  * it, the panel keeping the image. A 30 fps title on a 120 Hz panel drew,
+  * submitted and presented each frame four times. */
+-bool hle_present_unchanged(struct ANativeWindow *win, uint64_t key);
++bool hle_present_unchanged(HakuXWindow *win, uint64_t key);
+ 
+ /* Each display refresh, on the window's thread, these three in order.
+  * begin: an image of win's swapchain (made or remade as the window comes,
+  * goes or changes size), waiting for one: the panel's pace. *w, *h: the
+  * window's size. false: nothing to draw into (the HLE GPU not up yet, no
+  * window): skip this refresh, no frame or end. */
+-bool hle_present_begin(struct ANativeWindow *win, uint32_t *w, uint32_t *h);
++bool hle_present_begin(HakuXWindow *win, uint32_t *w, uint32_t *h);
+ /* frame: the front frame, held until a newer one is taken; its size, false
+  * when there is none yet. */
+ bool hle_present_frame(uint32_t *w, uint32_t *h);
+diff --git a/hw/xbox/hle/vk/vkdev.c b/hw/xbox/hle/vk/vkdev.c
+index 63ad06e..66b5abd 100644
+--- a/hw/xbox/hle/vk/vkdev.c
++++ b/hw/xbox/hle/vk/vkdev.c
+@@ -11,6 +11,9 @@
+ #include "hw/xbox/hle/vk/batch.h"
+ #include "hw/xbox/hle/vk/compat.h"
+ #include "hw/xbox/hle/vk/quirks.h"
++#ifdef HAKUX_ROCKNIX
++#include <SDL3/SDL_vulkan.h>
++#endif
+ 
+ #ifdef __ANDROID__
+ #include <sys/system_properties.h>
+@@ -236,6 +239,23 @@ int hle_vk_init(void)
+     vkEnumerateInstanceExtensionProperties(NULL, &nie, NULL);
+     g_autofree VkExtensionProperties *iext = g_new(VkExtensionProperties, nie ? nie : 1);
+     vkEnumerateInstanceExtensionProperties(NULL, &nie, iext);
++#ifdef HAKUX_ROCKNIX
++    uint32_t sdln = 0;
++    char const * const *sdl_exts = SDL_Vulkan_GetInstanceExtensions(&sdln);
++    if (!sdl_exts || !sdln || sdln > 16) {
++        hle_log("hakuX-hle-back", "vk: SDL Vulkan extensions unavailable");
++        return -1;
++    }
++    const char *iexts[16];
++    uint32_t nix = 0;
++    for (uint32_t i = 0; i < sdln; i++) {
++        if (!has_ext(iext, nie, sdl_exts[i])) {
++            hle_log("hakuX-hle-back", "vk: missing extension %s", sdl_exts[i]);
++            return -1;
++        }
++        iexts[nix++] = sdl_exts[i];
++    }
++#else
+     const char *iexts[2];
+     uint32_t nix = 0;
+     if (has_ext(iext, nie, VK_KHR_SURFACE_EXTENSION_NAME) &&
+@@ -243,6 +263,7 @@ int hle_vk_init(void)
+         iexts[nix++] = VK_KHR_SURFACE_EXTENSION_NAME;
+         iexts[nix++] = VK_KHR_ANDROID_SURFACE_EXTENSION_NAME;
+     }
++#endif
+     VkInstanceCreateInfo ici = {
+         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+         .pApplicationInfo = &app,
+diff --git a/native/CMakeLists.txt b/native/CMakeLists.txt
+index 95a0b58..672cb46 100644
+--- a/native/CMakeLists.txt
++++ b/native/CMakeLists.txt
+@@ -24,6 +24,10 @@ if(HAKUX_LTO AND CMAKE_BUILD_TYPE STREQUAL "Release")
+ endif()
+ 
+ get_filename_component(NC_REPO "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
++if(NOT ANDROID)
++  add_compile_definitions(HAKUX_ROCKNIX=1)
++  find_package(SDL3 CONFIG REQUIRED)
++endif()
+ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/fex.cmake")
+ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/hle.cmake")
+ 
+@@ -79,19 +83,35 @@ add_library(hakux_native STATIC
+   "${NC_REPO}/hw/xbox/hle/core/xbe.c"
+ )
+ target_include_directories(hakux_native PUBLIC "${NC_REPO}")
++if(NOT ANDROID)
++  target_compile_definitions(hakux_native PRIVATE _GNU_SOURCE)
++endif()
+ # xxhash (single header, FEX's copy): the savestates' blob store (state/cache.c)
+ target_include_directories(hakux_native PRIVATE "${HAKUX_FEX_DIR}/External/xxhash")
+ # The HLE layer's pure modules build without QEMU in this mode.
+ target_compile_definitions(hakux_native PRIVATE HLE_HOST_TEST)
+-target_link_libraries(hakux_native PUBLIC nc_fex hakux_hle hakux_apu log z)
++target_link_libraries(hakux_native PUBLIC nc_fex hakux_hle hakux_apu z)
++if(ANDROID)
++  target_link_libraries(hakux_native PUBLIC log)
++endif()
+ target_compile_options(hakux_native PRIVATE -Wall -Wno-unused-parameter)
+ 
+ # xboxrun's custom Vulkan driver ("vkdriver="): the app's code for it
+ # (native/app/vkdriver.c, vklayer.c), through adrenotools when NC_DEPS has it
+ # (cmake/app.cmake).
+-add_executable(xboxrun run/xboxrun.c run/capture.c app/vkdriver.c app/vklayer.c)
+-target_link_libraries(xboxrun PRIVATE hakux_native hakux_hle z log)
+ target_link_libraries(hakux_hle PUBLIC hakux_native)
+-
+-# The hakuX app's native core library (native/app, cmake/app.cmake).
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/app.cmake")
++if(ANDROID)
++  add_executable(xboxrun run/xboxrun.c run/capture.c app/vkdriver.c app/vklayer.c)
++  target_link_libraries(xboxrun PRIVATE hakux_native hakux_hle z log)
++  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/app.cmake")
++else()
++  add_executable(hakux-sa
++    "${NC_REPO}/linux/main.c"
++    "${NC_REPO}/linux/vsync.c"
++    "${NC_REPO}/linux/math_compat.c"
++    "${NC_REPO}/native/app/present.c"
++    "${NC_REPO}/native/app/vkdriver.c"
++  )
++  target_link_libraries(hakux-sa PRIVATE hakux_native hakux_hle SDL3::SDL3 dl pthread m)
++  install(TARGETS hakux-sa RUNTIME DESTINATION bin)
++endif()
+diff --git a/native/app/app.h b/native/app/app.h
+index 7f48661..933c71e 100644
+--- a/native/app/app.h
++++ b/native/app/app.h
+@@ -9,14 +9,19 @@
+ 
+ #include "native/core/nc.h"
+ 
+-struct ANativeWindow;
++#ifdef HAKUX_ROCKNIX
++#include <SDL3/SDL.h>
++typedef SDL_Window HakuXWindow;
++#else
++typedef struct ANativeWindow HakuXWindow;
++#endif
+ 
+ /* present.c — on the window's thread. */
+ bool nc_present_init(void);
+ /* Once per display refresh: the newest frame (or the last one) letterboxed
+  * into win, waiting for the panel; false when nothing could be presented
+  * (the HLE GPU not up yet, no window). */
+-bool nc_present_frame(struct ANativeWindow *win);
++bool nc_present_frame(HakuXWindow *win);
+ /* The picture's shape on screen: the frame's own (auto: 4:3 for 640x480),
+  * 4:3, 16:9 (a widescreen title's anamorphic 640x480), or the whole window. */
+ enum { NC_ASPECT_AUTO, NC_ASPECT_4_3, NC_ASPECT_16_9, NC_ASPECT_STRETCH };
+diff --git a/native/app/present.c b/native/app/present.c
+index dfd48bd..3f3aa31 100644
+--- a/native/app/present.c
++++ b/native/app/present.c
+@@ -13,7 +13,6 @@
+ #include "hw/xbox/hle/vk/swapchain.h"
+ 
+ #include <string.h>
+-#include <sys/system_properties.h>
+ #include "hw/xbox/hle/prop.h"
+ #include <time.h>
+ 
+@@ -164,7 +163,7 @@ static void wait_next_vsync(void)
+     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
+ }
+ 
+-bool nc_present_frame(struct ANativeWindow *win)
++bool nc_present_frame(HakuXWindow *win)
+ {
+     count_frames();
+     debug_poll();
+diff --git a/native/cmake/fex.cmake b/native/cmake/fex.cmake
+index 7d16aa3..cef0bd1 100644
+--- a/native/cmake/fex.cmake
++++ b/native/cmake/fex.cmake
+@@ -60,5 +60,8 @@ if(NOT TARGET nc_fex)
+     ARCHITECTURE_arm64=1 _LARGEFILE64_SOURCE
+     "FEX_PRESERVE_ALL_ATTR=__attribute__((preserve_all))" FEX_HAS_PRESERVE_ALL_ATTR=1
+   )
+-  target_link_libraries(nc_fex PUBLIC FEXCore FEXCore_Base JemallocLibs FEXHeaderUtils range-v3::range-v3 log)
++  target_link_libraries(nc_fex PUBLIC FEXCore FEXCore_Base JemallocLibs FEXHeaderUtils range-v3::range-v3)
++  if(ANDROID)
++    target_link_libraries(nc_fex PUBLIC log)
++  endif()
+ endif()
+diff --git a/native/cmake/hle.cmake b/native/cmake/hle.cmake
+index c2ca639..9afa90e 100644
+--- a/native/cmake/hle.cmake
++++ b/native/cmake/hle.cmake
+@@ -8,7 +8,10 @@ set(NC_DEPS "D:/tools/native-deps" CACHE PATH "native core third-party sources")
+ 
+ add_library(nc_volk STATIC "${NC_DEPS}/volk/volk.c")
+ target_include_directories(nc_volk PUBLIC "${NC_DEPS}/volk")
+-target_compile_definitions(nc_volk PUBLIC VK_NO_PROTOTYPES VK_USE_PLATFORM_ANDROID_KHR)
++target_compile_definitions(nc_volk PUBLIC VK_NO_PROTOTYPES)
++if(ANDROID)
++  target_compile_definitions(nc_volk PUBLIC VK_USE_PLATFORM_ANDROID_KHR)
++endif()
+ 
+ add_library(nc_spirv_reflect STATIC "${NC_DEPS}/spirv_reflect/spirv_reflect.c")
+ target_include_directories(nc_spirv_reflect PUBLIC "${NC_DEPS}/spirv_reflect")
+@@ -85,16 +88,27 @@ target_include_directories(hakux_hle PUBLIC "${NC_REPO}" "${NC_DEPS}/root" "${NC
+ # xxhash (single header, FEX's copy): pb/pbdraw.c's span hashes
+ target_include_directories(hakux_hle PRIVATE "${HAKUX_FEX_DIR}/External/xxhash")
+ target_compile_definitions(hakux_hle PUBLIC CONFIG_VULKAN=1 HAKUX_HLE_GPU=1 HAKUX_NATIVE_CORE=1)
++if(NOT ANDROID)
++  target_compile_definitions(hakux_hle PRIVATE _GNU_SOURCE)
++endif()
+ target_compile_options(hakux_hle PRIVATE -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare)
+ target_link_libraries(hakux_hle PUBLIC nc_glib nc_volk nc_spirv_reflect glslang SPIRV
+-                      glslang-default-resource-limits android log)
++                      glslang-default-resource-limits)
++if(ANDROID)
++  target_link_libraries(hakux_hle PUBLIC android log)
++endif()
+ 
+ # The MCPX APU: xemu's device (hw/xbox/mcpx/apu) ported onto the core's own
+ # services (native/dev/apu/apu_base.h).
+ set(NC_APU "${CMAKE_CURRENT_SOURCE_DIR}/dev/apu")
++if(ANDROID)
++  set(NC_AUDIO_OUT "${NC_APU}/out.c")
++else()
++  set(NC_AUDIO_OUT "${NC_REPO}/linux/audio_out.c")
++endif()
+ add_library(hakux_apu STATIC
+   ${NC_APU}/apu.c
+-  ${NC_APU}/out.c
++  ${NC_AUDIO_OUT}
+   ${NC_APU}/state.c
+   ${NC_APU}/dsp/debug.c
+   ${NC_APU}/dsp/dsp.c
+@@ -107,4 +121,10 @@ add_library(hakux_apu STATIC
+ target_include_directories(hakux_apu PRIVATE "${NC_REPO}")
+ target_compile_options(hakux_apu PRIVATE -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare
+                        -Wno-unused-variable)
+-target_link_libraries(hakux_apu PUBLIC hakux_hle aaudio log)
++target_link_libraries(hakux_apu PUBLIC hakux_hle)
++if(ANDROID)
++  target_link_libraries(hakux_apu PUBLIC aaudio log)
++else()
++  target_link_libraries(hakux_apu PUBLIC SDL3::SDL3)
++  target_compile_definitions(hakux_apu PRIVATE _GNU_SOURCE)
++endif()
+diff --git a/native/core/memscan.c b/native/core/memscan.c
+index e1ef410..8d01438 100644
+--- a/native/core/memscan.c
++++ b/native/core/memscan.c
+@@ -29,7 +29,6 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/system_properties.h>
+ #include "hw/xbox/hle/prop.h"
+ 
+ #define SCAN_MAX 300
+diff --git a/native/core/vm.c b/native/core/vm.c
+index 9ce2fbc..359eee5 100644
+--- a/native/core/vm.c
++++ b/native/core/vm.c
+@@ -7,6 +7,7 @@
+ #include <dlfcn.h>
+ 
+ #include <errno.h>
++#include <stdio.h>
+ #include <stdlib.h>
+ #include <sys/mman.h>
+ #include <sys/syscall.h>
+diff --git a/native/cpu/cpu.cpp b/native/cpu/cpu.cpp
+index 5163418..64d4687 100644
+--- a/native/cpu/cpu.cpp
++++ b/native/cpu/cpu.cpp
+@@ -28,8 +28,8 @@
+ #include <sys/mman.h>
+ #ifdef __ANDROID__
+ #include <sys/system_properties.h>
+-#include "hw/xbox/hle/prop.h"
+ #endif
++#include "hw/xbox/hle/prop.h"
+ #include <ucontext.h>
+ 
+ static_assert(NC_SYSOP_CPUID == static_cast<int>(FEXCore::Core::SystemOpKind::Cpuid));
+diff --git a/native/dev/nv2a.c b/native/dev/nv2a.c
+index 8f0a4ec..e7fa552 100644
+--- a/native/dev/nv2a.c
++++ b/native/dev/nv2a.c
+@@ -33,7 +33,6 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/system_properties.h>
+ #include "hw/xbox/hle/prop.h"
+ #include <time.h>
+ 
+diff --git a/native/dev/ohci.c b/native/dev/ohci.c
+index 0c5c44b..1e95004 100644
+--- a/native/dev/ohci.c
++++ b/native/dev/ohci.c
+@@ -17,6 +17,7 @@
+ #include "native/core/vm.h"
+ 
+ #include <pthread.h>
++#include <stdio.h>
+ #include <stdlib.h>
+ #include <time.h>
+ 
+diff --git a/native/kernel/fixups.c b/native/kernel/fixups.c
+index 9fd0cbc..0bd0e85 100644
+--- a/native/kernel/fixups.c
++++ b/native/kernel/fixups.c
+@@ -23,7 +23,6 @@
+ 
+ #include <string.h>
+ 
+-#include <sys/system_properties.h>
+ #include "hw/xbox/hle/prop.h"
+ 
+ #include "hw/xbox/hle/core/xbe.h"
+diff --git a/native/net/net.c b/native/net/net.c
+index 890645d..7a826e1 100644
+--- a/native/net/net.c
++++ b/native/net/net.c
+@@ -8,6 +8,7 @@
+ #include <errno.h>
+ #include <poll.h>
+ #include <pthread.h>
++#include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/eventfd.h>
+diff --git a/native/state/aci.def b/native/state/aci.def
+index f69a54f..d45cd65 100644
+--- a/native/state/aci.def
++++ b/native/state/aci.def
+@@ -15,7 +15,11 @@ NC_F(Channel, bd_addr, U32, 1, 1, 0)
+ NC_F(Channel, bd_ctl, U32, 1, 1, 0)
+ NC_END(Channel)
+ 
++#ifdef HAKUX_ROCKNIX
++NC_REC(Aci, 528)
++#else
+ NC_REC(Aci, 520)
++#endif
+ NC_SKIP(Aci, vm)
+ NC_SKIP(Aci, lock)
+ NC_F(Aci, glob_cnt, U32, 1, 1, 0)
+diff --git a/native/state/nic.def b/native/state/nic.def
+index 79de6ab..5a0d12a 100644
+--- a/native/state/nic.def
++++ b/native/state/nic.def
+@@ -3,7 +3,11 @@
+  * isn't kept: a loaded state's link negotiates again. */
+ NC_SECTION(NIC)
+ 
++#ifdef HAKUX_ROCKNIX
++NC_REC(Nvnet, 2824)
++#else
+ NC_REC(Nvnet, 2816)
++#endif
+ NC_SKIP(Nvnet, vm)
+ NC_SKIP(Nvnet, lock)
+ NC_SKIP(Nvnet, kick)
+diff --git a/native/state/usb.def b/native/state/usb.def
+index f5309d5..5490271 100644
+--- a/native/state/usb.def
++++ b/native/state/usb.def
+@@ -4,7 +4,11 @@
+  * with its state. */
+ NC_SECTION(USB)
+ 
++#ifdef HAKUX_ROCKNIX
++NC_REC(Ohci, 272)
++#else
+ NC_REC(Ohci, 264)
++#endif
+ NC_SKIP(Ohci, vm)
+ NC_SKIP(Ohci, lock)
+ NC_SKIP(Ohci, run)
