@@ -6,6 +6,13 @@ set -o pipefail
 
 GIT_RANGE="${1}"
 MAX_COUNT="${2}"
+REPOSITORY="${GITHUB_REPOSITORY:-}"
+if [ -z "${REPOSITORY}" ]; then
+  ORIGIN_URL="$(git remote get-url origin 2>/dev/null || true)"
+  REPOSITORY="${ORIGIN_URL#*github.com[/:]}"
+  REPOSITORY="${REPOSITORY%.git}"
+fi
+REPOSITORY="${REPOSITORY:-ROCKNIX/distribution}"
 
 if [ -z "${GIT_RANGE}" ]; then
   echo "ERROR: no git range provided" >&2
@@ -39,13 +46,13 @@ while IFS=$'\x1f' read -r subject author commit_hash; do
   [[ -z "$subject" ]] && continue
   github_username=""
   if command -v gh >/dev/null 2>&1 && [[ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]]; then
-    github_username=$(gh api "repos/ROCKNIX/distribution/commits/${commit_hash}" --jq '.author.login // empty' 2>/dev/null || true)
+    github_username=$(gh api "repos/${REPOSITORY}/commits/${commit_hash}" --jq '.author.login // empty' 2>/dev/null || true)
   fi
   if [[ -n "${github_username}" ]]; then
     author="@${github_username}"
   fi
   short_hash="${commit_hash:0:7}"
-  line="- ${subject} (${author}) ([${short_hash}](https://github.com/ROCKNIX/distribution/commit/${commit_hash}))"
+  line="- ${subject} (${author}) ([${short_hash}](https://github.com/${REPOSITORY}/commit/${commit_hash}))"
   category="🔩 Other"
   if [[ "$subject" == *:* ]]; then
   prefix=$(echo "$subject" | cut -d: -f1 | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')
@@ -72,7 +79,7 @@ while IFS=$'\x1f' read -r subject author commit_hash; do
     connman|iwd|networkmanager|bluez|openssh|samba|nfs*|avahi|syncthing|rclone|tailscale|zerotier*|wireguard*|openvpn|sixaxis|iw|iptables|wsdd2|wireless-regdb|libpcap|enet|libndp|libnl|libtirpc|libssh|nss-mdns|ap6611s|simple-http-server|fping|speedtest-cli|curl|libslirp|wifi)
       category="🌐 Network" ;;
     # Device Support
-    h700*|rk3326*|rk3399*|rk3566*|rk3576*|rk3588*|s922x*|sm6115*|sm4450*|sm8250*|sm8550*|sm8650*|sm8750*|amd64*|quirks)
+    h700*|rk3326*|rk3399*|rk3566*|rk3576*|rk3588*|s922x*|sdm845*|sm6115*|sm4450*|sm8250*|sm8550*|sm8650*|sm8750*|amd64*|quirks)
       category="📱 Device Support" ;;
     # CI & Workflows
     ci|workflows|validate-commit)
