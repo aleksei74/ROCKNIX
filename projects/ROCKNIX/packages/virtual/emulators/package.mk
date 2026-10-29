@@ -118,6 +118,12 @@ case "${DEVICE}" in
 esac
 
 case "${DEVICE}" in
+  SM8250|SM8550|SM8750)
+    PKG_EMUS+=" hakux-sa"
+    ;;
+esac
+
+case "${DEVICE}" in
   SDM845|RK3566|RK3576|RK3588|SM6115|SM8250|SM8550|SM8650|SM8750|S922X)
     PKG_EMUS+=" aram-sa"
     ;;
@@ -1434,6 +1440,11 @@ makeinstall_target() {
   case ${DEVICE} in
     SDM845|SM4450|SM8250|SM8550|SM8650|SM8750|AMD64)
       add_emu_core xbox xemu xemu-sa true
+      case "${DEVICE}" in
+        SM8250|SM8550|SM8750)
+          add_emu_core xbox hakux hakux-sa false
+        ;;
+      esac
       add_es_system xbox
       install_script "Start Xemu.sh"
       ;;
