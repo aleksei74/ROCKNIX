@@ -1,0 +1,18 @@
+Subject: [PATCH] power: supply: qcom_smbx: enable HVDCP for AYN Odin
+
+The AYN Odin supports Quick Charge. Enable HVDCP negotiation for this
+device while keeping the generic SMBX default unchanged for other devices.
+
+---
+ drivers/power/supply/qcom_smbx.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/power/supply/qcom_smbx.c b/drivers/power/supply/qcom_smbx.c
+--- a/drivers/power/supply/qcom_smbx.c
++++ b/drivers/power/supply/qcom_smbx.c
+@@ -817,3 +817,4 @@ static const struct smb_init_register smb_init_seq[] = {
+ 	/* Enable charging */
+-	{ .addr = USBIN_OPTIONS_1_CFG, .mask = HVDCP_EN_BIT, .val = 0 },
++	/* AYN Odin supports Quick Charge; allow HVDCP negotiation. */
++	{ .addr = USBIN_OPTIONS_1_CFG, .mask = HVDCP_EN_BIT, .val = HVDCP_EN_BIT },
+ 	{ .addr = CHARGING_ENABLE_CMD,
