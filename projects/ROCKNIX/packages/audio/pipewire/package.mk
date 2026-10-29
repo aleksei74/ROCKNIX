@@ -85,9 +85,6 @@ PKG_MESON_OPTS_TARGET="-Ddocs=disabled \
                        -Dlegacy-rtkit=false"
 
 case ${DEVICE} in
-  SDM845)
-    PKG_PIPEWIRE_PULSE_QUANTUM="960"
-    ;;
   SM6115|SM8550|SM8650|SM8750)
     PKG_PIPEWIRE_QUANTUM="960"
     PKG_PIPEWIRE_PULSE_QUANTUM="960"

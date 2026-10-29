@@ -11,8 +11,8 @@ qcom/sdm845/*.jsn
 # VIDEO_QCOM_VENUS
 qcom/venus-5.2/venus.mbn
 
-# QCOM_Q6V5_MSS (no-modem build, the Odin has no cellular modem)
-qcom/sdm845/modem_nm.mbn
+# Modem
+qcom/sdm845/modem*
 qcom/sdm845/mba.mbn
 
 # ATH10K

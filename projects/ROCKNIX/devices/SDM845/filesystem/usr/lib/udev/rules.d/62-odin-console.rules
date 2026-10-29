@@ -1,1 +1,0 @@
-ACTION=="add", SUBSYSTEM=="graphics", KERNEL=="fb0", ATTR{name}=="msmdrmfb", RUN+="/usr/lib/odin/restore-console"

@@ -16,9 +16,6 @@ PKG_LONGDESC="BusyBox combines tiny versions of many common UNIX utilities into 
 # busybox fails to build with GOLD support enabled with binutils-2.25
 PKG_BUILD_FLAGS="-parallel -gold"
 PKG_NEED_UNPACK="${PROJECT_DIR}/${PROJECT}/initramfs"
-if [ "${DEVICE}" = "SDM845" ]; then
-  PKG_NEED_UNPACK+=" ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/device.init"
-fi
 
 # nano text editor
 if [ "${NANO_EDITOR}" = "yes" ]; then
