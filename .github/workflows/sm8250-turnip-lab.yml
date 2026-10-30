@@ -1,0 +1,118 @@
+name: SM8250 Turnip 27 Lab
+run-name: "SM8250 Turnip 27 - ${{ inputs.variant }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Driver experiment (sysmem is a runtime option)"
+        type: choice
+        required: true
+        default: baseline
+        options:
+          - baseline
+          - sysmem
+          - autotune
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "sm8250-turnip-lab-${{ github.ref }}-${{ inputs.variant }}"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: "AArch64 glibc Turnip / ${{ inputs.variant }}"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    container:
+      image: debian:bookworm
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 750M
+      BUILD_JOBS: "4"
+    steps:
+      - name: Install ARM64 cross compiler and Debian 12 sysroot
+        shell: bash
+        run: |
+          set -euo pipefail
+          dpkg --add-architecture arm64
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            ca-certificates curl git file xz-utils tar build-essential python3 python3-venv \
+            python3-pip pkg-config ninja-build bison flex wayland-protocols \
+            libwayland-bin ccache \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu \
+            libdrm-dev:arm64 libwayland-dev:arm64 \
+            libx11-xcb-dev:arm64 libxcb-dri3-dev:arm64 \
+            libxcb-present-dev:arm64 libxcb-randr0-dev:arm64 \
+            libxcb-sync-dev:arm64 libxcb-xfixes0-dev:arm64 \
+            libxcb-keysyms1-dev:arm64 libxcb-shm0-dev:arm64 \
+            libxshmfence-dev:arm64 libxrandr-dev:arm64 \
+            libzstd-dev:arm64 zlib1g-dev:arm64 libexpat1-dev:arm64 \
+            libstdc++-12-dev:arm64
+          python3 -m venv /opt/turnip-meson
+          /opt/turnip-meson/bin/pip install --disable-pip-version-check \
+            'meson==1.9.1' mako PyYAML ply packaging
+
+      - name: Check out ROCKNIX build recipe
+        uses: actions/checkout@v6
+
+      - name: Check experiment recipe
+        shell: bash
+        run: python3 scripts/turnip-lab-sm8250/test_lab.py
+
+      - name: Restore Turnip compiler cache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: sm8250-turnip27-${{ hashFiles('scripts/turnip-lab-sm8250/build.sh') }}-${{ github.run_id }}
+          restore-keys: |
+            sm8250-turnip27-${{ hashFiles('scripts/turnip-lab-sm8250/build.sh') }}-
+
+      - name: Build selected Linux Vulkan ICD
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="/opt/turnip-meson/bin:$PATH"
+          mkdir -p "$CCACHE_DIR"
+          ccache -M "$CCACHE_MAXSIZE"
+          bash scripts/turnip-lab-sm8250/build.sh \
+            "${{ inputs.variant }}" \
+            "$GITHUB_WORKSPACE/turnip-lab-output" \
+            "$RUNNER_TEMP/turnip-lab" \
+            2>&1 | tee "$GITHUB_WORKSPACE/turnip-lab-build.log"
+          ccache -s
+
+      - name: Verify tarball and embedded Vulkan ICD
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/turnip-lab-sm8250/verify.py \
+            "${{ inputs.variant }}" "$GITHUB_WORKSPACE/turnip-lab-output" \
+            --test-package
+
+      - name: Upload test driver (not a firmware image)
+        uses: actions/upload-artifact@v7
+        with:
+          name: sm8250-turnip27-${{ inputs.variant }}-${{ github.run_number }}
+          path: |
+            turnip-lab-output/*.tar.gz
+            turnip-lab-output/*.sha256
+            turnip-lab-output/*.txt
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sm8250-turnip27-log-${{ inputs.variant }}-${{ github.run_number }}
+          path: |
+            turnip-lab-build.log
+            turnip-lab-output/
+          if-no-files-found: warn
+          retention-days: 7
