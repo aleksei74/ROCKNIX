@@ -42,6 +42,9 @@ class RecipeTests(unittest.TestCase):
         self.assertIn("SM8250 Turnip 27 Lab", workflow)
         self.assertIn("sm8250-turnip27", workflow)
         self.assertIn("baseline|sysmem|autotune", source)
+        self.assertIn('cp -a "$mesa/licenses"', source)
+        self.assertIn('cp "$source_root/drivers/LICENSE"', source)
+        self.assertNotIn('cp -a "$source_root/LICENSES"', source)
         self.assertNotIn("make SM8250", workflow)
         self.assertNotIn("build_distro", workflow)
         try:
@@ -119,6 +122,9 @@ def inspect_source_archive(archive):
 
         assert read("mesa/VERSION").strip() == "27.0.0-devel"
         assert SOURCE_COMMIT in read("NOTICE")
+        assert "MIT License" in read("mesa/licenses/MIT")
+        assert read("mesa/docs/license.rst").strip()
+        assert read("drivers/LICENSE").strip()
         text = read("mesa/src/freedreno/vulkan/tu_autotune.cc")
         assert text.count(ANCHOR) == 1
         modified = text.replace(ANCHOR, REPLACEMENT)

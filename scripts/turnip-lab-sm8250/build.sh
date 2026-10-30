@@ -127,7 +127,10 @@ EOF
 chmod 755 "$variant_dir/run-test.sh"
 
 cp "$source_root/NOTICE" "$variant_dir/SOURCE_NOTICE"
-cp -a "$source_root/LICENSES" "$variant_dir/LICENSES"
+mkdir -p "$variant_dir/LICENSES"
+cp -a "$mesa/licenses" "$variant_dir/LICENSES/mesa"
+cp "$mesa/docs/license.rst" "$variant_dir/LICENSES/mesa-license.rst"
+cp "$source_root/drivers/LICENSE" "$variant_dir/LICENSES/Droid-Deck-LICENSE"
 
 cat > "$variant_dir/BUILD_INFO.txt" <<EOF
 Device: SM8250 (Snapdragon 865 / Adreno 650)

@@ -92,7 +92,12 @@ def verify_driver(variant, out):
           "TU_DEBUG must be enabled only for the sysmem experiment")
 
     check((folder / "SOURCE_NOTICE").is_file(), "Source notice missing")
-    check((folder / "LICENSES").is_dir(), "License bundle missing")
+    for license_file in ("LICENSES/mesa/MIT",
+                         "LICENSES/mesa-license.rst",
+                         "LICENSES/Droid-Deck-LICENSE"):
+        check((folder / license_file).is_file()
+              and (folder / license_file).stat().st_size > 0,
+              f"Required license file missing or empty: {license_file}")
     info = (folder / "BUILD_INFO.txt").read_text()
     check("e2ab6687d5ad700cc2b856af684aa014f9dae943" in info,
           "Wrong Mesa source commit in manifest")
@@ -113,7 +118,10 @@ def verify_package(variant, out):
               "Tarball contains unexpected output paths")
         for suffix in ("libvulkan_freedreno.so",
                        "freedreno_icd.aarch64.json", "run-test.sh",
-                       "BUILD_INFO.txt", "SOURCE_NOTICE"):
+                       "BUILD_INFO.txt", "SOURCE_NOTICE",
+                       "LICENSES/mesa/MIT",
+                       "LICENSES/mesa-license.rst",
+                       "LICENSES/Droid-Deck-LICENSE"):
             check(f"{variant}/{suffix}" in names,
                   f"Required packaged file missing: {suffix}")
         packed_lib = bundle.extractfile(f"{variant}/libvulkan_freedreno.so")
