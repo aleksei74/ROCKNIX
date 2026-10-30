@@ -55,7 +55,7 @@ print("Applied the public Droid-Deck GMEM bandwidth multiplier change")
 PY
 fi
 
-cat > "$work_dir/aarch64-debian12.ini" <<'INI'
+cat > "$work_dir/aarch64-ubuntu24.ini" <<'INI'
 [binaries]
 c = ['ccache', 'aarch64-linux-gnu-gcc']
 cpp = ['ccache', 'aarch64-linux-gnu-g++']
@@ -81,7 +81,7 @@ export CCACHE_DIR="${CCACHE_DIR:-$work_dir/ccache}"
 mkdir -p "$CCACHE_DIR"
 
 build="$work_dir/build"
-meson setup "$build" "$mesa" --cross-file "$work_dir/aarch64-debian12.ini" \
+meson setup "$build" "$mesa" --cross-file "$work_dir/aarch64-ubuntu24.ini" \
   --buildtype=release --prefix=/usr \
   -Dvulkan-drivers=freedreno -Dfreedreno-kmds=msm,kgsl \
   -Dgallium-drivers= -Dplatforms=wayland,x11 \

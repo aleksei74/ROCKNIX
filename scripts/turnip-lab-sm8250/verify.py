@@ -53,8 +53,8 @@ def verify_elf(lib):
     glibc = {(int(a), int(b)) for a, b in
              re.findall(r"\bGLIBC_(\d+)\.(\d+)\b", versions)}
     check(bool(glibc), "Cannot determine required glibc symbol versions")
-    check(max(glibc) <= (2, 38),
-          f"Built driver requires GLIBC_{max(glibc)}, exceeding the conservative GLIBC_2.38 target")
+    check(max(glibc) <= (2, 44),
+          f"Built driver requires GLIBC_{max(glibc)}, newer than ROCKNIX GLIBC_2.44")
     stdcxx = {(int(a), int(b), int(c)) for a, b, c in
               re.findall(r"\bGLIBCXX_(\d+)\.(\d+)\.(\d+)\b", versions)}
     if stdcxx:

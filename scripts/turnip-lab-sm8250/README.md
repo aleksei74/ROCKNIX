@@ -24,8 +24,9 @@ gh workflow run sm8250-turnip-lab.yml -R aleksei74/ROCKNIX --ref next -f variant
 gh workflow run sm8250-turnip-lab.yml -R aleksei74/ROCKNIX --ref next -f variant=autotune
 ```
 
-The job installs an ARM64 cross compiler in an isolated **Debian 12** build
-container, which targets glibc 2.36 (compatible with the current ROCKNIX
+The job installs an ARM64 cross compiler in an isolated **Ubuntu 24.04** build
+container, including glslangValidator >= 12.2 and SPIR-V tools required by
+Mesa 27. This targets glibc 2.39 (compatible with the current ROCKNIX
 glibc 2.44 package).
 It produces a Linux **DRM/MSM + KGSL**, Wayland/X11 Turnip Vulkan ICD, not an
 Android Bionic driver. The built library is checked for architecture, shared
@@ -78,9 +79,9 @@ original firmware and system Mesa are unchanged.
 
 A pinned Linux Mesa 27 snapshot may not load on every ROCKNIX build, even with
 a compatible glibc version, due to kernel DRM/MSM, Vulkan loader and other
-runtime dependencies. The job reports link requirements and conservatively
-rejects drivers needing glibc newer than 2.38, even though the current ROCKNIX
-package is newer. Compare identical game scenes under the same clocks,
+runtime dependencies. The job reports link requirements and
+rejects drivers needing glibc newer than the current ROCKNIX 2.44 package.
+Compare identical game scenes under the same clocks,
 thermal conditions, emulator version and shader-cache state. Also test
 correctness: UBWC artifacts, shader compilation stalls, hangs and exits.
 

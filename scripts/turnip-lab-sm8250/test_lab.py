@@ -32,7 +32,10 @@ class RecipeTests(unittest.TestCase):
         workflow = WORKFLOW.read_text()
         self.assertIn(PIN_SHA, source)
         self.assertIn(SOURCE_COMMIT, source)
-        self.assertIn("debian:bookworm", workflow)
+        self.assertIn("ubuntu:24.04", workflow)
+        self.assertIn("glslang-tools spirv-tools", workflow)
+        self.assertIn("glslangValidator --version", workflow)
+        self.assertIn("aarch64-ubuntu24.ini", source)
         self.assertIn("SM8250 Turnip 27 Lab", workflow)
         self.assertIn("sm8250-turnip27", workflow)
         self.assertIn("baseline|sysmem|autotune", source)
@@ -44,7 +47,7 @@ class RecipeTests(unittest.TestCase):
             return
         data = yaml.safe_load(workflow)
         self.assertEqual(data["jobs"]["build"]["container"]["image"],
-                         "debian:bookworm")
+                         "ubuntu:24.04")
         inputs = data.get("on", data.get(True))["workflow_dispatch"]["inputs"]
         self.assertEqual(inputs["variant"]["options"],
                          ["baseline", "sysmem", "autotune"])
@@ -74,10 +77,10 @@ class RecipeTests(unittest.TestCase):
                     return "Class: ELF64\nMachine: AArch64\n"
                 if "-d" in args:
                     return "Shared library: [libc.so.6]\n"
-                return "Name: GLIBC_2.17\nName: GLIBC_2.39\n"
+                return "Name: GLIBC_2.17\nName: GLIBC_2.45\n"
 
             with patch.object(verify, "command", side_effect=readelf):
-                with self.assertRaisesRegex(ValueError, "conservative GLIBC_2.38"):
+                with self.assertRaisesRegex(ValueError, "ROCKNIX GLIBC_2.44"):
                     verify.verify_elf(lib)
 
     def test_validation_rejects_android(self):

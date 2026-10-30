@@ -27,14 +27,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     container:
-      image: debian:bookworm
+      image: ubuntu:24.04
     env:
       DEBIAN_FRONTEND: noninteractive
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 750M
       BUILD_JOBS: "4"
     steps:
-      - name: Install ARM64 cross compiler and Debian 12 sysroot
+      - name: Install ARM64 cross compiler and Ubuntu 24.04 sysroot
         shell: bash
         run: |
           set -euo pipefail
@@ -43,7 +43,7 @@ jobs:
           apt-get install -y --no-install-recommends \
             ca-certificates curl git file xz-utils tar build-essential python3 python3-venv \
             python3-pip pkg-config ninja-build bison flex wayland-protocols \
-            libwayland-bin ccache \
+            libwayland-bin glslang-tools spirv-tools ccache \
             gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu \
             libdrm-dev:arm64 libwayland-dev:arm64 \
             libx11-xcb-dev:arm64 libxcb-dri3-dev:arm64 \
@@ -52,7 +52,8 @@ jobs:
             libxcb-keysyms1-dev:arm64 libxcb-shm0-dev:arm64 \
             libxshmfence-dev:arm64 libxrandr-dev:arm64 \
             libzstd-dev:arm64 zlib1g-dev:arm64 libexpat1-dev:arm64 \
-            libstdc++-12-dev:arm64
+            libstdc++-13-dev:arm64
+          glslangValidator --version
           python3 -m venv /opt/turnip-meson
           /opt/turnip-meson/bin/pip install --disable-pip-version-check \
             'meson==1.9.1' mako PyYAML ply packaging
