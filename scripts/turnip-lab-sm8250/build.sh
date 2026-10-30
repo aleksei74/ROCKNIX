@@ -38,6 +38,13 @@ grep -Fq "$mesa_commit" "$source_root/NOTICE" || {
   echo "Mesa commit metadata does not match the pinned release" >&2
   exit 1
 }
+for license_file in "$mesa/licenses/MIT" "$mesa/docs/license.rst" \
+                    "$source_root/drivers/LICENSE"; do
+  if [ ! -s "$license_file" ]; then
+    echo "Required source license missing: $license_file" >&2
+    exit 1
+  fi
+done
 
 if [ "$variant" = "autotune" ]; then
   python3 - "$mesa/src/freedreno/vulkan/tu_autotune.cc" <<'PY'
