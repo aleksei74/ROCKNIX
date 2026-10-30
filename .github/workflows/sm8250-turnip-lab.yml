@@ -30,7 +30,6 @@ jobs:
       image: ubuntu:24.04
     env:
       DEBIAN_FRONTEND: noninteractive
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 750M
       BUILD_JOBS: "4"
     steps:
@@ -38,6 +37,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Ubuntu's default mirrors serve amd64, while arm64 packages are on ports.
+          test -f /etc/apt/sources.list.d/ubuntu.sources
+          sed -i \
+            -e '/^Architectures:/d' \
+            -e '/^URIs:/i Architectures: amd64' \
+            /etc/apt/sources.list.d/ubuntu.sources
+          cat > /etc/apt/sources.list.d/ubuntu-arm64.sources <<'EOF'
+          Types: deb
+          URIs: http://ports.ubuntu.com/ubuntu-ports
+          Suites: noble noble-updates noble-backports noble-security
+          Components: main restricted universe multiverse
+          Architectures: arm64
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          EOF
           dpkg --add-architecture arm64
           apt-get update -qq
           apt-get install -y --no-install-recommends \
@@ -78,6 +91,7 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="/opt/turnip-meson/bin:$PATH"
+          export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
           mkdir -p "$CCACHE_DIR"
           ccache -M "$CCACHE_MAXSIZE"
           bash scripts/turnip-lab-sm8250/build.sh \
