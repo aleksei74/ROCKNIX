@@ -1,0 +1,13 @@
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -483,6 +483,9 @@ ExternalProject_Add(m68kmake_host
+     SOURCE_DIR   "${CMAKE_SOURCE_DIR}/cmake/m68kmake-host"
+     CMAKE_ARGS
+         "-DCMAKE_BUILD_TYPE=Release"
++        "-DCMAKE_C_COMPILER=${SM2_M68KMAKE_HOST_CC}"
++        "-DCMAKE_C_FLAGS="
++        "-DCMAKE_EXE_LINKER_FLAGS="
+         "-DSM2_M68KMAKE_SRC=${SM2_MUSASHI_DIR}/m68kmake.c"
+         "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+     BUILD_ALWAYS OFF

@@ -11,6 +11,12 @@ PKG_TOOLCHAIN="manual"
 PKG_EMUS="amiberry duckstation-sa flycast-sa gzdoom-sa hatarisa hypseus-singe moonlight mupen64plus-sa openbor pico-8   \
           ppsspp-sa scummvm-sa touchhle-sa vice-sa wine yabasanshiro-pirry-sa"
 
+case "${ARCH}" in
+  aarch64|x86_64)
+    PKG_EMUS+=" sm2-emu-sa"
+    ;;
+esac
+
 EMUS_32BIT=""
 
 PKG_RETROARCH="core-info libretro-database retroarch retroarch-assets retroarch-joypads retroarch-overlays retropie-shaders slang-shaders"
@@ -839,6 +845,28 @@ makeinstall_target() {
       ;;
   esac
   add_es_system megadrive-japan
+
+  ### Sega Model 1 and 2
+  case "${ARCH}" in
+    aarch64|x86_64)
+      case "${DEVICE}" in
+        SM8250|SM8550|SM8650|SM8750)
+          add_emu_core segamodel1 sm2 sm2-emu-sa true
+          add_emu_core segamodel1 retroarch mame false
+          add_emu_core segamodel2 sm2 sm2-emu-sa true
+          add_emu_core segamodel2 retroarch mame false
+          ;;
+        *)
+          add_emu_core segamodel1 retroarch mame true
+          add_emu_core segamodel1 sm2 sm2-emu-sa false
+          add_emu_core segamodel2 retroarch mame true
+          add_emu_core segamodel2 sm2 sm2-emu-sa false
+          ;;
+      esac
+      add_es_system segamodel1
+      add_es_system segamodel2
+      ;;
+  esac
 
   ### Sega Model 3
   case ${DEVICE} in

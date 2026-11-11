@@ -9,6 +9,7 @@ PKG_SITE="https://github.com/google/shaderc"
 PKG_URL="${PKG_SITE}/archive/refs/tags/v${PKG_VERSION}.tar.gz"
 PKG_LONGDESC="A collection of tools, libraries, and tests for Vulkan shader compilation."
 PKG_DEPENDS_TARGET="toolchain glslang spirv-tools"
+PKG_DEPENDS_HOST="toolchain glslang:host spirv-tools:host"
 PKG_DEPENDS_UNPACK="spirv-headers"
 PKG_TOOLCHAIN="cmake"
 
@@ -28,4 +29,14 @@ pre_configure_target() {
   mkdir -p ${PKG_BUILD}/glslc/src
   echo '"$(PKG_VERSION)\n"' > ${PKG_BUILD}/glslc/src/build-version.inc
   export TARGET_LDFLAGS="${LDFLAGS} -lglslang"
+}
+
+pre_configure_host() {
+  PKG_CMAKE_OPTS_HOST+=" -DSHADERC_SKIP_TESTS=ON \
+                        -DSHADERC_SKIP_EXAMPLES=ON \
+                        -Dglslang_SOURCE_DIR=${TOOLCHAIN}/include/glslang \
+                        -DSPIRV-Headers_SOURCE_DIR=${PKG_BUILD}/external/spirv-headers"
+
+  mkdir -p "${PKG_BUILD}/glslc/src"
+  echo '"$(PKG_VERSION)\n"' > "${PKG_BUILD}/glslc/src/build-version.inc"
 }
