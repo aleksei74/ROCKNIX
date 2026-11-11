@@ -8,10 +8,17 @@ PKG_SHA256="89d4c3bf09fac8968f4198d00a6328e5e0df02f18d4b17b8eedc6b1a5773ae6b"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
 PKG_URL="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-${PKG_VERSION}/mesa-mesa-${PKG_VERSION}.tar.gz"
+if [ "${DEVICE}" = "SM8750" ]; then
+  PKG_VERSION="26.3.0"
+  PKG_SHA256="91d729aa68bb89e4ec857841300bbe922bcb3e52b1f97566ca83930d3b28343a"
+  PKG_URL="https://archive.mesa3d.org/mesa-${PKG_VERSION}.tar.xz"
+fi
 PKG_DEPENDS_HOST="toolchain:host expat:host libclc:host libdrm:host llvm:host Mako:host pyyaml:host spirv-tools:host"
 PKG_DEPENDS_TARGET="toolchain expat libdrm Mako:host pyyaml:host"
 PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
-PKG_PATCH_DIRS+=" ${DEVICE}"
+if [ "${DEVICE}" != "SM8750" ]; then
+  PKG_PATCH_DIRS+=" ${DEVICE}"
+fi
 case "${DEVICE}" in
   SM8250|SM8550|SM8650|SM8750)
     PKG_PATCH_DIRS+=" xenia"
