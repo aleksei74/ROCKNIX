@@ -1470,21 +1470,18 @@ makeinstall_target() {
   case ${DEVICE} in
     RK3566|RK3576|S922X|SM4450|SM6115)
       add_emu_core xbox retroarch hakux true
+      add_emu_core xbox hakux hakux-sa false
       add_es_system xbox
       ;;
     SM8250|SM8550|SM8650|SM8750|SDM845)
       add_emu_core xbox xemu xemu-sa true
       add_emu_core xbox retroarch hakux false
+      add_emu_core xbox hakux hakux-sa false
       add_es_system xbox
       install_script "Start Xemu.sh"
       ;;
     AMD64)
       add_emu_core xbox xemu xemu-sa true
-      case "${DEVICE}" in
-        SM8250|SM8550|SM8750)
-          add_emu_core xbox hakux hakux-sa false
-        ;;
-      esac
       add_es_system xbox
       install_script "Start Xemu.sh"
       ;;
