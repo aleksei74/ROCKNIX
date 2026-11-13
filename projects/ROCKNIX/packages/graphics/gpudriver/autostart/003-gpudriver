@@ -2,4 +2,9 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2024 ROCKNIX (https://github.com/ROCKNIX)
 
+# RK3566 initializes GPU before Sway; avoid rebinding live graphics libraries.
+if systemctl is-active --quiet rocknix-gpudriver.service; then
+  exit 0
+fi
+
 /usr/bin/gpudriver --start
