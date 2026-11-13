@@ -45,9 +45,9 @@ post_makeinstall_target() {
   # RK3566 must initialize its selected GPU stack before Sway starts.
   if [ "${DEVICE}" = "RK3566" ]; then
     mkdir -p "${INSTALL}/usr/lib/systemd/system/sway.service.d"
-    install -m 0644 "${PKG_DIR}/system.d/rk3566/rocknix-gpudriver.service" \
+    install -m 0644 "${PKG_DIR}/system.d.rk3566/rocknix-gpudriver.service" \
       "${INSTALL}/usr/lib/systemd/system/rocknix-gpudriver.service"
-    install -m 0644 "${PKG_DIR}/system.d/rk3566/10-gpudriver-before-sway.conf" \
+    install -m 0644 "${PKG_DIR}/system.d.rk3566/10-gpudriver-before-sway.conf" \
       "${INSTALL}/usr/lib/systemd/system/sway.service.d/10-gpudriver-before-sway.conf"
   fi
 }
