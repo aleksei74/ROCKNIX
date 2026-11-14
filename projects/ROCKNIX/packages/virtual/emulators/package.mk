@@ -861,20 +861,8 @@ makeinstall_target() {
   ### Sega Model 1 and 2
   case "${ARCH}" in
     aarch64|x86_64)
-      case "${DEVICE}" in
-        SM8250|SM8550|SM8650|SM8750)
-          add_emu_core segamodel1 sm2 sm2-emu-sa true
-          add_emu_core segamodel1 retroarch mame false
-          add_emu_core segamodel2 sm2 sm2-emu-sa true
-          add_emu_core segamodel2 retroarch mame false
-          ;;
-        *)
-          add_emu_core segamodel1 retroarch mame true
-          add_emu_core segamodel1 sm2 sm2-emu-sa false
-          add_emu_core segamodel2 retroarch mame true
-          add_emu_core segamodel2 sm2 sm2-emu-sa false
-          ;;
-      esac
+      add_emu_core segamodel1 sm2 sm2-emu-sa true
+      add_emu_core segamodel2 sm2 sm2-emu-sa true
       add_es_system segamodel1
       add_es_system segamodel2
       ;;
@@ -884,6 +872,7 @@ makeinstall_target() {
   case ${DEVICE} in
     SDM845|RK3588|SM4450|SM8250|SM8550|SM8650|SM8750)
       add_emu_core segamodel3 supermodel supermodel-sa true
+      add_emu_core segamodel3 sm2 sm2-emu-sa false
       add_es_system segamodel3
       ;;
   esac
