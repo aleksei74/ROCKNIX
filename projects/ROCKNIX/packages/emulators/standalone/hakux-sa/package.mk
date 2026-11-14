@@ -21,10 +21,6 @@ hakux_fetch() {
 }
 
 pre_configure_target() {
-  case "${DEVICE}" in
-    RK3566|RK3576|S922X|SM4450|SM6115|SDM845|SM8250|SM8550|SM8650|SM8750) ;;
-    *) return 1 ;;
-  esac
   git -C "${PKG_BUILD}" submodule update --init --depth=1 external/fex || return 1
   git -C "${PKG_BUILD}/external/fex" submodule update --init --depth=1 \
     External/fmt External/range-v3 External/rpmalloc \
