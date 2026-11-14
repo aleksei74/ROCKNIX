@@ -1,0 +1,43 @@
+diff --git a/FEXCore/include/FEXCore/fextl/fmt.h b/FEXCore/include/FEXCore/fextl/fmt.h
+--- a/FEXCore/include/FEXCore/fextl/fmt.h
++++ b/FEXCore/include/FEXCore/fextl/fmt.h
+@@ -18,3 +18,3 @@
+ OutputIt format_to(OutputIt out, ::fmt::format_string<Args...> fmt, Args&&... args) {
+-  return ::fmt::vformat_to(out, fmt.get(), ::fmt::make_format_args(args...));
++  return ::fmt::vformat_to(out, fmt, ::fmt::make_format_args(args...));
+ }
+@@ -38,3 +38,3 @@
+ FMT_NODISCARD FMT_INLINE auto format(::fmt::format_string<T...> fmt, T&&... args) -> fextl::string {
+-  return fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  return fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+ }
+@@ -44,3 +44,3 @@
+ FMT_INLINE auto print(::fmt::format_string<T...> fmt, T&&... args) -> void {
+-  auto String = fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  auto String = fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+   write(STDOUT_FILENO, String.c_str(), String.size());
+@@ -50,3 +50,3 @@
+ FMT_INLINE auto print(int FD, ::fmt::format_string<T...> fmt, T&&... args) -> void {
+-  auto String = fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  auto String = fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+   write(FD, String.c_str(), String.size());
+@@ -56,3 +56,3 @@
+ FMT_INLINE auto print(::fmt::format_string<T...> fmt, T&&... args) -> void {
+-  auto String = fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  auto String = fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+   auto f = FEXCore::File::File::GetStdOUT();
+@@ -63,3 +63,3 @@
+ FMT_INLINE auto print(HANDLE File, ::fmt::format_string<T...> fmt, T&&... args) -> void {
+-  auto String = fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  auto String = fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+   WriteFile(File, String.c_str(), String.size(), nullptr, nullptr);
+@@ -69,3 +69,3 @@
+ FMT_INLINE auto print(FEXCore::File::File& f, ::fmt::format_string<T...> fmt, T&&... args) -> void {
+-  auto String = fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  auto String = fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+   f.Write(String.c_str(), String.size());
+@@ -75,3 +75,3 @@
+ FMT_INLINE auto print(std::FILE* f, ::fmt::format_string<T...> fmt, T&&... args) -> void {
+-  auto String = fextl::fmt::vformat(fmt.get(), ::fmt::make_format_args(args...));
++  auto String = fextl::fmt::vformat(fmt, ::fmt::make_format_args(args...));
+   write(fileno(f), String.c_str(), String.size());
