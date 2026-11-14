@@ -1,17 +1,17 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-or-later
 . /etc/profile
-set_kill set "-9 sm2-emu"
+set_kill set "-9 keisho"
 
 ROM="$1"
 if [ ! -f "${ROM}" ]; then
-  echo "sm2-emu: ROM not found: ${ROM}" >&2
+  echo "keisho: ROM not found: ${ROM}" >&2
   exit 1
 fi
 
 GAME="$(basename "${ROM}")"
 PLATFORM="$(basename "${2:-segamodel2}")"
-CONFIG_DIR="/storage/.config/sm2-emu"
+CONFIG_DIR="/storage/.config/keisho"
 mkdir -p "${CONFIG_DIR}"
 
 if [ -r /usr/share/turnip/turnip-env.sh ]; then
@@ -45,6 +45,6 @@ if [ "$(get_setting vsync "${PLATFORM}" "${GAME}")" = "false" ]; then
   OPTIONS+=(--no-vsync)
 fi
 
-sway_fullscreen sm2-emu &
-echo "Command: sm2-emu ${OPTIONS[*]} ${ROM}" >/var/log/exec.log
-${EMUPERF} /usr/bin/sm2-emu "${OPTIONS[@]}" "${ROM}" >>/var/log/exec.log 2>&1
+sway_fullscreen keisho &
+echo "Command: keisho ${OPTIONS[*]} ${ROM}" >/var/log/exec.log
+${EMUPERF} /usr/bin/keisho "${OPTIONS[@]}" "${ROM}" >>/var/log/exec.log 2>&1

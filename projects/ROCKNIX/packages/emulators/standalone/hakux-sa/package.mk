@@ -22,7 +22,7 @@ hakux_fetch() {
 
 pre_configure_target() {
   case "${DEVICE}" in
-    SM8250|SM8550|SM8750) ;;
+    RK3566|RK3576|S922X|SM4450|SM6115|SM8250|SM8550|SM8750) ;;
     *) return 1 ;;
   esac
   git -C "${PKG_BUILD}" submodule update --init --depth=1 external/fex || return 1
@@ -51,6 +51,10 @@ make_target() {
   local deps="${PKG_BUILD}/.hakux-deps"
   local out="${PKG_BUILD}/.${TARGET_NAME}"
   local clang="${TOOLCHAIN}/bin"
+  local hakux_arch="armv8.2-a+fp16+dotprod+rcpc"
+  case "${DEVICE}" in
+    RK3566|RK3576|S922X|SM4450|SM6115) hakux_arch="armv8-a" ;;
+  esac
 
   cmake -G Ninja -S "${PKG_BUILD}/native" -B "${out}" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -71,7 +75,7 @@ make_target() {
     -DCMAKE_CXX_FLAGS="-O2 -fPIC" \
     -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" \
     -DHAKUX_LTO=OFF \
-    -DHAKUX_ARCH="armv8.2-a+fp16+dotprod+rcpc" \
+    -DHAKUX_ARCH="${hakux_arch}" \
     -DNC_DEPS="${deps}" \
     -DHAKUX_FEX_DIR="${PKG_BUILD}/external/fex" || return 1
   ninja -C "${out}" -j"${CONCURRENCY_MAKE_LEVEL:-4}" hakux-sa

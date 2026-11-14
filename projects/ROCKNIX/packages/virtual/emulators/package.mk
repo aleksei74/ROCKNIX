@@ -57,7 +57,7 @@ case "${DEVICE}" in
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr yabadabadoo-lr"
     PKG_DEPENDS_TARGET+=" common-shaders glsl-shaders"
     PKG_EMUS+=" advancedrastic-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa"
-    LIBRETRO_CORES+=" dolphin-lr uae4arm-lr"
+    LIBRETRO_CORES+=" dolphin-lr hakux-lr uae4arm-lr"
     ;;
   T618)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr"
@@ -123,7 +123,7 @@ case "${DEVICE}" in
 esac
 
 case "${DEVICE}" in
-  SM8250|SM8550|SM8750)
+  RK3566|RK3576|S922X|SM4450|SM6115|SM8250|SM8550|SM8750)
     PKG_EMUS+=" hakux-sa"
     ;;
 esac
@@ -1479,7 +1479,11 @@ makeinstall_target() {
     SM8250|SM8550|SM8650|SM8750|SDM845)
       add_emu_core xbox xemu xemu-sa true
       add_emu_core xbox retroarch hakux false
-      add_emu_core xbox hakux hakux-sa false
+      case "${DEVICE}" in
+        SM8250|SM8550|SM8750)
+          add_emu_core xbox hakux hakux-sa false
+          ;;
+      esac
       add_es_system xbox
       install_script "Start Xemu.sh"
       ;;

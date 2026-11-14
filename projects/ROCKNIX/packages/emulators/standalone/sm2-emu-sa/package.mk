@@ -2,15 +2,15 @@
 # Copyright (C) 2026 ROCKNIX
 
 PKG_NAME="sm2-emu-sa"
-PKG_VERSION="8bb80c157b294c1229bd8c1054d13f87daab52c0"
+PKG_VERSION="f7648a99b5bb3d05f880493e8db0593bae157e28"
 PKG_LICENSE="GPL-3.0-or-later"
-PKG_SITE="https://github.com/dmanlfc/sm2-emu"
+PKG_SITE="https://github.com/Keisho-Emu/Keisho"
 PKG_URL="${PKG_SITE}.git"
 PKG_GIT_SUBMODULE_DEPTH="1"
 PKG_GIT_SUBMODULES="3rdparty/musashi 3rdparty/ymfm 3rdparty/VulkanMemoryAllocator \
                     3rdparty/imgui 3rdparty/miniz 3rdparty/pugixml 3rdparty/SDL \
                     3rdparty/SheenBidi 3rdparty/harfbuzz"
-PKG_LONGDESC="Sega Model 1 and Model 2 arcade emulator"
+PKG_LONGDESC="Keisho Sega Model 1, Model 2 and Model 3 arcade emulator"
 PKG_DEPENDS_TARGET="toolchain shaderc:host SDL3 pugixml harfbuzz fontconfig curl"
 
 PKG_CMAKE_OPTS_TARGET+=" -DCMAKE_BUILD_TYPE=Release \
