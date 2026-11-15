@@ -103,17 +103,35 @@ EOF
 
   #ARMSX2's own Turnip ships only on these devices (see armsx2-sa)
   case ${DEVICE} in
-    SM4450|SM6115|SM8250|SM8550|SM8650|SDM845) ;;
+    RK3566)
+      xmlstarlet ed --inplace -d '//core[@name="armsx2-sa"]//feature[@name="vulkan driver"]/choice[@value="armsx2"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg
+      ;;
+    SM4450|SM6115|SM8250|SM8550|SM8650|SDM845)
+      xmlstarlet ed --inplace -d '//core[@name="armsx2-sa"]//feature[@name="vulkan driver"]/choice[@value="malisx2"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg
+      ;;
     *) xmlstarlet ed --inplace -d '//core[@name="armsx2-sa"]//feature[@name="vulkan driver"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg ;;
   esac
 
   case "${DEVICE}" in
+    RK3566)
+      xmlstarlet ed --inplace \
+        -d '//emulator[@name="hakux"]//feature[@name="turnip driver"]' \
+        -d '//emulator[@name="sm2"]//feature[@name="turnip driver"]' \
+        ${INSTALL}/usr/config/emulationstation/es_features.cfg
+      ;;
     SM8250|SM8550)
       xmlstarlet ed --inplace -d '//emulator[@name="hakux"]//feature[@name="turnip driver"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg
       ;;
     SM8750) ;;
     *) xmlstarlet ed --inplace -d '//emulator[@name="hakux"]' ${INSTALL}/usr/config/emulationstation/es_features.cfg ;;
   esac
+
+  if [ "${DEVICE}" != "RK3566" ]; then
+    xmlstarlet ed --inplace \
+      -d '//emulator[@name="hakux"]//feature[@name="vulkan driver"]' \
+      -d '//emulator[@name="sm2"]//feature[@name="vulkan driver"]' \
+      ${INSTALL}/usr/config/emulationstation/es_features.cfg
+  fi
 }
 
 

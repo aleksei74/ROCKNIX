@@ -56,7 +56,7 @@ case "${DEVICE}" in
   RK3566)
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr pcsx_rearmed-lr yabadabadoo-lr"
     PKG_DEPENDS_TARGET+=" common-shaders glsl-shaders"
-    PKG_EMUS+=" advancedrastic-sa armsx2-sa azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa"
+    PKG_EMUS+=" advancedrastic-sa armsx2-sa malisx2 azahar-sa dolphin-sa drastic-sa mednafen melonds-sa vita3k-sa"
     LIBRETRO_CORES+=" dolphin-lr hakux-lr uae4arm-lr"
     ;;
   T618)

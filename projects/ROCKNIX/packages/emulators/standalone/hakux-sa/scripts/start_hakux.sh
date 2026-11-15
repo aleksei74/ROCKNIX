@@ -18,6 +18,11 @@ if [ -r /usr/share/turnip/turnip-env.sh ]; then
   rocknix_turnip_apply hakux "$(get_setting turnip_driver "$PLATFORM" "$GAME")"
 fi
 
+if [ -r /usr/share/malisx2/malisx2-env.sh ]; then
+  . /usr/share/malisx2/malisx2-env.sh
+  rocknix_malisx2_apply "$(get_setting vulkan_driver "$PLATFORM" "$GAME")"
+fi
+
 export SDL_VIDEODRIVER=wayland
 export HAKUX_NATIVE_BASE=/storage/.cache/hakux
 mkdir -p "$HAKUX_NATIVE_BASE"

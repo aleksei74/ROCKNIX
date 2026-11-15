@@ -19,6 +19,11 @@ if [ -r /usr/share/turnip/turnip-env.sh ]; then
   rocknix_turnip_apply sm2-emu "$(get_setting turnip_driver "${PLATFORM}" "${GAME}")"
 fi
 
+if [ -r /usr/share/malisx2/malisx2-env.sh ]; then
+  . /usr/share/malisx2/malisx2-env.sh
+  rocknix_malisx2_apply "$(get_setting vulkan_driver "${PLATFORM}" "${GAME}")"
+fi
+
 export SDL_VIDEODRIVER=wayland
 
 CORES="$(get_setting cores "${PLATFORM}" "${GAME}")"

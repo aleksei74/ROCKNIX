@@ -229,6 +229,11 @@ if [ -r /usr/share/turnip/turnip-env.sh ]; then
   rocknix_turnip_apply armsx2 "$(get_setting turnip_driver "${PLATFORM}" "${GAME}")"
 fi
 
+if [ -r /usr/share/malisx2/malisx2-env.sh ]; then
+  . /usr/share/malisx2/malisx2-env.sh
+  rocknix_malisx2_apply "${VKDRIVER}"
+fi
+
 #Set QT enviornment to wayland
   export QT_QPA_PLATFORM=wayland
 
