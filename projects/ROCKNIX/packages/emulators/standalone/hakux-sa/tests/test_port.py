@@ -20,8 +20,9 @@ def main():
     pkg = (PACKAGE / "package.mk").read_text()
     assert 'PKG_VERSION="' + UPSTREAM + '"' in pkg
     assert 'PKG_TOOLCHAIN="manual"' in pkg
-    for device in ("SM8250", "SM8550", "SM8750"):
-        assert device in pkg
+    assert " libfmt " in pkg
+    assert "fex-fmt9-compat.patch" not in pkg
+    assert not (PACKAGE / "sources/fex-fmt9-compat.patch").exists()
     assert "hakux-sa" in (PACKAGE / "scripts/start_hakux.sh").read_text()
 
     for name in ("package.mk", "scripts/start_hakux.sh"):

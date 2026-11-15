@@ -25,14 +25,6 @@ pre_configure_target() {
   git -C "${PKG_BUILD}/external/fex" submodule update --init --depth=1 \
     External/fmt External/range-v3 External/rpmalloc \
     External/unordered_dense External/xxhash Source/Common/cpp-optparse || return 1
-  case "${DEVICE}" in
-    RK3566|RK3576|S922X|SM6115)
-      local fex_patch="${PKG_DIR}/sources/fex-fmt9-compat.patch"
-      if ! git -C "${PKG_BUILD}/external/fex" apply --reverse --check "${fex_patch}" >/dev/null 2>&1; then
-        git -C "${PKG_BUILD}/external/fex" apply "${fex_patch}" || return 1
-      fi
-      ;;
-  esac
   mkdir -p "${PKG_BUILD}/linux"
   cp "${PKG_DIR}/sources/linux/"*.c "${PKG_BUILD}/linux/" || return 1
   cp "${PKG_DIR}/sources/linux/"*.h "${PKG_BUILD}/linux/" || return 1
