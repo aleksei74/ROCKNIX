@@ -1,0 +1,16 @@
+diff --git a/hw/xbox/hle/vk/vkdev.c b/hw/xbox/hle/vk/vkdev.c
+--- a/hw/xbox/hle/vk/vkdev.c
++++ b/hw/xbox/hle/vk/vkdev.c
+@@ -583,9 +583,9 @@ int hle_vk_init(void)
+     VkPhysicalDeviceVulkan12Features f12 = {
+         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &f13,
+         .timelineSemaphore = VK_TRUE, .bufferDeviceAddress = c->bda,
+-        .runtimeDescriptorArray = VK_TRUE, .descriptorBindingPartiallyBound = VK_TRUE,
+-        .descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
+-        .shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
++        .runtimeDescriptorArray = c->bindless, .descriptorBindingPartiallyBound = c->bindless,
++        .descriptorBindingSampledImageUpdateAfterBind = c->bindless,
++        .shaderSampledImageArrayNonUniformIndexing = c->bindless,
+         .hostQueryReset = c->host_query_reset };
+     VkPhysicalDeviceFeatures2 f = {
+         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = v13 ? &f12 : NULL };

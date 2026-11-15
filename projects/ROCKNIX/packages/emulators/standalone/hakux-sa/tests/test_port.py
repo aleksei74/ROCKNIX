@@ -10,6 +10,7 @@ from pathlib import Path
 PACKAGE = Path(__file__).resolve().parents[1]
 UPSTREAM = "e11ee60b90742a368a08f7f5339af10048a63a04"
 PATCH = PACKAGE / "patches/0001-linux-sdl-vulkan-core.patch"
+VK_PATCH = PACKAGE / "patches/0002-vk13-optional-bindless.patch"
 
 
 def run(*args, **kwargs):
@@ -46,6 +47,7 @@ def main():
         proc.stdout.close()
         assert proc.wait() == 0
         run("patch", "--batch", "--forward", "-p1", "-d", temp, "-i", str(PATCH))
+        run("patch", "--batch", "--forward", "-p1", "-d", temp, "-i", str(VK_PATCH))
 
         source = Path(temp)
         code = (source / "hw/xbox/hle/vk/swapchain.c").read_text()
@@ -56,6 +58,8 @@ def main():
         assert "menu_draw(cb, f, iw, ih)" in code
         vk = (source / "hw/xbox/hle/vk/vkdev.c").read_text()
         assert "SDL_Vulkan_GetInstanceExtensions" in vk
+        assert ".runtimeDescriptorArray = c->bindless" in vk
+        assert ".descriptorBindingSampledImageUpdateAfterBind = c->bindless" in vk
         cmake = (source / "native/CMakeLists.txt").read_text()
         assert "add_executable(hakux-sa" in cmake
         assert "find_package(SDL3 CONFIG REQUIRED)" in cmake
