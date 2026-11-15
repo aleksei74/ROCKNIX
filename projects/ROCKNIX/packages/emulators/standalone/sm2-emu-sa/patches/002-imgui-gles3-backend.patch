@@ -1,0 +1,10 @@
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -395,4 +395,5 @@
+         )
+-        target_link_libraries(sm2_imgui_gles PUBLIC SDL3::SDL3)
++        target_compile_definitions(sm2_imgui_gles PRIVATE IMGUI_IMPL_OPENGL_ES3)
++        target_link_libraries(sm2_imgui_gles PUBLIC SDL3::SDL3 GLESv2)
+         if(NOT MSVC)
+             target_compile_options(sm2_imgui_gles PRIVATE -w)
