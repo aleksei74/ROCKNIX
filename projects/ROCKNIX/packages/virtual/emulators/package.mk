@@ -17,6 +17,14 @@ case "${ARCH}" in
     ;;
 esac
 
+if [ "${ARCH}" = "aarch64" ]; then
+  case "${DEVICE}" in
+    H700|RK3566|SM8250|SM8550|SM8650|SM8750)
+      PKG_EMUS+=" spelunkomp-sa"
+      ;;
+  esac
+fi
+
 EMUS_32BIT=""
 
 PKG_RETROARCH="core-info libretro-database retroarch retroarch-assets retroarch-joypads retroarch-overlays retropie-shaders slang-shaders"
@@ -257,6 +265,13 @@ makeinstall_target() {
   add_emu_core arcade retroarch fbalpha2012 false
   add_emu_core arcade retroarch fbalpha2019 false
   add_emu_core arcade retroarch mame false
+  if [ "${ARCH}" = "aarch64" ]; then
+    case "${DEVICE}" in
+      H700|RK3566|SM8250|SM8550|SM8650|SM8750)
+        add_emu_core arcade spelunkomp spelunkomp-sa false
+        ;;
+    esac
+  fi
   case ${DEVICE} in
     SM8550|SM8650|SM8750|AMD64)
       add_emu_core arcade ares ares-sa false
